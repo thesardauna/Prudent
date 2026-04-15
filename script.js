@@ -1,143 +1,137 @@
-let regulatoryRules = [];
-let stateRules = [];
-let riskMatrix = [];
+let csvData = {};
 
-let currentReport = null;
+const files = [
+    "regulatory_rules.csv",
+    "risk_matrix.csv",
+    "state_rules.csv",
+    "risk_events.csv",
+    "authority_directory.csv",
+    "compliance_checklist_template.csv",
+    "regulation_explanations.csv"
+];
 
-/* LOAD CSV FILES */
-function loadCSV(file, callback) {
+/* LOAD ALL CSV */
+files.forEach(file => {
     Papa.parse(`csv/${file}`, {
         download: true,
         header: true,
-        complete: function(results) {
-            callback(results.data);
+        complete: res => {
+            csvData[file] = res.data;
         }
     });
-}
+});
 
-loadCSV("regulatory_rules.csv", data => regulatoryRules = data);
-loadCSV("state_rules.csv", data => stateRules = data);
-loadCSV("risk_matrix.csv", data => riskMatrix = data);
+let currentReport;
 
 /* FORM */
-document.getElementById("form").addEventListener("submit", function(e){
+document.getElementById("form").addEventListener("submit", e => {
     e.preventDefault();
-    let data = getFormData();
-    currentReport = generateReport(data);
+    currentReport = generateReport();
     displayReport(currentReport);
 });
 
-/* GET DATA */
-function getFormData(){
-    return {
-        business_id: val("business_id"),
-        business_name: val("business_name"),
-        state: val("state"),
-        sector: val("sector"),
-        lga: val("lga"),
-        has_cac: val("has_cac"),
-        has_tin: val("has_tin"),
-        has_vat: val("has_vat"),
-        has_nafdac: val("has_nafdac"),
-        has_permit: val("has_permit")
-    };
-}
+/* GENERATE REPORT */
+function generateReport() {
 
-function val(id){ return document.getElementById(id).value; }
+    let state = document.getElementById("state").value;
+    let sector = document.getElementById("sector").value.toLowerCase();
 
-/* CORE ENGINE */
-function generateReport(data){
-
-    let issues = [];
-    let recommendations = [];
     let fulfilled = 0;
-    let total = 5;
 
-    /* BASIC CHECK */
-    if(data.has_cac==="Yes") fulfilled++; else issues.push("Not registered with CAC");
-    if(data.has_tin==="Yes") fulfilled++; else issues.push("No Tax Identification Number");
-    if(data.has_vat==="Yes") fulfilled++; else issues.push("VAT not registered");
-    if(data.has_nafdac==="Yes") fulfilled++; else issues.push("NAFDAC approval missing");
-    if(data.has_permit==="Yes") fulfilled++; else issues.push("Operational permit missing");
+    if (val("has_cac") === "Yes") fulfilled++;
+    if (val("has_tin") === "Yes") fulfilled++;
+    if (val("has_vat") === "Yes") fulfilled++;
+    if (val("has_nafdac") === "Yes") fulfilled++;
+    if (val("has_permit") === "Yes") fulfilled++;
 
-    /* REGULATORY RULES */
-    let relevantRules = regulatoryRules.filter(r => 
-        r.sector?.toLowerCase() === data.sector.toLowerCase()
+    let risk =
+        fulfilled >= 4 ? "Low Risk" :
+        fulfilled >= 2 ? "Medium Risk" :
+        "High Risk";
+
+    /* FILTER CSV DATA */
+    let rules = csvData["regulatory_rules.csv"] || [];
+    let stateRules = csvData["state_rules.csv"] || [];
+    let risks = csvData["risk_events.csv"] || [];
+    let authorities = csvData["authority_directory.csv"] || [];
+
+    let relevantRules = rules.filter(r =>
+        r.sector?.toLowerCase().includes(sector)
     );
 
-    relevantRules.forEach(rule => {
-        if(rule.requirement){
-            issues.push(rule.requirement);
-            recommendations.push(rule.recommendation);
-        }
-    });
-
-    /* STATE RULES */
-    let relevantStateRules = stateRules.filter(r => 
-        r.state === data.state
+    let relevantStateRules = stateRules.filter(r =>
+        r.state === state
     );
 
-    relevantStateRules.forEach(rule => {
-        issues.push(rule.rule);
-        recommendations.push(rule.action);
-    });
-
-    /* RISK LEVEL */
-    let risk = fulfilled >=4 ? "Low Risk" :
-               fulfilled >=2 ? "Medium Risk" :
-               "High Risk";
+    let relevantRisks = risks.filter(r =>
+        r.sector?.toLowerCase().includes(sector)
+    );
 
     return {
-        ...data,
+        business_name: val("business_name"),
         compliance_score: fulfilled + "/5",
         risk_level: risk,
-        total_requirements: total,
-        fulfilled_requirements: fulfilled,
-        missing_requirements: total - fulfilled,
-        issues,
-        recommendations,
-        date_generated: new Date().toISOString().split("T")[0]
+        rules: relevantRules,
+        state_rules: relevantStateRules,
+        risks: relevantRisks,
+        authorities
     };
 }
 
-/* DISPLAY REPORT */
-function displayReport(r){
+/* DISPLAY RICH REPORT */
+function displayReport(report) {
 
-    let riskClass =
-        r.risk_level==="Low Risk" ? "good" :
-        r.risk_level==="Medium Risk" ? "medium" :
-        "bad";
+    let html = "";
 
-    let html = `
-    <div class="report-box">
-
-    <div class="section">
-        <h3>Business Overview</h3>
-        <p><b>${r.business_name}</b> (${r.business_id})</p>
-        <p>State: ${r.state} | Sector: ${r.sector}</p>
+    html += `
+    <div class="report-section">
+        <h3>Overview</h3>
+        <p><b>${report.business_name}</b></p>
+        <p>Score: ${report.compliance_score}</p>
+        <span class="badge ${report.risk_level.split(" ")[0].toLowerCase()}">
+            ${report.risk_level}
+        </span>
     </div>
+    `;
 
-    <div class="section">
-        <h3>Compliance Score</h3>
-        <p class="${riskClass}">
-            ${r.compliance_score} — ${r.risk_level}
-        </p>
-    </div>
+    /* REGULATORY RULES */
+    html += `<div class="report-section"><h3>Applicable Regulations</h3><ul>`;
+    report.rules.slice(0,10).forEach(r=>{
+        html+=`<li>${r.rule || "Regulation rule"}</li>`;
+    });
+    html += `</ul></div>`;
 
-    <div class="section">
-        <h3>Regulatory Issues</h3>
+    /* STATE RULES */
+    html += `<div class="report-section"><h3>State Laws</h3><ul>`;
+    report.state_rules.slice(0,10).forEach(r=>{
+        html+=`<li>${r.rule || "State law"}</li>`;
+    });
+    html += `</ul></div>`;
+
+    /* RISKS */
+    html += `<div class="report-section"><h3>Risk Exposure</h3><ul>`;
+    report.risks.slice(0,10).forEach(r=>{
+        html+=`<li>${r.risk || "Risk factor"}</li>`;
+    });
+    html += `</ul></div>`;
+
+    /* AUTHORITIES */
+    html += `<div class="report-section"><h3>Relevant Authorities</h3><ul>`;
+    report.authorities.slice(0,10).forEach(a=>{
+        html+=`<li>${a.name || "Authority"}</li>`;
+    });
+    html += `</ul></div>`;
+
+    /* RECOMMENDATIONS */
+    html += `
+    <div class="report-section">
+        <h3>AI Recommendations</h3>
         <ul>
-            ${r.issues.map(i => `<li class="bad">${i}</li>`).join("")}
+            <li>Complete all missing registrations</li>
+            <li>Follow state-specific compliance rules</li>
+            <li>Schedule compliance audit</li>
+            <li>Engage regulatory authorities</li>
         </ul>
-    </div>
-
-    <div class="section">
-        <h3>Recommendations</h3>
-        <ul>
-            ${r.recommendations.map(i => `<li class="good">${i}</li>`).join("")}
-        </ul>
-    </div>
-
     </div>
     `;
 
@@ -145,18 +139,25 @@ function displayReport(r){
     document.getElementById("reportSection").classList.remove("hidden");
 }
 
-/* DOWNLOAD CSV */
+/* UTIL */
+function val(id){
+    return document.getElementById(id).value;
+}
+
+/* CSV DOWNLOAD */
 function downloadCSV(){
     if(!currentReport) return;
 
-    let headers = Object.keys(currentReport).join(",");
-    let values = Object.values(currentReport).map(v =>
-        Array.isArray(v) ? `"${v.join("; ")}"` : v
-    ).join(",");
+    let row = [
+        currentReport.business_name,
+        currentReport.compliance_score,
+        currentReport.risk_level
+    ];
 
-    let blob = new Blob([headers + "\n" + values], {type:"text/csv"});
+    let csv = "Business,Score,Risk\n" + row.join(",");
+
+    let blob = new Blob([csv], {type:"text/csv"});
     let a = document.createElement("a");
-
     a.href = URL.createObjectURL(blob);
     a.download = "report.csv";
     a.click();
