@@ -1,0 +1,9 @@
+requirement,risk_level,severity_score,penalty,penalty_type,estimated_cost,legal_consequence,enforcement_body,priority
+Business Registration,High,9,Daily fines/Forced closure,Monetary/Administrative,N50000 - N150000,Striking off from register,Corporate Affairs Commission (CAC),High
+Operating License (CBN),Critical,10,License revocation/N20m+ fine,Monetary/Regulatory,N500000 - N10m+,Prosecution of directors,Central Bank of Nigeria (CBN),Critical
+Food Handling Permit,Medium,6,Sealing of premises,Administrative,N20000 - N100,000,Public health citation,State Ministry of Health / LGA,Medium
+Environmental Audit (EAR),Medium,7,N1m+ fine/Environmental litigation,Monetary/Legal,N250000 - N750000,Sanctions/Closure,NESREA,High
+ITF Contribution,Low,4,5% monthly interest on unpaid dues,Financial,1% of annual payroll,Inability to bid for Federal contracts,Industrial Training Fund (ITF),Medium
+SCUML Registration,High,9,Asset freezing/Operational suspension,Legal/Financial,N0 (Admin costs only),Money laundering investigation,EFCC / SCUML,High
+Signage & Advertisement,Low,3,Removal of board/N50k fine,Administrative,N15000 - N200000,Asset seizure (Signage),LASAA / State Agencies,Low
+Tax Identification (TIN),High,8,Compounded interest/N50k initial fine,Financial,N0 (Registration is free),Inability to clear goods/No Tax Clearance,FIRS,High
