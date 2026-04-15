@@ -1,318 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prudent – AI Compliance Copilot</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<style>
+/* PRINT MODE */
+@media print {
+  body * { visibility: hidden; }
+  #report, #report * { visibility: visible; }
+  #report { position: absolute; top: 0; left: 0; width: 100%; }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Prudent</h1>
+<p class="subtitle">AI Compliance Copilot for SMEs</p>
+
+<div class="card">
+
+<label>Business Type</label>
+<input id="businessType" placeholder="retail, food, ngo">
+
+<label>State</label>
+<select id="state"></select>
+
+<label>Business Size</label>
+<select id="size">
+<option value="">Select size</option>
+<option>Small</option>
+<option>Medium</option>
+</select>
+
+<button onclick="checkCompliance()">Analyze Compliance</button>
+
+</div>
+
+<div id="report" class="card hidden"></div>
+
+</div>
+
 <script>
-let rulesData = [];
-let riskData = [];
-let stateData = [];
-let authorityData = [];
-let checklistData = [];
 
-let latestReport = null;
+/* DATA */
+let rulesData = [], riskData = [], stateData = [], authorityData = [];
 
-/* =========================
-   CSV LOADER
-========================= */
-function loadCSV(file) {
-  return new Promise((resolve, reject) => {
-    Papa.parse(file, {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      complete: res => {
-        if (!res || !res.data) {
-          reject(new Error(`No data returned for ${file}`));
-          return;
-        }
-        resolve(res.data);
-      },
-      error: err => reject(new Error(`Failed to load ${file}: ${err}`))
+/* LOAD CSV */
+function loadCSV(file){
+  return new Promise(res=>{
+    Papa.parse(file,{
+      download:true,
+      header:true,
+      skipEmptyLines:true,
+      complete:r=>res(r.data)
     });
   });
 }
 
-/* =========================
-   INIT
-========================= */
-async function init() {
-  try {
-    [
-      rulesData,
-      riskData,
-      stateData,
-      authorityData,
-      checklistData
-    ] = await Promise.all([
-      loadCSV("./csv/regulatory_rules.csv"),
-      loadCSV("./csv/risk_matrix.csv"),
-      loadCSV("./csv/state_rules.csv"),
-      loadCSV("./csv/authority_directory.csv"),
-      loadCSV("./csv/compliance_checklist_template.csv")
-    ]);
-
-    console.log("rulesData", rulesData.length);
-    console.log("riskData", riskData.length);
-    console.log("stateData", stateData.length);
-    console.log("authorityData", authorityData.length);
-    console.log("checklistData", checklistData.length);
-
-    populateStates();
-  } catch (error) {
-    console.error("Dataset load error:", error);
-    alert("Unable to load one or more CSV files. Check browser console for the exact file.");
-  }
+/* INIT */
+async function init(){
+  [rulesData, riskData, stateData, authorityData] = await Promise.all([
+    loadCSV("csv/regulatory_rules.csv"),
+    loadCSV("csv/risk_matrix.csv"),
+    loadCSV("csv/state_rules.csv"),
+    loadCSV("csv/authority_directory.csv")
+  ]);
+  populateStates();
 }
-
 init();
 
-/* =========================
-   STATE DROPDOWN
-========================= */
-function populateStates() {
-  const select = document.getElementById("state");
-  const states = [...new Set(stateData.map(row => row.state).filter(Boolean))].sort();
-
-  select.innerHTML =
-    `<option value="">Select State</option>` +
-    states.map(state => `<option value="${escapeHtml(state)}">${escapeHtml(state)}</option>`).join("");
+/* STATE DROPDOWN */
+function populateStates(){
+  let states=[...new Set(stateData.map(s=>s.state))];
+  let select=document.getElementById("state");
+  select.innerHTML="<option>Select State</option>"+
+    states.map(s=>`<option>${s}</option>`).join("");
 }
 
-/* =========================
-   MAIN
-========================= */
-function checkCompliance() {
-  const type = normalize(document.getElementById("businessType").value);
-  const state = normalize(document.getElementById("state").value);
-  const size = normalize(document.getElementById("size").value);
+/* MAIN */
+function checkCompliance(){
 
-  if (!type || !state || !size) {
-    alert("Please fill all fields.");
-    return;
-  }
+  let type=n(document.getElementById("businessType").value);
+  let state=n(document.getElementById("state").value);
+  let size=n(document.getElementById("size").value);
 
-  document.getElementById("loading").classList.remove("hidden");
-  document.getElementById("result").classList.add("hidden");
+  let base=rulesData.filter(r=>n(r.business_type)==type||n(r.business_type)=="all");
+  let local=stateData.filter(s=>n(s.state)==state);
 
-  setTimeout(() => buildRichReport(type, state, size), 300);
+  let req=[...base.map(r=>r.requirement),...local.map(l=>l.requirement)];
+  req=[...new Set(req)];
+
+  let missing=req.slice(0,Math.ceil(req.length/2));
+  let fulfilled=req.filter(x=>!missing.includes(x));
+
+  let risk=0, penalty=[], authorities=[];
+
+  missing.forEach(m=>{
+    let rm=riskData.find(r=>n(r.requirement)==n(m));
+    if(rm){
+      risk+=parseInt(rm.severity_score||0);
+      penalty.push(rm.penalty);
+    }
+    let auth=rulesData.find(r=>n(r.requirement)==n(m));
+    if(auth) authorities.push(auth.authority);
+  });
+
+  let score=Math.max(0,100-risk);
+
+  render({
+    type,state,size,req,missing,fulfilled,penalty,authorities,score
+  });
 }
 
-/* =========================
-   REPORT ENGINE
-========================= */
-function buildRichReport(type, state, size) {
-  const matchedRules = rulesData.filter(row => {
-    const rowType = normalize(row.business_type);
-    const rowSize = normalize(row.applicable_size);
-    const rowLocation = normalize(row.location);
+/* RENDER REPORT */
+function render(r){
 
-    const typeMatch = rowType === type || rowType === "all";
-    const sizeMatch = !rowSize || rowSize === size || rowSize === "all";
-    const locationMatch = !rowLocation || rowLocation === "all" || rowLocation === state;
+  let status="Low Risk";
+  if(r.score<70) status="Medium Risk";
+  if(r.score<40) status="High Risk";
 
-    return typeMatch && sizeMatch && locationMatch;
-  });
+  let html=`
+  <h2>Compliance Report</h2>
 
-  const matchedStateRules = stateData.filter(row => {
-    const rowState = normalize(row.state);
-    const rowSector = normalize(row.applicable_sector);
-    return rowState === state && (!rowSector || rowSector === "all" || rowSector === type);
-  });
+  <p><b>Business:</b> ${cap(r.type)}</p>
+  <p><b>State:</b> ${cap(r.state)}</p>
+  <p><b>Size:</b> ${cap(r.size)}</p>
 
-  const combinedRequirementsMap = new Map();
+  <hr>
 
-  matchedRules.forEach(row => {
-    const key = normalize(row.requirement);
-    if (!key) return;
+  <h3>📊 Summary</h3>
+  <p><b>Score:</b> ${r.score}% (${status})</p>
+  <p><b>Total Requirements:</b> ${r.req.length}</p>
+  <p><b>Missing:</b> ${r.missing.length}</p>
 
-    combinedRequirementsMap.set(key, {
-      requirement: row.requirement || "Unnamed Requirement",
-      authority: row.authority || "",
-      mandatory: row.mandatory || "",
-      description: row.description || "",
-      frequency: row.frequency || "",
-      legal_reference: row.legal_reference || "",
-      risk_weight: row.risk_weight || ""
-    });
-  });
+  <h3>📋 Required Compliance</h3>
+  <ul>${r.req.map(x=>`<li>${x}</li>`).join("")}</ul>
 
-  matchedStateRules.forEach(row => {
-    const key = normalize(row.requirement);
-    if (!key) return;
+  <h3>❌ Missing Requirements</h3>
+  <ul>${r.missing.map(x=>`<li>${x}</li>`).join("")}</ul>
 
-    const existing = combinedRequirementsMap.get(key) || {};
-    combinedRequirementsMap.set(key, {
-      requirement: row.requirement || existing.requirement || "Unnamed Requirement",
-      authority: existing.authority || row.authority || "",
-      mandatory: existing.mandatory || row.mandatory || "",
-      description: existing.description || row.description || "",
-      frequency: existing.frequency || "",
-      legal_reference: existing.legal_reference || "",
-      risk_weight: existing.risk_weight || "",
-      processing_time: row.processing_time || "",
-      fee_estimate: row.fee_estimate || ""
-    });
-  });
+  <h3>⚖️ Penalties</h3>
+  <ul>${r.penalty.map(p=>`<li>${p||"Penalty applies"}</li>`).join("")}</ul>
 
-  const requirements = [...combinedRequirementsMap.values()];
+  <h3>🏛️ Authorities</h3>
+  <ul>${[...new Set(r.authorities)].map(a=>`<li>${a}</li>`).join("")}</ul>
 
-  if (!requirements.length) {
-    document.getElementById("loading").classList.add("hidden");
-    const result = document.getElementById("result");
-    result.classList.remove("hidden");
-    result.innerHTML = `<h3>Compliance Result</h3><p>No matching compliance requirements found.</p>`;
-    return;
-  }
+  <h3>📌 Recommendations</h3>
+  <ul>
+    <li>Complete missing compliance items immediately</li>
+    <li>Register with required authorities</li>
+    <li>Schedule compliance audit</li>
+  </ul>
 
-  const missing = requirements.slice(0, Math.ceil(requirements.length / 2));
-  const fulfilled = requirements.filter(item => !missing.includes(item));
-
-  const enrichedMissing = missing.map(item => {
-    const risk = riskData.find(r => normalize(r.requirement) === normalize(item.requirement)) || {};
-    const authority = authorityData.find(a => normalize(a.authority_name) === normalize(item.authority)) || {};
-    const checklistSteps = checklistData
-      .filter(c => normalize(c.business_type) === type && normalize(c.requirement) === normalize(item.requirement))
-      .sort((a, b) => Number(a.step_number || 0) - Number(b.step_number || 0));
-
-    return {
-      ...item,
-      risk_level: risk.risk_level || "Unknown",
-      severity_score: Number(risk.severity_score || 0),
-      penalty: risk.penalty || "Not specified",
-      estimated_cost: risk.estimated_cost || "",
-      legal_consequence: risk.legal_consequence || "",
-      authority_email: authority.contact_email || "",
-      authority_phone: authority.contact_phone || "",
-      authority_website: authority.website || "",
-      checklist: checklistSteps
-    };
-  });
-
-  const totalRisk = enrichedMissing.reduce((sum, item) => sum + item.severity_score, 0);
-  const score = Math.max(0, 100 - totalRisk);
-
-  let status = "Low Risk";
-  if (score < 70) status = "Medium Risk";
-  if (score < 40) status = "High Risk";
-
-  latestReport = {
-    businessType: type,
-    state,
-    size,
-    requirements,
-    missing: enrichedMissing,
-    fulfilled,
-    score,
-    status,
-    generatedAt: new Date().toLocaleString()
-  };
-
-  renderRichResult();
-}
-
-/* =========================
-   RENDER
-========================= */
-function renderRichResult() {
-  document.getElementById("loading").classList.add("hidden");
-
-  const r = latestReport;
-  const result = document.getElementById("result");
-  result.classList.remove("hidden");
-
-  result.innerHTML = `
-    <h3>Compliance Intelligence Report</h3>
-    <p><strong>Business Type:</strong> ${capitalizeWords(r.businessType)}</p>
-    <p><strong>State:</strong> ${capitalizeWords(r.state)}</p>
-    <p><strong>Business Size:</strong> ${capitalizeWords(r.size)}</p>
-    <p><strong>Generated:</strong> ${escapeHtml(r.generatedAt)}</p>
-
-    <h4>Required Compliance Items</h4>
-    <ul>
-      ${r.requirements.map(item => `
-        <li>
-          <strong>${escapeHtml(item.requirement)}</strong>
-          ${item.authority ? ` — ${escapeHtml(item.authority)}` : ""}
-        </li>
-      `).join("")}
-    </ul>
-
-    <h4>Missing Requirements</h4>
-    ${r.missing.map(item => `
-      <div class="report-block">
-        <p><strong>${escapeHtml(item.requirement)}</strong></p>
-        <p><strong>Authority:</strong> ${escapeHtml(item.authority || "Not specified")}</p>
-        <p><strong>Risk Level:</strong> ${escapeHtml(item.risk_level)}</p>
-        <p><strong>Penalty:</strong> ${escapeHtml(item.penalty)}</p>
-        ${item.authority_phone ? `<p><strong>Contact:</strong> ${escapeHtml(item.authority_phone)}</p>` : ""}
-        ${item.authority_email ? `<p><strong>Email:</strong> ${escapeHtml(item.authority_email)}</p>` : ""}
-      </div>
-    `).join("")}
-
-    <p class="${colorClass(r.score)}"><strong>Compliance Score: ${r.score}% (${r.status})</strong></p>
-
-    <button onclick="downloadPDF()">Download Rich PDF Report</button>
+  <button onclick="window.print()">Print Report</button>
+  <button onclick="downloadPDF()">Download PDF</button>
   `;
+
+  let div=document.getElementById("report");
+  div.classList.remove("hidden");
+  div.innerHTML=html;
 }
 
-/* =========================
-   PDF
-========================= */
-function downloadPDF() {
-  if (!latestReport) {
-    alert("Please run a compliance check first.");
-    return;
-  }
-
+/* PDF */
+function downloadPDF(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  const r = latestReport;
-  let y = 20;
 
-  doc.setFontSize(16);
-  doc.text("Prudent Compliance Report", 14, y);
-  y += 10;
-
-  doc.setFontSize(11);
-  doc.text(`Business Type: ${capitalizeWords(r.businessType)}`, 14, y); y += 7;
-  doc.text(`State: ${capitalizeWords(r.state)}`, 14, y); y += 7;
-  doc.text(`Business Size: ${capitalizeWords(r.size)}`, 14, y); y += 7;
-  doc.text(`Compliance Score: ${r.score}% (${r.status})`, 14, y); y += 10;
-
-  doc.text("Missing Requirements:", 14, y); y += 8;
-
-  r.missing.forEach(item => {
-    const lines = doc.splitTextToSize(`- ${item.requirement} | ${item.penalty}`, 180);
-    if (y > 270) {
-      doc.addPage();
-      y = 20;
-    }
-    doc.text(lines, 14, y);
-    y += lines.length * 6;
-  });
-
+  doc.text(document.getElementById("report").innerText,10,10);
   doc.save("Prudent_Report.pdf");
 }
 
-/* =========================
-   HELPERS
-========================= */
-function normalize(value) {
-  return (value || "").toString().trim().toLowerCase();
-}
+/* HELPERS */
+function n(x){return (x||"").toLowerCase().trim();}
+function cap(x){return x.charAt(0).toUpperCase()+x.slice(1);}
 
-function capitalizeWords(text) {
-  return (text || "").replace(/\b\w/g, c => c.toUpperCase());
-}
-
-function colorClass(score) {
-  if (score < 40) return "red";
-  if (score < 70) return "yellow";
-  return "green";
-}
-
-function escapeHtml(str) {
-  return (str || "").toString()
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
 </script>
+
+</body>
+</html>
