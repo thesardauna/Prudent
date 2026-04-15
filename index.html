@@ -11,53 +11,261 @@
   <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Libraries -->
+  <!-- CSV Parser -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <!-- PDF Generator -->
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <!-- HEADER -->
-    <header>
-      <h1>Prudent</h1>
-      <p class="subtitle">AI Compliance Copilot for SMEs</p>
-    </header>
+  <!-- HEADER -->
+  <header>
+    <h1>Prudent</h1>
+    <p class="subtitle">AI Compliance Copilot for SMEs</p>
+  </header>
 
-    <!-- INPUT CARD -->
-    <div class="card">
-      <h2>Check Your Compliance</h2>
+  <!-- INPUT FORM -->
+  <div class="card">
+    <h2>Check Your Compliance</h2>
 
-      <label>Business Type</label>
-      <input type="text" id="businessType" placeholder="e.g Retail, Food, NGO" />
+    <label>Business Type</label>
+    <input type="text" id="businessType" placeholder="e.g Retail, Food, NGO" />
 
-      <label>Location (State)</label>
-      <input type="text" id="location" placeholder="e.g Bauchi, Abuja" />
+    <label>Location (State)</label>
+    <input type="text" id="location" placeholder="e.g Bauchi, Abuja" />
 
-      <label>Business Size</label>
-      <select id="size">
-        <option value="">Select size</option>
-        <option>Small</option>
-        <option>Medium</option>
-      </select>
+    <label>Business Size</label>
+    <select id="size">
+      <option value="">Select size</option>
+      <option>Small</option>
+      <option>Medium</option>
+    </select>
 
-      <button onclick="checkCompliance()">Check Compliance</button>
-    </div>
-
-    <!-- RESULT CARD -->
-    <div id="result" class="card hidden"></div>
-
-    <!-- FOOTER -->
-    <footer style="margin-top: 30px; text-align:center; color:#94a3b8; font-size:0.8rem;">
-      <p>Prudent © 2026 — Smart Compliance for Nigerian SMEs</p>
-    </footer>
-
+    <button onclick="runCheck()">Check Compliance</button>
   </div>
 
-  <!-- MAIN SCRIPT -->
-  <script src="script.js"></script>
+  <!-- LOADING -->
+  <div id="loading" class="card hidden">
+    <p>🔄 Loading datasets & analyzing compliance...</p>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result" class="card hidden"></div>
+
+  <!-- FOOTER -->
+  <footer style="margin-top:30px;text-align:center;color:#94a3b8;font-size:0.8rem;">
+    Prudent © 2026 — Smart Compliance for Nigerian SMEs
+  </footer>
+
+</div>
+
+<script>
+/* =========================
+   DATA STORAGE
+========================= */
+let rulesData = [];
+let riskData = [];
+let stateData = [];
+let checklistData = [];
+let authoritiesData = [];
+
+let latestReport = null;
+let dataLoaded = false;
+
+/* =========================
+   CSV LOADER
+========================= */
+function loadCSV(file) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(file, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: res => resolve(res.data),
+      error: err => reject(err)
+    });
+  });
+}
+
+/* =========================
+   LOAD ALL DATASETS
+========================= */
+async function loadAllData() {
+  try {
+    [rulesData, riskData, stateData, checklistData, authoritiesData] = await Promise.all([
+      loadCSV("csv/regulatory_rules.csv"),
+      loadCSV("csv/risk_matrix.csv"),
+      loadCSV("csv/state_rules.csv"),
+      loadCSV("csv/compliance_checklist_template.csv"),
+      loadCSV("csv/authority_directory.csv")
+    ]);
+
+    dataLoaded = true;
+  } catch (error) {
+    alert("Error loading datasets. Check CSV folder.");
+    console.error(error);
+  }
+}
+
+loadAllData();
+
+/* =========================
+   MAIN CHECK FUNCTION
+========================= */
+function runCheck() {
+
+  if (!dataLoaded) {
+    alert("Datasets still loading...");
+    return;
+  }
+
+  const type = normalize(document.getElementById("businessType").value);
+  const location = normalize(document.getElementById("location").value);
+  const size = normalize(document.getElementById("size").value);
+
+  if (!type || !location || !size) {
+    alert("Please complete all fields.");
+    return;
+  }
+
+  document.getElementById("loading").classList.remove("hidden");
+  document.getElementById("result").classList.add("hidden");
+
+  setTimeout(() => processCompliance(type, location, size), 500);
+}
+
+/* =========================
+   PROCESS ENGINE
+========================= */
+function processCompliance(type, location, size) {
+
+  let rules = rulesData.filter(r =>
+    normalize(r.business_type) === type || normalize(r.business_type) === "all"
+  );
+
+  rules = rules.filter(r =>
+    !r.applicable_size ||
+    normalize(r.applicable_size) === size ||
+    normalize(r.applicable_size) === "all"
+  );
+
+  let stateRules = stateData.filter(s =>
+    normalize(s.state) === location || normalize(s.state) === "all"
+  );
+
+  let requirements = [
+    ...rules.map(r => r.requirement),
+    ...stateRules.map(r => r.requirement)
+  ].filter(Boolean);
+
+  requirements = [...new Set(requirements)];
+
+  let missing = requirements.slice(0, Math.ceil(requirements.length / 2));
+  let fulfilled = requirements.filter(r => !missing.includes(r));
+
+  let risk = 0;
+
+  missing.forEach(req => {
+    let match = riskData.find(r => normalize(r.requirement) === normalize(req));
+    if (match) {
+      risk += parseInt(match.severity_score || 0);
+    }
+  });
+
+  let score = Math.max(0, 100 - risk);
+
+  let status = "Low Risk";
+  let color = "green";
+
+  if (score < 70) { status = "Medium Risk"; color = "yellow"; }
+  if (score < 40) { status = "High Risk"; color = "red"; }
+
+  latestReport = { type, location, size, requirements, missing, fulfilled, score, status };
+
+  displayResult();
+}
+
+/* =========================
+   DISPLAY RESULT
+========================= */
+function displayResult() {
+
+  document.getElementById("loading").classList.add("hidden");
+
+  const r = latestReport;
+  const resultDiv = document.getElementById("result");
+  resultDiv.classList.remove("hidden");
+
+  resultDiv.innerHTML = `
+    <h3>Compliance Result</h3>
+
+    <p><strong>Business:</strong> ${capitalize(r.type)}</p>
+    <p><strong>Location:</strong> ${capitalize(r.location)}</p>
+
+    <h4>Required</h4>
+    <ul>${r.requirements.map(x => `<li>${x}</li>`).join("")}</ul>
+
+    <h4>Missing</h4>
+    <ul>${r.missing.map(x => `<li>${x}</li>`).join("")}</ul>
+
+    <p class="${getColorClass(r.score)}">
+      <strong>Score: ${r.score}% (${r.status})</strong>
+    </p>
+
+    <button onclick="downloadPDF()">Download PDF Report</button>
+  `;
+}
+
+/* =========================
+   PDF EXPORT
+========================= */
+function downloadPDF() {
+
+  if (!latestReport) return;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  let y = 20;
+  const r = latestReport;
+
+  doc.text("Prudent Compliance Report", 14, y);
+  y += 10;
+
+  doc.text(`Business: ${capitalize(r.type)}`, 14, y);
+  y += 7;
+  doc.text(`Location: ${capitalize(r.location)}`, 14, y);
+  y += 7;
+  doc.text(`Score: ${r.score}% (${r.status})`, 14, y);
+  y += 10;
+
+  doc.text("Missing Items:", 14, y);
+  y += 8;
+
+  r.missing.forEach(m => {
+    doc.text("- " + m, 14, y);
+    y += 6;
+  });
+
+  doc.save("Prudent_Report.pdf");
+}
+
+/* =========================
+   HELPERS
+========================= */
+function normalize(x) { return (x || "").toLowerCase().trim(); }
+function capitalize(x) { return x.charAt(0).toUpperCase() + x.slice(1); }
+
+function getColorClass(score) {
+  if (score < 40) return "red";
+  if (score < 70) return "yellow";
+  return "green";
+}
+</script>
 
 </body>
 </html>
