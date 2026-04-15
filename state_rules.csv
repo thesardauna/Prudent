@@ -1,0 +1,38 @@
+state,lga,requirement,authority,mandatory,applicable_sector,description,processing_time,fee_estimate
+Abia,Umuahia North,Business Premises Permit,Abia State IRS,Yes,All,Annual state registration for commercial property,3-5 Days,"N10,000 (Urban), N2,000 (Rural)"
+Adamawa,Yola North,Trade License,Yola North LGA,Yes,Retail/Services,Local govt permit for operating a shop,5-10 Days,N5,000 - N20,000
+Akwa Ibom,Uyo,Premises Certificate,AKIRS,Yes,General,Annual state tax for business property usage,5 Days,"N10,000 (Urban), N2,000 (Rural)"
+Anambra,Awka South,Business Premises Levy,Anambra State IRS,Yes,All,State-wide mandatory registration,3-7 Days,N10,000 (New) / N5,000 (Renewal)
+Bauchi,Bauchi,Form FA 35/36 Registration,Min. of Commerce,Yes,General,Official registration of occupation/premises,1-3 Days,N15,000 (Urban) / N5,000 (Rural)
+Bayelsa,Yenagoa,Business Permit,BYIRS,Yes,All,State operational certification,5-10 Days,N10,000 - N50,000
+Benue,Makurdi,Trade Permit,Makurdi LGA,Yes,Commerce,Local government trading authorization,7 Days,N5,000 - N15,000
+Borno,Maiduguri,Premises Registration,Min. of Trade,Yes,General,Annual registration via the Registrar of Trade,5-10 Days,N10,000 - N100,000 (By size)
+Cross River,Calabar Municipal,Trade License,Municipal Council,Yes,Hospitality/Retail,Annual municipal operating permit,3-7 Days,N15,000 - N50,000
+Delta,Warri South,Sanitation Fee,Waste Mgmt Board,Yes,Manufacturing/Retail,Monthly commercial waste disposal levy,Instant,N5,000 - N20,000 Monthly
+Ebonyi,Abakaliki,Business Premises,EBIRS,Yes,All,State mandatory commercial property tax,5 Days,N10,000
+Edo,Oredo,Business Premises Permit,Edo State IRS,Yes,All,Annual registration for physical locations,3-5 Days,N10,000
+Ekiti,Ado-Ekiti,Operational Permit,Ekiti State IRS,Yes,Retail/SME,General business operating license,2-4 Days,N5,000 - N20,000
+Enugu,Enugu North,Shop Rate,Enugu North LGA,Yes,Retail,Local government shop/kiosk levy,3 Days,N2,500 - N7,500
+FCT,Abuja Municipal,Trade License,AMAC,Yes,Retail/Hospitality,Municipal permit to operate a service point,5-10 Days,N20,000 - N150,000
+Gombe,Gombe,Premises Levy,Gombe State IRS,Yes,General,Registration via TSA/Remita payment,1 Day,N15,000 (Urban) / N2,000 (Rural)
+Imo,Owerri Municipal,Operational Permit,Imo State IRS,Yes,All,State-wide business location registration,5-7 Days,N10,000
+Jigawa,Dutse,Business Premises,Min. of Commerce,Yes,All,State commercial property permit,7-10 Days,N5,000 - N15,000
+Kaduna,Kaduna North,Business Premises,KADIRS,Yes,All,Annual state registration (ranked 2nd in EoDB 2025),3 Days,N10,000
+Kano,Kumbotso,Business Premises,KIRS,Yes,All,Mandatory state certification for offices/shops,1-5 Days,N10,000 (New) / N5,000 (Renewal)
+Katsina,Katsina,Business Fee Schedule,Min. of Commerce,Yes,SME/Agric,Fee varies by town (Major vs Other),2-5 Days,N2,000 - N50,000
+Kebbi,Birnin Kebbi,Trade Related Fees,KEBIRS/SBIR,Yes,All,Tiered fee based on shop size (sqm),3-5 Days,N2,000 - N50,000
+Kogi,Lokoja,Business Premises,Kogi State IRS,Yes,General,Annual state commercial levy,5 Days,N10,000
+Kwara,Ilorin West,Trade Permit,Ilorin West LGA,Yes,Retail,Local council operating permit,7 Days,N5,000 - N25,000
+Lagos,Eti-Osa,Signage Permit,LASAA,Yes,All (Commercial),Permit for outdoor branding and signage,2 Days,N10,000 App fee + Variable
+Nasarawa,Lafia,Business Premises,Nasarawa IRS,Yes,All,State mandatory property registration,5 Days,N10,000
+Niger,Chanchaga,Premises Permit,Niger State IRS,Yes,All,Annual registration for shops/offices,3-5 Days,N10,000
+Ogun,Abeokuta South,Business Permit,OGIRS,Yes,All,Digitized state permit registration,1-2 Days,N10,000
+Ondo,Akure South,Premises Permit,ODIRS,Yes,All,Reduced cost to ease business startup,3 Days,N5,000 - N10,000
+Osun,Osogbo,Operational Permit,Osun State IRS,Yes,All,Annual state-wide registration,5 Days,N10,000
+Oyo,Ibadan North,Trade License,Ibadan North LGA,Yes,Retail,Local govt shop/stall permit,7 Days,N5,000 - N20,000
+Plateau,Jos North,Business Premises,PSIRS,Yes,All,Mandatory state registration,5 Days,N10,000
+Rivers,Obio-Akpor,Operational Permit,Obio-Akpor LGA,Yes,All,Local council trading authorization,3-7 Days,N10,000 - N50,000
+Sokoto,Sokoto North,Business Premises,Sokoto IRS,Yes,All,Annual state property levy,7 Days,N10,000
+Taraba,Jalingo,Trade Permit,Jalingo LGA,Yes,Retail,Local govt operating license,10 Days,N5,000 - N15,000
+Yobe,Damaturu,Premises Registration,Min. of Commerce,Yes,All,State-level business certification,7-14 Days,N5,000 - N10,000
+Zamfara,Gusau,Business Permit,Zamfara IRS,Yes,All,Annual state-wide operating permit,5-10 Days,N10,000
