@@ -1,37 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Prudent – AI Compliance Copilot</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<div class="card">
+  <h2>Check Your Compliance</h2>
 
-<div class="container">
-  <h1>Prudent</h1>
-  <p class="subtitle">AI Compliance Copilot for SMEs</p>
+  <label>Business Type</label>
+  <input type="text" id="businessType" placeholder="e.g Retail, Food, NGO">
 
-  <div class="card">
-    <h2>Check Your Compliance</h2>
+  <label>Location</label>
+  <input type="text" id="location" placeholder="e.g Bauchi, Abuja">
 
-    <label>Business Type</label>
-    <input type="text" id="businessType" placeholder="e.g Retail, Farm">
+  <label>Business Size</label>
+  <select id="size">
+    <option value="">Select size</option>
+    <option>Small</option>
+    <option>Medium</option>
+  </select>
 
-    <label>Location</label>
-    <input type="text" id="location" placeholder="e.g Bauchi">
-
-    <label>Business Size</label>
-    <select id="size">
-      <option>Small</option>
-      <option>Medium</option>
-    </select>
-
-    <button onclick="checkCompliance()">Check Compliance</button>
-  </div>
-
-  <div id="result" class="card hidden"></div>
+  <button onclick="checkCompliance()">Check Compliance</button>
 </div>
 
-<script src="script.js"></script>
-</body>
-</html>
+<div id="result" class="card hidden"></div>
