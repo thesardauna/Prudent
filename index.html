@@ -3,89 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prudent – AI Compliance Copilot</title>
+<title>Prudent AI Compliance Copilot</title>
 <link rel="stylesheet" href="style.css">
+
+<!-- CSV parser -->
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 
 <body>
 
 <header class="header">
-    <h1>Prudent AI Compliance Copilot</h1>
-    <p>Smart Regulatory Intelligence for Nigerian Businesses</p>
+    <h1>Prudent AI Compliance Engine</h1>
+    <p>Regulatory Intelligence for Nigerian SMEs</p>
 </header>
 
 <main class="container">
 
-<!-- FORM -->
 <section class="card">
-    <h2>Business Compliance Input</h2>
+<h2>Business Input</h2>
 
-    <form id="form">
+<form id="form">
 
-        <input id="business_id" placeholder="Business ID" required>
-        <input id="business_name" placeholder="Business Name" required>
+<input id="business_id" placeholder="Business ID" required>
+<input id="business_name" placeholder="Business Name" required>
 
-        <select id="type">
-            <option>SME</option>
-            <option>Startup</option>
-            <option>Enterprise</option>
-        </select>
+<select id="state">
+    <option value="">Select State</option>
+    <option>Bauchi</option>
+    <option>Lagos</option>
+    <option>Kano</option>
+    <option>Abuja</option>
+    <option>Kaduna</option>
+</select>
 
-        <input id="sector" placeholder="Sector">
-        <input id="location" placeholder="Location">
-        <input id="state" placeholder="State">
-        <input id="lga" placeholder="LGA">
+<input id="sector" placeholder="Sector (e.g AgricTech)">
+<input id="lga" placeholder="LGA">
 
-        <select id="size">
-            <option>Micro</option>
-            <option>Small</option>
-            <option>Medium</option>
-            <option>Large</option>
-        </select>
+<select id="has_cac"><option>Yes</option><option>No</option></select>
+<select id="has_tin"><option>Yes</option><option>No</option></select>
+<select id="has_vat"><option>Yes</option><option>No</option></select>
+<select id="has_nafdac"><option>Yes</option><option>No</option></select>
+<select id="has_permit"><option>Yes</option><option>No</option></select>
 
-        <input id="year_established" type="number" placeholder="Year Established">
+<button type="submit">Analyze Compliance</button>
 
-        <select id="has_cac">
-            <option value="Yes">CAC Registered</option>
-            <option value="No">No CAC</option>
-        </select>
-
-        <select id="has_tin">
-            <option value="Yes">Has TIN</option>
-            <option value="No">No TIN</option>
-        </select>
-
-        <select id="has_vat">
-            <option value="Yes">VAT Registered</option>
-            <option value="No">No VAT</option>
-        </select>
-
-        <select id="has_nafdac">
-            <option value="Yes">NAFDAC Approved</option>
-            <option value="No">No NAFDAC</option>
-        </select>
-
-        <select id="has_permit">
-            <option value="Yes">Permit Available</option>
-            <option value="No">No Permit</option>
-        </select>
-
-        <input id="last_compliance_check" type="date">
-
-        <button type="submit">Generate Report</button>
-
-    </form>
+</form>
 </section>
 
-<!-- REPORT -->
 <section id="reportSection" class="card hidden">
-    <h2>Compliance Report</h2>
-    <div id="reportContent"></div>
+<h2>Compliance Intelligence Report</h2>
+<div id="reportContent"></div>
 
-    <div class="actions">
-        <button onclick="downloadCSV()">Download CSV</button>
-        <button onclick="window.print()">Download PDF</button>
-    </div>
+<div class="actions">
+<button onclick="downloadCSV()">Download CSV</button>
+<button onclick="window.print()">Download PDF</button>
+</div>
 </section>
 
 </main>
