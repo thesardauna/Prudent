@@ -1,14 +1,22 @@
+:root {
+    --primary:#200080;
+    --accent:#20ff80;
+    --gold:#d4af37;
+    --bg:#0a0f1c;
+    --card:#111827;
+}
+
 body {
     margin:0;
-    font-family: 'Segoe UI', sans-serif;
-    background:#0a0f1c;
-    color:#fff;
+    font-family:Segoe UI;
+    background:var(--bg);
+    color:white;
 }
 
 .header {
     text-align:center;
-    padding:25px;
-    background:linear-gradient(90deg,#200080,#20ff80);
+    padding:30px;
+    background:linear-gradient(90deg,var(--primary),var(--accent));
 }
 
 .container {
@@ -18,7 +26,7 @@ body {
 }
 
 .card {
-    background:#111827;
+    background:var(--card);
     padding:20px;
     border-radius:12px;
     margin-bottom:20px;
@@ -26,7 +34,7 @@ body {
 
 form {
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
     gap:10px;
 }
 
@@ -38,51 +46,34 @@ input,select {
 
 button {
     padding:12px;
-    border:none;
     border-radius:10px;
-    background:#20ff80;
+    border:none;
     font-weight:bold;
     cursor:pointer;
-}
-
-.actions button {
-    background:#d4af37;
+    background:var(--accent);
 }
 
 /* REPORT DESIGN */
-.report-box {
-    margin-top:20px;
-}
-
-.section {
+.report-section {
     margin-bottom:20px;
     padding:15px;
-    border-radius:10px;
+    border-left:4px solid var(--gold);
     background:#1f2937;
+    border-radius:10px;
 }
 
-.section h3 {
-    margin-top:0;
-    color:#20ff80;
+.badge {
+    padding:5px 10px;
+    border-radius:20px;
+    font-weight:bold;
 }
 
-.bad {
-    color:#ff4d4d;
+.low { background:#20ff80; color:black; }
+.medium { background:orange; }
+.high { background:red; }
+
+ul {
+    padding-left:20px;
 }
 
-.good {
-    color:#20ff80;
-}
-
-.medium {
-    color:#ffaa00;
-}
-
-.hidden {
-    display:none;
-}
-
-@media print {
-    form, .actions, .header { display:none; }
-    body { background:white; color:black; }
-}
+.hidden { display:none; }
