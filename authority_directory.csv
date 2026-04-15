@@ -1,0 +1,11 @@
+authority_id,authority_name,level,focus_area,contact_email,contact_phone,website,location
+AUTH-001,Corporate Affairs Commission (CAC),Federal,Business Registration,helpdesk@cac.gov.ng,+234 818 222 9020,www.cac.gov.ng,Abuja
+AUTH-002,Federal Inland Revenue Service (FIRS),Federal,Taxation,enquiries@firs.gov.ng,+234 9460 2700,www.firs.gov.ng,Abuja
+AUTH-003,Central Bank of Nigeria (CBN),Federal,Financial Services,contactcbn@cbn.gov.ng,+234 700 225 5226,www.cbn.gov.ng,Abuja
+AUTH-004,NAFDAC,Federal,Food and Drugs,nafdac@nafdac.gov.ng,+234 1 4608800,www.nafdac.gov.ng,Lagos/Abuja
+AUTH-005,Lagos State Internal Revenue Service (LIRS),State,State Taxation,info@lirs.gov.ng,+234 700 225 55477,www.lirs.gov.ng,Lagos
+AUTH-006,Abuja Municipal Area Council (AMAC),Local,Trade Licensing,info@amac.fct.gov.ng,+234 9 291 4305,www.amac.fct.gov.ng,FCT
+AUTH-007,Nigerian Communications Commission (NCC),Federal,Telecommunications,consumer@ncc.gov.ng,+234 9 461 7000,www.ncc.gov.ng,Abuja
+AUTH-008,SCUML (EFCC),Federal,Anti-Money Laundering,helpdesk@scuml.org,+234 818 377 2899,www.scuml.org,Abuja
+AUTH-009,Kano State Internal Revenue Service (KIRS),State,State Taxation,info@kirs.gov.ng,+234 803 123 4567,www.kirs.kano.gov.ng,Kano
+AUTH-010,Nigerian Port Authority (NPA),Federal,Maritime/Trade,info@nigerianports.gov.ng,+234 1 2700641,www.nigerianports.gov.ng,Lagos
