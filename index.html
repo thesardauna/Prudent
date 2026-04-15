@@ -4,188 +4,92 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prudent – AI Compliance Copilot</title>
-
 <link rel="stylesheet" href="style.css">
-
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-
-<style>
-/* PRINT MODE */
-@media print {
-  body * { visibility: hidden; }
-  #report, #report * { visibility: visible; }
-  #report { position: absolute; top: 0; left: 0; width: 100%; }
-}
-</style>
-
 </head>
 
 <body>
 
-<div class="container">
+<header class="header">
+    <h1>Prudent AI Compliance Copilot</h1>
+    <p>Smart Regulatory Intelligence for Nigerian Businesses</p>
+</header>
 
-<h1>Prudent</h1>
-<p class="subtitle">AI Compliance Copilot for SMEs</p>
+<main class="container">
 
-<div class="card">
+<!-- FORM -->
+<section class="card">
+    <h2>Business Compliance Input</h2>
 
-<label>Business Type</label>
-<input id="businessType" placeholder="retail, food, ngo">
+    <form id="form">
 
-<label>State</label>
-<select id="state"></select>
+        <input id="business_id" placeholder="Business ID" required>
+        <input id="business_name" placeholder="Business Name" required>
 
-<label>Business Size</label>
-<select id="size">
-<option value="">Select size</option>
-<option>Small</option>
-<option>Medium</option>
-</select>
+        <select id="type">
+            <option>SME</option>
+            <option>Startup</option>
+            <option>Enterprise</option>
+        </select>
 
-<button onclick="checkCompliance()">Analyze Compliance</button>
+        <input id="sector" placeholder="Sector">
+        <input id="location" placeholder="Location">
+        <input id="state" placeholder="State">
+        <input id="lga" placeholder="LGA">
 
-</div>
+        <select id="size">
+            <option>Micro</option>
+            <option>Small</option>
+            <option>Medium</option>
+            <option>Large</option>
+        </select>
 
-<div id="report" class="card hidden"></div>
+        <input id="year_established" type="number" placeholder="Year Established">
 
-</div>
+        <select id="has_cac">
+            <option value="Yes">CAC Registered</option>
+            <option value="No">No CAC</option>
+        </select>
 
-<script>
+        <select id="has_tin">
+            <option value="Yes">Has TIN</option>
+            <option value="No">No TIN</option>
+        </select>
 
-/* DATA */
-let rulesData = [], riskData = [], stateData = [], authorityData = [];
+        <select id="has_vat">
+            <option value="Yes">VAT Registered</option>
+            <option value="No">No VAT</option>
+        </select>
 
-/* LOAD CSV */
-function loadCSV(file){
-  return new Promise(res=>{
-    Papa.parse(file,{
-      download:true,
-      header:true,
-      skipEmptyLines:true,
-      complete:r=>res(r.data)
-    });
-  });
-}
+        <select id="has_nafdac">
+            <option value="Yes">NAFDAC Approved</option>
+            <option value="No">No NAFDAC</option>
+        </select>
 
-/* INIT */
-async function init(){
-  [rulesData, riskData, stateData, authorityData] = await Promise.all([
-    loadCSV("csv/regulatory_rules.csv"),
-    loadCSV("csv/risk_matrix.csv"),
-    loadCSV("csv/state_rules.csv"),
-    loadCSV("csv/authority_directory.csv")
-  ]);
-  populateStates();
-}
-init();
+        <select id="has_permit">
+            <option value="Yes">Permit Available</option>
+            <option value="No">No Permit</option>
+        </select>
 
-/* STATE DROPDOWN */
-function populateStates(){
-  let states=[...new Set(stateData.map(s=>s.state))];
-  let select=document.getElementById("state");
-  select.innerHTML="<option>Select State</option>"+
-    states.map(s=>`<option>${s}</option>`).join("");
-}
+        <input id="last_compliance_check" type="date">
 
-/* MAIN */
-function checkCompliance(){
+        <button type="submit">Generate Report</button>
 
-  let type=n(document.getElementById("businessType").value);
-  let state=n(document.getElementById("state").value);
-  let size=n(document.getElementById("size").value);
+    </form>
+</section>
 
-  let base=rulesData.filter(r=>n(r.business_type)==type||n(r.business_type)=="all");
-  let local=stateData.filter(s=>n(s.state)==state);
+<!-- REPORT -->
+<section id="reportSection" class="card hidden">
+    <h2>Compliance Report</h2>
+    <div id="reportContent"></div>
 
-  let req=[...base.map(r=>r.requirement),...local.map(l=>l.requirement)];
-  req=[...new Set(req)];
+    <div class="actions">
+        <button onclick="downloadCSV()">Download CSV</button>
+        <button onclick="window.print()">Download PDF</button>
+    </div>
+</section>
 
-  let missing=req.slice(0,Math.ceil(req.length/2));
-  let fulfilled=req.filter(x=>!missing.includes(x));
+</main>
 
-  let risk=0, penalty=[], authorities=[];
-
-  missing.forEach(m=>{
-    let rm=riskData.find(r=>n(r.requirement)==n(m));
-    if(rm){
-      risk+=parseInt(rm.severity_score||0);
-      penalty.push(rm.penalty);
-    }
-    let auth=rulesData.find(r=>n(r.requirement)==n(m));
-    if(auth) authorities.push(auth.authority);
-  });
-
-  let score=Math.max(0,100-risk);
-
-  render({
-    type,state,size,req,missing,fulfilled,penalty,authorities,score
-  });
-}
-
-/* RENDER REPORT */
-function render(r){
-
-  let status="Low Risk";
-  if(r.score<70) status="Medium Risk";
-  if(r.score<40) status="High Risk";
-
-  let html=`
-  <h2>Compliance Report</h2>
-
-  <p><b>Business:</b> ${cap(r.type)}</p>
-  <p><b>State:</b> ${cap(r.state)}</p>
-  <p><b>Size:</b> ${cap(r.size)}</p>
-
-  <hr>
-
-  <h3>📊 Summary</h3>
-  <p><b>Score:</b> ${r.score}% (${status})</p>
-  <p><b>Total Requirements:</b> ${r.req.length}</p>
-  <p><b>Missing:</b> ${r.missing.length}</p>
-
-  <h3>📋 Required Compliance</h3>
-  <ul>${r.req.map(x=>`<li>${x}</li>`).join("")}</ul>
-
-  <h3>❌ Missing Requirements</h3>
-  <ul>${r.missing.map(x=>`<li>${x}</li>`).join("")}</ul>
-
-  <h3>⚖️ Penalties</h3>
-  <ul>${r.penalty.map(p=>`<li>${p||"Penalty applies"}</li>`).join("")}</ul>
-
-  <h3>🏛️ Authorities</h3>
-  <ul>${[...new Set(r.authorities)].map(a=>`<li>${a}</li>`).join("")}</ul>
-
-  <h3>📌 Recommendations</h3>
-  <ul>
-    <li>Complete missing compliance items immediately</li>
-    <li>Register with required authorities</li>
-    <li>Schedule compliance audit</li>
-  </ul>
-
-  <button onclick="window.print()">Print Report</button>
-  <button onclick="downloadPDF()">Download PDF</button>
-  `;
-
-  let div=document.getElementById("report");
-  div.classList.remove("hidden");
-  div.innerHTML=html;
-}
-
-/* PDF */
-function downloadPDF(){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  doc.text(document.getElementById("report").innerText,10,10);
-  doc.save("Prudent_Report.pdf");
-}
-
-/* HELPERS */
-function n(x){return (x||"").toLowerCase().trim();}
-function cap(x){return x.charAt(0).toUpperCase()+x.slice(1);}
-
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
