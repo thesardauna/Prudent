@@ -1,0 +1,13 @@
+checklist_id,business_type,requirement,step_number,step_description,documents_required,estimated_time,priority
+CHK-001,Limited Liability Company,CAC Incorporation,1,Name availability search and reservation,Proposed Business Names,24 Hours,High
+CHK-001,Limited Liability Company,CAC Incorporation,2,Fill registration forms and upload constitutional documents,ID Cards (Directors/Shareholders); MEMART,3-5 Days,High
+CHK-001,Limited Liability Company,CAC Incorporation,3,Payment of stamp duties and registration fees,Remita Receipt,Instant,High
+CHK-001,Limited Liability Company,CAC Incorporation,4,Download e-Certificate and Status Report,N/A,24 Hours,High
+CHK-002,Restaurant/Cafe,Food Handling Permit,1,Application to LGA Health Department,Application Letter; Business Plan,2 Days,Medium
+CHK-002,Restaurant/Cafe,Food Handling Permit,2,Health inspection of premises and staff screening,Staff Medical Reports,3-5 Days,High
+CHK-002,Restaurant/Cafe,Food Handling Permit,3,Issuance of Health and Hygiene Certificate,Inspection Report,2 Days,Medium
+CHK-003,FinTech,CBN License (PSSP),1,Submit formal application and non-refundable fee,Company Profile; Feasibility Study,1 Month,Critical
+CHK-003,FinTech,CBN License (PSSP),2,Capital deposit (Escrow) into CBN account,Evidence of Deposit (Minimum Capital),1 Week,Critical
+CHK-003,FinTech,CBN License (PSSP),3,Document review and physical site inspection,IT Policy; Security Architecture,2-3 Months,Critical
+CHK-004,SME,Tax Identification (TIN),1,Register on FIRS Taxpromax portal,CAC Certificate; Utility Bill,48 Hours,High
+CHK-005,Logistics,State Haulage Permit,1,Payment of consolidated haulage fees at State IRS,Vehicle Registration Docs,1 Day,Medium
