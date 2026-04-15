@@ -1,0 +1,9 @@
+business_type,sector,location,requirement,authority,mandatory,risk_weight,description,applicable_size,frequency,legal_reference
+Limited Liability Company,General,National,Business Registration,Corporate Affairs Commission (CAC),Yes,High,Formal legal incorporation of the entity,All,One-time,Companies and Allied Matters Act (CAMA) 2020
+FinTech / Digital Bank,Financial Services,National,Operating License,Central Bank of Nigeria (CBN),Yes,Critical,Authorization to provide financial services or hold deposits,All,Annual Renewal,BOFIA 2020
+Restaurant / Eatery,Hospitality,State/LGA,Food Handling Permit,State Ministry of Health / Local Govt,Yes,Medium,Certification for hygiene and food safety standards,Small/Medium,Annual,State Public Health Laws
+Manufacturing Plant,Industrial,National,Environmental Audit Report (EAR),NESREA,Yes,Medium,Assessment of industrial impact on the environment,Large,Every 3 Years,NESREA (Establishment) Act 2007
+All Employers (5+ staff),General,National,ITF Contribution,Industrial Training Fund (ITF),Yes,Low,1% of annual payroll for manpower development,Medium/Large,Annual,ITF Act 2011
+Consulting Firm,Professional Services,National,SCUML Registration,EFCC (Special Control Unit Against Money Laundering),Yes,High,Compliance for Designated Non-Financial Businesses (DNFBPs),All,One-time,Money Laundering (Prevention and Prohibition) Act 2022
+Retail Store,Commerce,Local Govt,Signage & Advertisement,State Signage & Advertising Agency (e.g. LASAA),Yes,Low,Permit for outdoor branding and shopfront signage,All,Annual,State Structures for Signage and Advertisement Laws
+Tech Startup,General,National,Tax Identification Number (TIN),Federal Inland Revenue Service (FIRS),Yes,High,Required for VAT CIT and all federal tax filings,All,One-time,Finance Act / Federal Inland Revenue Service Act
