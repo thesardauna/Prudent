@@ -6,58 +6,65 @@
 <title>Prudent AI Compliance Copilot</title>
 <link rel="stylesheet" href="style.css">
 
-<!-- CSV parser -->
+<!-- PapaParse for CSV -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 
 <body>
 
 <header class="header">
-    <h1>Prudent AI Compliance Engine</h1>
-    <p>Regulatory Intelligence for Nigerian SMEs</p>
+    <h1>Prudent AI Compliance Copilot</h1>
+    <p>Regulatory Intelligence Engine for Nigerian Businesses</p>
 </header>
 
 <main class="container">
 
 <section class="card">
-<h2>Business Input</h2>
+    <h2>Business Input</h2>
 
-<form id="form">
+    <form id="form">
 
-<input id="business_id" placeholder="Business ID" required>
-<input id="business_name" placeholder="Business Name" required>
+        <input id="business_id" placeholder="Business ID" required>
+        <input id="business_name" placeholder="Business Name" required>
 
-<select id="state">
-    <option value="">Select State</option>
-    <option>Bauchi</option>
-    <option>Lagos</option>
-    <option>Kano</option>
-    <option>Abuja</option>
-    <option>Kaduna</option>
-</select>
+        <input id="sector" placeholder="Sector (e.g AgricTech, Food, Health)">
+        
+        <!-- FULL NIGERIA STATES -->
+        <select id="state" required>
+            <option value="">Select State</option>
+            <option>Abia</option><option>Adamawa</option><option>Akwa Ibom</option>
+            <option>Anambra</option><option>Bauchi</option><option>Bayelsa</option>
+            <option>Benue</option><option>Borno</option><option>Cross River</option>
+            <option>Delta</option><option>Ebonyi</option><option>Edo</option>
+            <option>Ekiti</option><option>Enugu</option><option>FCT</option>
+            <option>Gombe</option><option>Imo</option><option>Jigawa</option>
+            <option>Kaduna</option><option>Kano</option><option>Katsina</option>
+            <option>Kebbi</option><option>Kogi</option><option>Kwara</option>
+            <option>Lagos</option><option>Nasarawa</option><option>Niger</option>
+            <option>Ogun</option><option>Ondo</option><option>Osun</option>
+            <option>Oyo</option><option>Plateau</option><option>Rivers</option>
+            <option>Sokoto</option><option>Taraba</option><option>Yobe</option>
+            <option>Zamfara</option>
+        </select>
 
-<input id="sector" placeholder="Sector (e.g AgricTech)">
-<input id="lga" placeholder="LGA">
+        <select id="has_cac"><option>Yes</option><option>No</option></select>
+        <select id="has_tin"><option>Yes</option><option>No</option></select>
+        <select id="has_vat"><option>Yes</option><option>No</option></select>
+        <select id="has_nafdac"><option>Yes</option><option>No</option></select>
+        <select id="has_permit"><option>Yes</option><option>No</option></select>
 
-<select id="has_cac"><option>Yes</option><option>No</option></select>
-<select id="has_tin"><option>Yes</option><option>No</option></select>
-<select id="has_vat"><option>Yes</option><option>No</option></select>
-<select id="has_nafdac"><option>Yes</option><option>No</option></select>
-<select id="has_permit"><option>Yes</option><option>No</option></select>
-
-<button type="submit">Analyze Compliance</button>
-
-</form>
+        <button type="submit">Run Compliance Intelligence</button>
+    </form>
 </section>
 
 <section id="reportSection" class="card hidden">
-<h2>Compliance Intelligence Report</h2>
-<div id="reportContent"></div>
+    <h2>AI Compliance Report</h2>
+    <div id="reportContent"></div>
 
-<div class="actions">
-<button onclick="downloadCSV()">Download CSV</button>
-<button onclick="window.print()">Download PDF</button>
-</div>
+    <div class="actions">
+        <button onclick="downloadCSV()">Download CSV</button>
+        <button onclick="window.print()">Download PDF</button>
+    </div>
 </section>
 
 </main>
