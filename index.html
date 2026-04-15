@@ -5,16 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Prudent – AI Compliance Copilot</title>
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-
   <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
 
   <!-- CSV Parser -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-  <!-- PDF Generator -->
+  <!-- PDF -->
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 
@@ -23,20 +20,21 @@
 <div class="container">
 
   <!-- HEADER -->
-  <header>
-    <h1>Prudent</h1>
-    <p class="subtitle">AI Compliance Copilot for SMEs</p>
-  </header>
+  <h1>Prudent</h1>
+  <p class="subtitle">AI Compliance Copilot for SMEs</p>
 
-  <!-- INPUT FORM -->
+  <!-- FORM -->
   <div class="card">
+
     <h2>Check Your Compliance</h2>
 
     <label>Business Type</label>
-    <input type="text" id="businessType" placeholder="e.g Retail, Food, NGO" />
+    <input type="text" id="businessType" placeholder="e.g retail, food, ngo" />
 
-    <label>Location (State)</label>
-    <input type="text" id="location" placeholder="e.g Bauchi, Abuja" />
+    <label>State</label>
+    <select id="state">
+      <option>Loading states...</option>
+    </select>
 
     <label>Business Size</label>
     <select id="size">
@@ -45,39 +43,33 @@
       <option>Medium</option>
     </select>
 
-    <button onclick="runCheck()">Check Compliance</button>
+    <button onclick="checkCompliance()">Check Compliance</button>
+
   </div>
 
   <!-- LOADING -->
   <div id="loading" class="card hidden">
-    <p>🔄 Loading datasets & analyzing compliance...</p>
+    <p>🔄 Processing compliance...</p>
   </div>
 
   <!-- RESULT -->
   <div id="result" class="card hidden"></div>
 
-  <!-- FOOTER -->
-  <footer style="margin-top:30px;text-align:center;color:#94a3b8;font-size:0.8rem;">
-    Prudent © 2026 — Smart Compliance for Nigerian SMEs
-  </footer>
-
 </div>
 
 <script>
+
 /* =========================
-   DATA STORAGE
+   DATA
 ========================= */
 let rulesData = [];
 let riskData = [];
 let stateData = [];
-let checklistData = [];
-let authoritiesData = [];
 
 let latestReport = null;
-let dataLoaded = false;
 
 /* =========================
-   CSV LOADER
+   LOAD CSV
 ========================= */
 function loadCSV(file) {
   return new Promise((resolve, reject) => {
@@ -92,74 +84,75 @@ function loadCSV(file) {
 }
 
 /* =========================
-   LOAD ALL DATASETS
+   INIT
 ========================= */
-async function loadAllData() {
-  try {
-    [rulesData, riskData, stateData, checklistData, authoritiesData] = await Promise.all([
-      loadCSV("csv/regulatory_rules.csv"),
-      loadCSV("csv/risk_matrix.csv"),
-      loadCSV("csv/state_rules.csv"),
-      loadCSV("csv/compliance_checklist_template.csv"),
-      loadCSV("csv/authority_directory.csv")
-    ]);
+async function init() {
+  [rulesData, riskData, stateData] = await Promise.all([
+    loadCSV("csv/regulatory_rules.csv"),
+    loadCSV("csv/risk_matrix.csv"),
+    loadCSV("csv/state_rules.csv")
+  ]);
 
-    dataLoaded = true;
-  } catch (error) {
-    alert("Error loading datasets. Check CSV folder.");
-    console.error(error);
-  }
+  populateStates();
 }
 
-loadAllData();
+init();
 
 /* =========================
-   MAIN CHECK FUNCTION
+   POPULATE STATES
 ========================= */
-function runCheck() {
+function populateStates() {
+  const select = document.getElementById("state");
 
-  if (!dataLoaded) {
-    alert("Datasets still loading...");
-    return;
-  }
+  let states = [...new Set(stateData.map(s => s.state).filter(Boolean))];
+
+  select.innerHTML = `<option value="">Select State</option>` +
+    states.map(s => `<option value="${s}">${s}</option>`).join("");
+}
+
+/* =========================
+   MAIN LOGIC
+========================= */
+function checkCompliance() {
 
   const type = normalize(document.getElementById("businessType").value);
-  const location = normalize(document.getElementById("location").value);
+  const state = normalize(document.getElementById("state").value);
   const size = normalize(document.getElementById("size").value);
 
-  if (!type || !location || !size) {
-    alert("Please complete all fields.");
+  if (!type || !state || !size) {
+    alert("Please fill all fields");
     return;
   }
 
   document.getElementById("loading").classList.remove("hidden");
   document.getElementById("result").classList.add("hidden");
 
-  setTimeout(() => processCompliance(type, location, size), 500);
+  setTimeout(() => process(type, state, size), 500);
 }
 
 /* =========================
    PROCESS ENGINE
 ========================= */
-function processCompliance(type, location, size) {
+function process(type, state, size) {
 
-  let rules = rulesData.filter(r =>
-    normalize(r.business_type) === type || normalize(r.business_type) === "all"
+  let baseRules = rulesData.filter(r =>
+    normalize(r.business_type) === type ||
+    normalize(r.business_type) === "all"
   );
 
-  rules = rules.filter(r =>
+  baseRules = baseRules.filter(r =>
     !r.applicable_size ||
     normalize(r.applicable_size) === size ||
     normalize(r.applicable_size) === "all"
   );
 
-  let stateRules = stateData.filter(s =>
-    normalize(s.state) === location || normalize(s.state) === "all"
+  let localRules = stateData.filter(s =>
+    normalize(s.state) === state
   );
 
   let requirements = [
-    ...rules.map(r => r.requirement),
-    ...stateRules.map(r => r.requirement)
+    ...baseRules.map(r => r.requirement),
+    ...localRules.map(r => r.requirement)
   ].filter(Boolean);
 
   requirements = [...new Set(requirements)];
@@ -167,44 +160,56 @@ function processCompliance(type, location, size) {
   let missing = requirements.slice(0, Math.ceil(requirements.length / 2));
   let fulfilled = requirements.filter(r => !missing.includes(r));
 
-  let risk = 0;
+  let totalRisk = 0;
+  let penalties = [];
 
   missing.forEach(req => {
-    let match = riskData.find(r => normalize(r.requirement) === normalize(req));
+    let match = riskData.find(r =>
+      normalize(r.requirement) === normalize(req)
+    );
+
     if (match) {
-      risk += parseInt(match.severity_score || 0);
+      totalRisk += parseInt(match.severity_score || 0);
+      penalties.push(match.penalty || "Penalty applies");
     }
   });
 
-  let score = Math.max(0, 100 - risk);
+  let score = Math.max(0, 100 - totalRisk);
 
   let status = "Low Risk";
-  let color = "green";
+  if (score < 70) status = "Medium Risk";
+  if (score < 40) status = "High Risk";
 
-  if (score < 70) { status = "Medium Risk"; color = "yellow"; }
-  if (score < 40) { status = "High Risk"; color = "red"; }
+  latestReport = {
+    type, state, size,
+    requirements,
+    missing,
+    fulfilled,
+    penalties,
+    score,
+    status
+  };
 
-  latestReport = { type, location, size, requirements, missing, fulfilled, score, status };
-
-  displayResult();
+  render();
 }
 
 /* =========================
-   DISPLAY RESULT
+   DISPLAY
 ========================= */
-function displayResult() {
+function render() {
 
   document.getElementById("loading").classList.add("hidden");
 
   const r = latestReport;
-  const resultDiv = document.getElementById("result");
-  resultDiv.classList.remove("hidden");
+  const div = document.getElementById("result");
 
-  resultDiv.innerHTML = `
+  div.classList.remove("hidden");
+
+  div.innerHTML = `
     <h3>Compliance Result</h3>
 
     <p><strong>Business:</strong> ${capitalize(r.type)}</p>
-    <p><strong>Location:</strong> ${capitalize(r.location)}</p>
+    <p><strong>State:</strong> ${capitalize(r.state)}</p>
 
     <h4>Required</h4>
     <ul>${r.requirements.map(x => `<li>${x}</li>`).join("")}</ul>
@@ -212,7 +217,10 @@ function displayResult() {
     <h4>Missing</h4>
     <ul>${r.missing.map(x => `<li>${x}</li>`).join("")}</ul>
 
-    <p class="${getColorClass(r.score)}">
+    <h4>Penalties</h4>
+    <ul>${r.penalties.map(p => `<li>${p}</li>`).join("")}</ul>
+
+    <p class="${colorClass(r.score)}">
       <strong>Score: ${r.score}% (${r.status})</strong>
     </p>
 
@@ -221,24 +229,22 @@ function displayResult() {
 }
 
 /* =========================
-   PDF EXPORT
+   PDF
 ========================= */
 function downloadPDF() {
-
-  if (!latestReport) return;
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
-  let y = 20;
   const r = latestReport;
+  let y = 20;
 
   doc.text("Prudent Compliance Report", 14, y);
   y += 10;
 
   doc.text(`Business: ${capitalize(r.type)}`, 14, y);
   y += 7;
-  doc.text(`Location: ${capitalize(r.location)}`, 14, y);
+  doc.text(`State: ${capitalize(r.state)}`, 14, y);
   y += 7;
   doc.text(`Score: ${r.score}% (${r.status})`, 14, y);
   y += 10;
@@ -260,11 +266,12 @@ function downloadPDF() {
 function normalize(x) { return (x || "").toLowerCase().trim(); }
 function capitalize(x) { return x.charAt(0).toUpperCase() + x.slice(1); }
 
-function getColorClass(score) {
+function colorClass(score) {
   if (score < 40) return "red";
   if (score < 70) return "yellow";
   return "green";
 }
+
 </script>
 
 </body>
