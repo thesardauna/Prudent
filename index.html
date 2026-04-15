@@ -1,75 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prudent – AI Compliance Copilot</title>
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- CSV Parser -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
-  <!-- PDF -->
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-</head>
-
-<body>
-
-<div class="container">
-
-  <!-- HEADER -->
-  <h1>Prudent</h1>
-  <p class="subtitle">AI Compliance Copilot for SMEs</p>
-
-  <!-- FORM -->
-  <div class="card">
-
-    <h2>Check Your Compliance</h2>
-
-    <label>Business Type</label>
-    <input type="text" id="businessType" placeholder="e.g retail, food, ngo" />
-
-    <label>State</label>
-    <select id="state">
-      <option>Loading states...</option>
-    </select>
-
-    <label>Business Size</label>
-    <select id="size">
-      <option value="">Select size</option>
-      <option>Small</option>
-      <option>Medium</option>
-    </select>
-
-    <button onclick="checkCompliance()">Check Compliance</button>
-
-  </div>
-
-  <!-- LOADING -->
-  <div id="loading" class="card hidden">
-    <p>🔄 Processing compliance...</p>
-  </div>
-
-  <!-- RESULT -->
-  <div id="result" class="card hidden"></div>
-
-</div>
-
 <script>
-
-/* =========================
-   DATA
-========================= */
 let rulesData = [];
 let riskData = [];
 let stateData = [];
+let authorityData = [];
+let checklistData = [];
 
 let latestReport = null;
 
 /* =========================
-   LOAD CSV
+   CSV LOADER
 ========================= */
 function loadCSV(file) {
   return new Promise((resolve, reject) => {
@@ -77,7 +16,7 @@ function loadCSV(file) {
       download: true,
       header: true,
       skipEmptyLines: true,
-      complete: res => resolve(res.data),
+      complete: res => resolve(res.data || []),
       error: err => reject(err)
     });
   });
@@ -87,144 +26,285 @@ function loadCSV(file) {
    INIT
 ========================= */
 async function init() {
-  [rulesData, riskData, stateData] = await Promise.all([
-    loadCSV("csv/regulatory_rules.csv"),
-    loadCSV("csv/risk_matrix.csv"),
-    loadCSV("csv/state_rules.csv")
-  ]);
+  try {
+    [
+      rulesData,
+      riskData,
+      stateData,
+      authorityData,
+      checklistData
+    ] = await Promise.all([
+      loadCSV("csv/regulatory_rules.csv"),
+      loadCSV("csv/risk_matrix.csv"),
+      loadCSV("csv/state_rules.csv"),
+      loadCSV("csv/authority_directory.csv"),
+      loadCSV("csv/compliance_checklist_template.csv")
+    ]);
 
-  populateStates();
+    populateStates();
+  } catch (error) {
+    console.error("Dataset load error:", error);
+    alert("Unable to load one or more CSV files.");
+  }
 }
 
 init();
 
 /* =========================
-   POPULATE STATES
+   STATE DROPDOWN
 ========================= */
 function populateStates() {
   const select = document.getElementById("state");
+  const states = [...new Set(stateData.map(row => row.state).filter(Boolean))].sort();
 
-  let states = [...new Set(stateData.map(s => s.state).filter(Boolean))];
-
-  select.innerHTML = `<option value="">Select State</option>` +
-    states.map(s => `<option value="${s}">${s}</option>`).join("");
+  select.innerHTML =
+    `<option value="">Select State</option>` +
+    states.map(state => `<option value="${escapeHtml(state)}">${escapeHtml(state)}</option>`).join("");
 }
 
 /* =========================
-   MAIN LOGIC
+   MAIN
 ========================= */
 function checkCompliance() {
-
   const type = normalize(document.getElementById("businessType").value);
   const state = normalize(document.getElementById("state").value);
   const size = normalize(document.getElementById("size").value);
 
   if (!type || !state || !size) {
-    alert("Please fill all fields");
+    alert("Please fill all fields.");
     return;
   }
 
   document.getElementById("loading").classList.remove("hidden");
   document.getElementById("result").classList.add("hidden");
 
-  setTimeout(() => process(type, state, size), 500);
+  setTimeout(() => buildRichReport(type, state, size), 350);
 }
 
 /* =========================
-   PROCESS ENGINE
+   RICH REPORT ENGINE
 ========================= */
-function process(type, state, size) {
+function buildRichReport(type, state, size) {
+  const matchedRules = rulesData.filter(row => {
+    const rowType = normalize(row.business_type);
+    const rowSize = normalize(row.applicable_size);
+    const rowLocation = normalize(row.location);
 
-  let baseRules = rulesData.filter(r =>
-    normalize(r.business_type) === type ||
-    normalize(r.business_type) === "all"
-  );
+    const typeMatch = rowType === type || rowType === "all";
+    const sizeMatch = !rowSize || rowSize === size || rowSize === "all";
+    const locationMatch = !rowLocation || rowLocation === "all" || rowLocation === state;
 
-  baseRules = baseRules.filter(r =>
-    !r.applicable_size ||
-    normalize(r.applicable_size) === size ||
-    normalize(r.applicable_size) === "all"
-  );
-
-  let localRules = stateData.filter(s =>
-    normalize(s.state) === state
-  );
-
-  let requirements = [
-    ...baseRules.map(r => r.requirement),
-    ...localRules.map(r => r.requirement)
-  ].filter(Boolean);
-
-  requirements = [...new Set(requirements)];
-
-  let missing = requirements.slice(0, Math.ceil(requirements.length / 2));
-  let fulfilled = requirements.filter(r => !missing.includes(r));
-
-  let totalRisk = 0;
-  let penalties = [];
-
-  missing.forEach(req => {
-    let match = riskData.find(r =>
-      normalize(r.requirement) === normalize(req)
-    );
-
-    if (match) {
-      totalRisk += parseInt(match.severity_score || 0);
-      penalties.push(match.penalty || "Penalty applies");
-    }
+    return typeMatch && sizeMatch && locationMatch;
   });
 
-  let score = Math.max(0, 100 - totalRisk);
+  const matchedStateRules = stateData.filter(row => {
+    const rowState = normalize(row.state);
+    const rowSector = normalize(row.applicable_sector);
+    return rowState === state && (!rowSector || rowSector === "all" || rowSector === type);
+  });
+
+  const combinedRequirementsMap = new Map();
+
+  matchedRules.forEach(row => {
+    const key = normalize(row.requirement);
+    if (!key) return;
+
+    combinedRequirementsMap.set(key, {
+      requirement: row.requirement || "Unnamed Requirement",
+      source: "regulatory_rules",
+      authority: row.authority || "",
+      mandatory: row.mandatory || "",
+      description: row.description || "",
+      frequency: row.frequency || "",
+      legal_reference: row.legal_reference || "",
+      risk_weight: row.risk_weight || ""
+    });
+  });
+
+  matchedStateRules.forEach(row => {
+    const key = normalize(row.requirement);
+    if (!key) return;
+
+    const existing = combinedRequirementsMap.get(key) || {};
+    combinedRequirementsMap.set(key, {
+      requirement: row.requirement || existing.requirement || "Unnamed Requirement",
+      source: existing.source ? `${existing.source}, state_rules` : "state_rules",
+      authority: existing.authority || row.authority || "",
+      mandatory: existing.mandatory || row.mandatory || "",
+      description: existing.description || row.description || "",
+      frequency: existing.frequency || "",
+      legal_reference: existing.legal_reference || "",
+      risk_weight: existing.risk_weight || "",
+      processing_time: row.processing_time || "",
+      fee_estimate: row.fee_estimate || "",
+      applicable_sector: row.applicable_sector || ""
+    });
+  });
+
+  const requirements = [...combinedRequirementsMap.values()];
+
+  if (!requirements.length) {
+    document.getElementById("loading").classList.add("hidden");
+    const result = document.getElementById("result");
+    result.classList.remove("hidden");
+    result.innerHTML = `
+      <h3>Compliance Result</h3>
+      <p>No matching compliance requirements were found for this business type and state.</p>
+    `;
+    latestReport = null;
+    return;
+  }
+
+  const missing = requirements.slice(0, Math.ceil(requirements.length / 2));
+  const fulfilled = requirements.filter(item => !missing.includes(item));
+
+  const enrichedMissing = missing.map(item => {
+    const risk = riskData.find(r => normalize(r.requirement) === normalize(item.requirement)) || {};
+    const authority =
+      authorityData.find(a =>
+        normalize(a.authority_name) === normalize(item.authority)
+      ) || {};
+    const checklistSteps = checklistData
+      .filter(c =>
+        normalize(c.business_type) === type &&
+        normalize(c.requirement) === normalize(item.requirement)
+      )
+      .sort((a, b) => Number(a.step_number || 0) - Number(b.step_number || 0));
+
+    return {
+      ...item,
+      risk_level: risk.risk_level || "Unknown",
+      severity_score: Number(risk.severity_score || 0),
+      penalty: risk.penalty || "Not specified",
+      penalty_type: risk.penalty_type || "",
+      estimated_cost: risk.estimated_cost || "",
+      legal_consequence: risk.legal_consequence || "",
+      enforcement_body: risk.enforcement_body || "",
+      priority: risk.priority || "",
+      authority_email: authority.contact_email || "",
+      authority_phone: authority.contact_phone || "",
+      authority_website: authority.website || "",
+      authority_location: authority.location || "",
+      checklist: checklistSteps
+    };
+  });
+
+  const totalRisk = enrichedMissing.reduce((sum, item) => sum + item.severity_score, 0);
+  const score = Math.max(0, 100 - totalRisk);
 
   let status = "Low Risk";
   if (score < 70) status = "Medium Risk";
   if (score < 40) status = "High Risk";
 
+  const summary = buildSummary(requirements, enrichedMissing);
+
   latestReport = {
-    type, state, size,
+    businessType: type,
+    state,
+    size,
     requirements,
-    missing,
+    missing: enrichedMissing,
     fulfilled,
-    penalties,
     score,
-    status
+    status,
+    summary,
+    generatedAt: new Date().toLocaleString()
   };
 
-  render();
+  renderRichResult();
 }
 
 /* =========================
-   DISPLAY
+   SUMMARY
 ========================= */
-function render() {
+function buildSummary(requirements, missing) {
+  const highRiskCount = missing.filter(x => normalize(x.risk_level) === "high").length;
+  const mediumRiskCount = missing.filter(x => normalize(x.risk_level) === "medium").length;
+  const authorities = [...new Set(missing.map(x => x.authority).filter(Boolean))];
 
+  return {
+    total_requirements: requirements.length,
+    total_missing: missing.length,
+    total_fulfilled: requirements.length - missing.length,
+    high_risk_count: highRiskCount,
+    medium_risk_count: mediumRiskCount,
+    authorities_involved: authorities
+  };
+}
+
+/* =========================
+   RENDER
+========================= */
+function renderRichResult() {
   document.getElementById("loading").classList.add("hidden");
 
   const r = latestReport;
-  const div = document.getElementById("result");
+  const result = document.getElementById("result");
+  result.classList.remove("hidden");
 
-  div.classList.remove("hidden");
+  result.innerHTML = `
+    <h3>Compliance Intelligence Report</h3>
 
-  div.innerHTML = `
-    <h3>Compliance Result</h3>
+    <p><strong>Business Type:</strong> ${capitalizeWords(r.businessType)}</p>
+    <p><strong>State:</strong> ${capitalizeWords(r.state)}</p>
+    <p><strong>Business Size:</strong> ${capitalizeWords(r.size)}</p>
+    <p><strong>Generated:</strong> ${escapeHtml(r.generatedAt)}</p>
 
-    <p><strong>Business:</strong> ${capitalize(r.type)}</p>
-    <p><strong>State:</strong> ${capitalize(r.state)}</p>
+    <h4>Executive Summary</h4>
+    <ul>
+      <li>Total requirements: ${r.summary.total_requirements}</li>
+      <li>Fulfilled requirements: ${r.summary.total_fulfilled}</li>
+      <li>Missing requirements: ${r.summary.total_missing}</li>
+      <li>High-risk gaps: ${r.summary.high_risk_count}</li>
+      <li>Medium-risk gaps: ${r.summary.medium_risk_count}</li>
+      <li>Authorities involved: ${r.summary.authorities_involved.length ? r.summary.authorities_involved.map(escapeHtml).join(", ") : "None"}</li>
+    </ul>
 
-    <h4>Required</h4>
-    <ul>${r.requirements.map(x => `<li>${x}</li>`).join("")}</ul>
+    <p class="${colorClass(r.score)}"><strong>Compliance Score: ${r.score}% (${r.status})</strong></p>
 
-    <h4>Missing</h4>
-    <ul>${r.missing.map(x => `<li>${x}</li>`).join("")}</ul>
+    <h4>Required Compliance Items</h4>
+    <ul>
+      ${r.requirements.map(item => `
+        <li>
+          <strong>${escapeHtml(item.requirement)}</strong>
+          ${item.authority ? ` — ${escapeHtml(item.authority)}` : ""}
+          ${item.description ? `<br><span class="muted-text">${escapeHtml(item.description)}</span>` : ""}
+        </li>
+      `).join("")}
+    </ul>
 
-    <h4>Penalties</h4>
-    <ul>${r.penalties.map(p => `<li>${p}</li>`).join("")}</ul>
+    <h4>Missing Requirements Analysis</h4>
+    ${r.missing.map(item => `
+      <div class="report-block">
+        <p><strong>${escapeHtml(item.requirement)}</strong></p>
+        <p><strong>Authority:</strong> ${escapeHtml(item.authority || "Not specified")}</p>
+        <p><strong>Risk Level:</strong> ${escapeHtml(item.risk_level)}</p>
+        <p><strong>Penalty:</strong> ${escapeHtml(item.penalty)}</p>
+        ${item.estimated_cost ? `<p><strong>Estimated Cost:</strong> ${escapeHtml(item.estimated_cost)}</p>` : ""}
+        ${item.legal_consequence ? `<p><strong>Legal Consequence:</strong> ${escapeHtml(item.legal_consequence)}</p>` : ""}
+        ${item.processing_time ? `<p><strong>Processing Time:</strong> ${escapeHtml(item.processing_time)}</p>` : ""}
+        ${item.fee_estimate ? `<p><strong>Fee Estimate:</strong> ${escapeHtml(item.fee_estimate)}</p>` : ""}
+        ${item.authority_phone ? `<p><strong>Authority Contact:</strong> ${escapeHtml(item.authority_phone)}</p>` : ""}
+        ${item.authority_email ? `<p><strong>Email:</strong> ${escapeHtml(item.authority_email)}</p>` : ""}
+        ${item.authority_website ? `<p><strong>Website:</strong> ${escapeHtml(item.authority_website)}</p>` : ""}
+        ${item.checklist.length ? `
+          <p><strong>Checklist Steps:</strong></p>
+          <ol>
+            ${item.checklist.map(step => `
+              <li>
+                ${escapeHtml(step.step_description || "No description")}
+                ${step.documents_required ? ` <br><span class="muted-text">Documents: ${escapeHtml(step.documents_required)}</span>` : ""}
+              </li>
+            `).join("")}
+          </ol>
+        ` : ""}
+      </div>
+    `).join("")}
 
-    <p class="${colorClass(r.score)}">
-      <strong>Score: ${r.score}% (${r.status})</strong>
-    </p>
+    <h4>Recommended Next Action</h4>
+    <p>Complete the highest-risk missing requirements first, beginning with those that carry strong legal or enforcement consequences.</p>
 
-    <button onclick="downloadPDF()">Download PDF Report</button>
+    <button onclick="downloadPDF()">Download Rich PDF Report</button>
   `;
 }
 
@@ -232,39 +312,85 @@ function render() {
    PDF
 ========================= */
 function downloadPDF() {
+  if (!latestReport) {
+    alert("Please run a compliance check first.");
+    return;
+  }
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-
   const r = latestReport;
-  let y = 20;
+  let y = 18;
 
-  doc.text("Prudent Compliance Report", 14, y);
-  y += 10;
+  function addLine(text, size = 11, gap = 7) {
+    doc.setFontSize(size);
+    const lines = doc.splitTextToSize(text, 180);
+    if (y + (lines.length * 6) > 280) {
+      doc.addPage();
+      y = 18;
+    }
+    doc.text(lines, 14, y);
+    y += lines.length * 6 + gap - 6;
+  }
 
-  doc.text(`Business: ${capitalize(r.type)}`, 14, y);
-  y += 7;
-  doc.text(`State: ${capitalize(r.state)}`, 14, y);
-  y += 7;
-  doc.text(`Score: ${r.score}% (${r.status})`, 14, y);
-  y += 10;
+  addLine("Prudent Compliance Intelligence Report", 17, 10);
+  addLine(`Generated: ${r.generatedAt}`);
+  addLine(`Business Type: ${capitalizeWords(r.businessType)}`);
+  addLine(`State: ${capitalizeWords(r.state)}`);
+  addLine(`Business Size: ${capitalizeWords(r.size)}`);
+  addLine(`Compliance Score: ${r.score}% (${r.status})`, 12, 10);
 
-  doc.text("Missing Items:", 14, y);
-  y += 8;
+  addLine("Executive Summary", 13, 8);
+  addLine(`Total requirements: ${r.summary.total_requirements}`);
+  addLine(`Fulfilled requirements: ${r.summary.total_fulfilled}`);
+  addLine(`Missing requirements: ${r.summary.total_missing}`);
+  addLine(`High-risk gaps: ${r.summary.high_risk_count}`);
+  addLine(`Medium-risk gaps: ${r.summary.medium_risk_count}`);
+  addLine(`Authorities involved: ${r.summary.authorities_involved.join(", ") || "None"}`, 11, 10);
 
-  r.missing.forEach(m => {
-    doc.text("- " + m, 14, y);
-    y += 6;
+  addLine("Missing Requirements Analysis", 13, 8);
+
+  r.missing.forEach((item, index) => {
+    addLine(`${index + 1}. ${item.requirement}`, 12, 7);
+    addLine(`Authority: ${item.authority || "Not specified"}`);
+    addLine(`Risk Level: ${item.risk_level}`);
+    addLine(`Penalty: ${item.penalty}`);
+    if (item.estimated_cost) addLine(`Estimated Cost: ${item.estimated_cost}`);
+    if (item.legal_consequence) addLine(`Legal Consequence: ${item.legal_consequence}`);
+    if (item.processing_time) addLine(`Processing Time: ${item.processing_time}`);
+    if (item.fee_estimate) addLine(`Fee Estimate: ${item.fee_estimate}`);
+    if (item.authority_phone) addLine(`Authority Contact: ${item.authority_phone}`);
+    if (item.authority_email) addLine(`Authority Email: ${item.authority_email}`);
+    if (item.authority_website) addLine(`Authority Website: ${item.authority_website}`);
+
+    if (item.checklist.length) {
+      addLine("Checklist Steps:", 11, 6);
+      item.checklist.forEach(step => {
+        addLine(`- ${step.step_description || "No description"}`);
+        if (step.documents_required) {
+          addLine(`  Documents: ${step.documents_required}`);
+        }
+      });
+    }
+    y += 2;
   });
 
-  doc.save("Prudent_Report.pdf");
+  addLine("Recommendation", 13, 8);
+  addLine("Complete the highest-risk compliance gaps first and engage the listed authorities using the contact details provided.");
+
+  doc.save(`Prudent_Rich_Report_${slugify(r.businessType)}_${slugify(r.state)}.pdf`);
 }
 
 /* =========================
    HELPERS
 ========================= */
-function normalize(x) { return (x || "").toLowerCase().trim(); }
-function capitalize(x) { return x.charAt(0).toUpperCase() + x.slice(1); }
+function normalize(value) {
+  return (value || "").toString().trim().toLowerCase();
+}
+
+function capitalizeWords(text) {
+  return (text || "").replace(/\b\w/g, c => c.toUpperCase());
+}
 
 function colorClass(score) {
   if (score < 40) return "red";
@@ -272,7 +398,20 @@ function colorClass(score) {
   return "green";
 }
 
-</script>
+function slugify(text) {
+  return (text || "report")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
 
-</body>
-</html>
+function escapeHtml(str) {
+  return (str || "").toString()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+</script>
