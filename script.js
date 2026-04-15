@@ -175,3 +175,9 @@ function getColor(score) {
   if (score < 70) return "yellow";
   return "green";
 }
+
+loadCSV("/csv/regulatory_rules.csv")
+loadCSV("/csv/risk_matrix.csv")
+loadCSV("/csv/state_rules.csv")
+loadCSV("/csv/authority_directory.csv")
+loadCSV("/csv/compliance_checklist_template.csv")
