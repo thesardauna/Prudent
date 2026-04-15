@@ -1,104 +1,88 @@
-:root {
-    --primary: #200080;
-    --accent: #20ff80;
-    --gold: #d4af37;
-    --bg: #0a0f1c;
-    --card: #111827;
-    --text: #ffffff;
-}
-
-* {
-    box-sizing: border-box;
-}
-
 body {
-    margin: 0;
-    font-family: "Segoe UI", sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    margin:0;
+    font-family: 'Segoe UI', sans-serif;
+    background:#0a0f1c;
+    color:#fff;
 }
 
-/* HEADER */
 .header {
-    text-align: center;
-    padding: 25px;
-    background: linear-gradient(90deg, var(--primary), var(--accent));
+    text-align:center;
+    padding:25px;
+    background:linear-gradient(90deg,#200080,#20ff80);
 }
 
-/* LAYOUT */
 .container {
-    max-width: 1100px;
-    margin: auto;
-    padding: 20px;
+    max-width:1100px;
+    margin:auto;
+    padding:20px;
 }
 
 .card {
-    background: var(--card);
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
+    background:#111827;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:20px;
 }
 
-/* FORM */
 form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 12px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:10px;
 }
 
-input, select {
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    outline: none;
+input,select {
+    padding:10px;
+    border-radius:8px;
+    border:none;
 }
 
-/* BUTTON */
 button {
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    background: var(--accent);
-    color: #000;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#20ff80;
+    font-weight:bold;
+    cursor:pointer;
 }
 
 .actions button {
-    margin-right: 10px;
-    background: var(--gold);
+    background:#d4af37;
 }
 
-/* REPORT */
-#reportContent {
-    margin-top: 15px;
+/* REPORT DESIGN */
+.report-box {
+    margin-top:20px;
 }
 
-.report-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+.section {
+    margin-bottom:20px;
+    padding:15px;
+    border-radius:10px;
+    background:#1f2937;
 }
 
-.report-item {
-    background: #1f2937;
-    padding: 10px;
-    border-radius: 8px;
+.section h3 {
+    margin-top:0;
+    color:#20ff80;
 }
 
-/* HIDE */
+.bad {
+    color:#ff4d4d;
+}
+
+.good {
+    color:#20ff80;
+}
+
+.medium {
+    color:#ffaa00;
+}
+
 .hidden {
-    display: none;
+    display:none;
 }
 
-/* PRINT */
 @media print {
-    body {
-        background: white;
-        color: black;
-    }
-
-    .header, form, .actions {
-        display: none;
-    }
+    form, .actions, .header { display:none; }
+    body { background:white; color:black; }
 }
