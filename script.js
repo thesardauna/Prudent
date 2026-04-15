@@ -1,183 +1,102 @@
-/* =========================
-   GLOBAL DATA
-========================= */
-let rulesData = [];
-let riskData = [];
-let stateData = [];
-let statesList = [];
+let currentReport = null;
 
-let latestReport = null;
+document.getElementById("form").addEventListener("submit", function (e) {
+    e.preventDefault();
 
-/* =========================
-   LOAD CSV
-========================= */
-function loadCSV(file) {
-  return new Promise((resolve, reject) => {
-    Papa.parse(file, {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      complete: res => resolve(res.data),
-      error: err => reject(err)
-    });
-  });
+    let data = getFormData();
+    currentReport = generateReport(data);
+    displayReport(currentReport);
+});
+
+/* GET DATA */
+function getFormData() {
+    return {
+        business_id: val("business_id"),
+        business_name: val("business_name"),
+        type: val("type"),
+        sector: val("sector"),
+        location: val("location"),
+        state: val("state"),
+        lga: val("lga"),
+        size: val("size"),
+        year_established: val("year_established"),
+        has_cac: val("has_cac"),
+        has_tin: val("has_tin"),
+        has_vat: val("has_vat"),
+        has_nafdac: val("has_nafdac"),
+        has_permit: val("has_permit"),
+        last_compliance_check: val("last_compliance_check")
+    };
 }
 
-/* =========================
-   INIT DATA
-========================= */
-async function init() {
-  [rulesData, riskData, stateData] = await Promise.all([
-    loadCSV("csv/regulatory_rules.csv"),
-    loadCSV("csv/risk_matrix.csv"),
-    loadCSV("csv/state_rules.csv")
-  ]);
-
-  populateStates();
+function val(id) {
+    return document.getElementById(id).value;
 }
 
-init();
+/* GENERATE REPORT */
+function generateReport(data) {
+    let report_id = "RPT-" + Date.now();
 
-/* =========================
-   POPULATE STATE DROPDOWN
-========================= */
-function populateStates() {
-  const select = document.getElementById("state");
+    let total = 5;
+    let fulfilled = 0;
+    let recommendations = [];
 
-  statesList = [...new Set(stateData.map(s => s.state).filter(Boolean))];
+    if (data.has_cac === "Yes") fulfilled++; else recommendations.push("Register with CAC");
+    if (data.has_tin === "Yes") fulfilled++; else recommendations.push("Get TIN");
+    if (data.has_vat === "Yes") fulfilled++; else recommendations.push("Register VAT");
+    if (data.has_nafdac === "Yes") fulfilled++; else recommendations.push("Obtain NAFDAC");
+    if (data.has_permit === "Yes") fulfilled++; else recommendations.push("Get Permit");
 
-  select.innerHTML = `<option value="">Select State</option>` +
-    statesList.map(s => `<option value="${s}">${s}</option>`).join("");
+    let risk =
+        fulfilled >= 4 ? "Low Risk" :
+        fulfilled >= 2 ? "Medium Risk" :
+        "High Risk";
+
+    return {
+        report_id,
+        business_id: data.business_id,
+        business_name: data.business_name,
+        compliance_score: fulfilled + "/5",
+        risk_level: risk,
+        total_requirements: total,
+        fulfilled_requirements: fulfilled,
+        missing_requirements: total - fulfilled,
+        recommendations: recommendations.join("; "),
+        status: fulfilled === 5 ? "Compliant" : "Pending Compliance",
+        date_generated: new Date().toISOString().split("T")[0]
+    };
 }
 
-/* =========================
-   MAIN CHECK
-========================= */
-function checkCompliance() {
+/* DISPLAY */
+function displayReport(report) {
+    let html = `<div class="report-grid">`;
 
-  const type = normalize(document.getElementById("businessType").value);
-  const state = normalize(document.getElementById("state").value);
-  const size = normalize(document.getElementById("size").value);
-
-  if (!type || !state || !size) {
-    alert("Please fill all fields");
-    return;
-  }
-
-  /* ===== RULE MATCHING ===== */
-
-  // Base regulatory rules
-  let baseRules = rulesData.filter(r =>
-    normalize(r.business_type) === type ||
-    normalize(r.business_type) === "all"
-  );
-
-  // Size filter
-  baseRules = baseRules.filter(r =>
-    !r.applicable_size ||
-    normalize(r.applicable_size) === size ||
-    normalize(r.applicable_size) === "all"
-  );
-
-  // State-specific rules
-  let localRules = stateData.filter(s =>
-    normalize(s.state) === state
-  );
-
-  /* ===== COMBINE ===== */
-
-  let requirements = [
-    ...baseRules.map(r => r.requirement),
-    ...localRules.map(r => r.requirement)
-  ].filter(Boolean);
-
-  requirements = [...new Set(requirements)];
-
-  /* ===== SIMULATE STATUS ===== */
-  let missing = requirements.slice(0, Math.ceil(requirements.length / 2));
-  let fulfilled = requirements.filter(r => !missing.includes(r));
-
-  /* ===== RISK CALCULATION ===== */
-  let totalRisk = 0;
-  let penalties = [];
-
-  missing.forEach(req => {
-    let match = riskData.find(r =>
-      normalize(r.requirement) === normalize(req)
-    );
-
-    if (match) {
-      totalRisk += parseInt(match.severity_score || 0);
-      penalties.push(match.penalty || "Penalty applies");
+    for (let key in report) {
+        html += `
+        <div class="report-item">
+            <strong>${key}</strong><br>${report[key]}
+        </div>`;
     }
-  });
 
-  let score = Math.max(0, 100 - totalRisk);
+    html += `</div>`;
 
-  let status = "Low Risk";
-  if (score < 70) status = "Medium Risk";
-  if (score < 40) status = "High Risk";
-
-  latestReport = {
-    type, state, size,
-    requirements,
-    missing,
-    fulfilled,
-    penalties,
-    score,
-    status
-  };
-
-  renderResult();
+    document.getElementById("reportContent").innerHTML = html;
+    document.getElementById("reportSection").classList.remove("hidden");
 }
 
-/* =========================
-   RENDER RESULT
-========================= */
-function renderResult() {
+/* DOWNLOAD CSV */
+function downloadCSV() {
+    if (!currentReport) return;
 
-  const r = latestReport;
-  const result = document.getElementById("result");
+    let headers = Object.keys(currentReport).join(",");
+    let values = Object.values(currentReport).join(",");
 
-  result.classList.remove("hidden");
+    let csv = headers + "\n" + values;
 
-  result.innerHTML = `
-    <h3>Compliance Result</h3>
+    let blob = new Blob([csv], { type: "text/csv" });
+    let link = document.createElement("a");
 
-    <p><strong>Business:</strong> ${capitalize(r.type)}</p>
-    <p><strong>State:</strong> ${capitalize(r.state)}</p>
-
-    <h4>Required Compliance</h4>
-    <ul>${r.requirements.map(x => `<li>${x}</li>`).join("")}</ul>
-
-    <h4>Missing Requirements</h4>
-    <ul>${r.missing.map(x => `<li>${x}</li>`).join("")}</ul>
-
-    <h4>Penalties</h4>
-    <ul>${r.penalties.map(p => `<li>${p}</li>`).join("")}</ul>
-
-    <p class="${getColor(r.score)}">
-      <strong>Score: ${r.score}% (${r.status})</strong>
-    </p>
-
-    <button onclick="downloadPDF()">Download PDF Report</button>
-  `;
+    link.href = URL.createObjectURL(blob);
+    link.download = "report.csv";
+    link.click();
 }
-
-/* =========================
-   HELPERS
-========================= */
-function normalize(x) { return (x || "").toLowerCase().trim(); }
-function capitalize(x) { return x.charAt(0).toUpperCase() + x.slice(1); }
-
-function getColor(score) {
-  if (score < 40) return "red";
-  if (score < 70) return "yellow";
-  return "green";
-}
-
-loadCSV("/csv/regulatory_rules.csv")
-loadCSV("/csv/risk_matrix.csv")
-loadCSV("/csv/state_rules.csv")
-loadCSV("/csv/authority_directory.csv")
-loadCSV("/csv/compliance_checklist_template.csv")
