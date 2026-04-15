@@ -1,20 +1,63 @@
-<div class="card">
-  <h2>Check Your Compliance</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prudent – AI Compliance Copilot</title>
 
-  <label>Business Type</label>
-  <input type="text" id="businessType" placeholder="e.g Retail, Food, NGO">
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-  <label>Location</label>
-  <input type="text" id="location" placeholder="e.g Bauchi, Abuja">
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css" />
 
-  <label>Business Size</label>
-  <select id="size">
-    <option value="">Select size</option>
-    <option>Small</option>
-    <option>Medium</option>
-  </select>
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+</head>
 
-  <button onclick="checkCompliance()">Check Compliance</button>
-</div>
+<body>
 
-<div id="result" class="card hidden"></div>
+  <div class="container">
+
+    <!-- HEADER -->
+    <header>
+      <h1>Prudent</h1>
+      <p class="subtitle">AI Compliance Copilot for SMEs</p>
+    </header>
+
+    <!-- INPUT CARD -->
+    <div class="card">
+      <h2>Check Your Compliance</h2>
+
+      <label>Business Type</label>
+      <input type="text" id="businessType" placeholder="e.g Retail, Food, NGO" />
+
+      <label>Location (State)</label>
+      <input type="text" id="location" placeholder="e.g Bauchi, Abuja" />
+
+      <label>Business Size</label>
+      <select id="size">
+        <option value="">Select size</option>
+        <option>Small</option>
+        <option>Medium</option>
+      </select>
+
+      <button onclick="checkCompliance()">Check Compliance</button>
+    </div>
+
+    <!-- RESULT CARD -->
+    <div id="result" class="card hidden"></div>
+
+    <!-- FOOTER -->
+    <footer style="margin-top: 30px; text-align:center; color:#94a3b8; font-size:0.8rem;">
+      <p>Prudent © 2026 — Smart Compliance for Nigerian SMEs</p>
+    </footer>
+
+  </div>
+
+  <!-- MAIN SCRIPT -->
+  <script src="script.js"></script>
+
+</body>
+</html>
