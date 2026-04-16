@@ -2,80 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prudent Compliance Engine</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-:root{
-  --primary:#200080;
-  --bg:#f7f9fc;
-  --surface:#ffffff;
-  --text:#182230;
-  --muted:#667085;
-  --border:#e3e8ef;
-  --danger:#d92d20;
-  --warn:#dc6803;
-  --ok:#039855;
-}
-
-body{
-  margin:0;
-  font-family:Arial;
-  background:var(--bg);
-  padding:20px;
-}
-
-.container{
-  max-width:1000px;
-  margin:auto;
-  background:#fff;
-  padding:20px;
-  border-radius:15px;
-}
-
-h1{color:var(--primary);}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:15px;
-}
-
+body{font-family:Arial;background:#f7f9fc;padding:20px;}
+.container{max-width:1000px;margin:auto;background:#fff;padding:20px;border-radius:15px;}
+h1{color:#200080;}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;}
 .full{grid-column:1/-1;}
-
-input,select{
-  width:100%;
-  padding:10px;
-  border-radius:8px;
-  border:1px solid var(--border);
-}
-
-button{
-  padding:12px;
-  background:var(--primary);
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-.card{
-  background:#fff;
-  border:1px solid var(--border);
-  padding:15px;
-  margin-top:15px;
-  border-radius:10px;
-}
-
-.badge{
-  padding:5px 10px;
-  border-radius:15px;
-  color:#fff;
-}
-
-.high{background:var(--danger);}
-.medium{background:var(--warn);}
-.low{background:var(--ok);}
+input,select{padding:10px;border:1px solid #ddd;border-radius:8px;width:100%;}
+button{padding:12px;background:#200080;color:#fff;border:none;border-radius:8px;}
+.card{border:1px solid #eee;padding:15px;margin-top:15px;border-radius:10px;}
+.badge{padding:5px 10px;border-radius:15px;color:#fff;}
+.high{background:#d92d20;}
+.medium{background:#dc6803;}
+.low{background:#039855;}
 </style>
 
 </head>
@@ -84,7 +26,7 @@ button{
 
 <div class="container">
 
-<h1>Prudent Compliance Check</h1>
+<h1>Prudent Compliance Engine</h1>
 
 <form id="form">
 
@@ -97,21 +39,12 @@ button{
 
 <div>
 <label>Business Type</label>
-<select name="business_type">
-<option>Sole Proprietorship</option>
-<option>Partnership</option>
-<option>LLC</option>
-</select>
+<select name="business_type" id="business_type"></select>
 </div>
 
 <div>
 <label>Sector</label>
-<select name="sector">
-<option>Agriculture</option>
-<option>Health</option>
-<option>Technology</option>
-<option>Food & Beverage</option>
-</select>
+<select name="sector" id="sector"></select>
 </div>
 
 <div>
@@ -124,45 +57,11 @@ button{
 </select>
 </div>
 
-<div>
-<label>CAC</label>
-<select name="has_cac">
-<option>Compliant</option>
-<option>Non-Compliant</option>
-</select>
-</div>
-
-<div>
-<label>TIN</label>
-<select name="has_tin">
-<option>Compliant</option>
-<option>Non-Compliant</option>
-</select>
-</div>
-
-<div>
-<label>VAT</label>
-<select name="has_vat">
-<option>Compliant</option>
-<option>Non-Compliant</option>
-</select>
-</div>
-
-<div>
-<label>NAFDAC</label>
-<select name="has_nafdac">
-<option>Compliant</option>
-<option>Non-Compliant</option>
-</select>
-</div>
-
-<div>
-<label>Permit</label>
-<select name="has_permit">
-<option>Compliant</option>
-<option>Non-Compliant</option>
-</select>
-</div>
+<div><label>CAC</label><select name="has_cac"><option>Compliant</option><option>Non-Compliant</option></select></div>
+<div><label>TIN</label><select name="has_tin"><option>Compliant</option><option>Non-Compliant</option></select></div>
+<div><label>VAT</label><select name="has_vat"><option>Compliant</option><option>Non-Compliant</option></select></div>
+<div><label>NAFDAC</label><select name="has_nafdac"><option>Compliant</option><option>Non-Compliant</option></select></div>
+<div><label>Permit</label><select name="has_permit"><option>Compliant</option><option>Non-Compliant</option></select></div>
 
 </div>
 
@@ -177,98 +76,115 @@ button{
 
 <script>
 
-// Load CSV
-async function loadCSV(){
-  const res = await fetch("csv/general_rules.csv");
+// CSV loader
+async function loadCSV(path){
+  const res = await fetch(path);
   const text = await res.text();
-  const lines = text.split("\n");
-  const headers = lines[0].split(",");
-  
+
+  const lines = text.trim().split("\n");
+  const headers = lines[0].split(",").map(h=>h.trim().toLowerCase());
+
   return lines.slice(1).map(line=>{
     const values = line.split(",");
-    let obj = {};
-    headers.forEach((h,i)=>obj[h.trim()] = values[i]);
+    let obj={};
+    headers.forEach((h,i)=>obj[h]=values[i]?.trim());
     return obj;
   });
 }
 
-let rules = [];
-loadCSV().then(data=>rules=data);
+let dataCSV=[];
 
-// Match logic
-function match(row,data){
-  return (
-    (row.business_type=="All" || row.business_type==data.business_type) &&
-    (row.sector=="All" || row.sector==data.sector)
-  );
+async function init(){
+  dataCSV = await loadCSV("csv/general_rules.csv");
+
+  // populate business types
+  const types = [...new Set(dataCSV.map(r=>r.business_type))];
+  document.getElementById("business_type").innerHTML =
+    types.map(t=>`<option>${t}</option>`).join("");
+
+  // populate sectors
+  const sectors = [...new Set(dataCSV.map(r=>r.sector))];
+  document.getElementById("sector").innerHTML =
+    sectors.map(s=>`<option>${s}</option>`).join("");
 }
 
-// Score logic
-function scoreCompliance(data){
+init();
+
+// risk engine
+function calculateRisk(rows){
   let score = 0;
-  Object.values(data).forEach(v=>{
-    if(v=="Compliant") score += 10;
+  let issues = [];
+
+  rows.forEach(r=>{
+    if(r.compliance_status === "Non-Compliant" || r.compliance_status === "Partial"){
+      
+      if(r.risk_level === "High") score += 25;
+      else if(r.risk_level === "Medium") score += 15;
+      else score += 5;
+
+      issues.push(r);
+    }
   });
-  return score;
+
+  let level = score>50?"high":score>20?"medium":"low";
+  return {score,level,issues};
 }
 
+// submit
 document.getElementById("form").addEventListener("submit",function(e){
 e.preventDefault();
 
-const data = Object.fromEntries(new FormData(this));
+const formData = Object.fromEntries(new FormData(this));
 
-const filtered = rules.filter(r=>match(r,data));
+// filter rules
+const rules = dataCSV.filter(r =>
+  r.business_type === formData.business_type ||
+  r.sector === formData.sector
+);
 
-let score = scoreCompliance(data);
-let risk = score>60?"low":score>30?"medium":"high";
+// calculate risk
+const risk = calculateRisk(rules);
 
+// extract authorities
+const authorities = [...new Set(rules.map(r=>r.regulator))];
+
+// render
 document.getElementById("report").innerHTML = `
 
 <div class="card">
-<h2>${data.business_name}</h2>
-<p><b>Score:</b> ${score}%</p>
-<span class="badge ${risk}">${risk.toUpperCase()} RISK</span>
+<h2>${formData.business_name}</h2>
+<p><b>Risk Score:</b> ${risk.score}</p>
+<span class="badge ${risk.level}">${risk.level.toUpperCase()}</span>
 </div>
 
 <div class="card">
-<h3>Regulators</h3>
-<ul>${filtered.map(r=>`<li>${r.regulator}</li>`).join("")}</ul>
+<h3>Authorities</h3>
+<ul>${authorities.map(a=>`<li>${a}</li>`).join("")}</ul>
 </div>
 
 <div class="card">
-<h3>Requirements</h3>
-<ul>${filtered.map(r=>`<li>${r.requirement}</li>`).join("")}</ul>
-</div>
-
-<div class="card">
-<h3>Compliance Status</h3>
-<ul>${filtered.map(r=>`<li>${r.compliance_status}</li>`).join("")}</ul>
-</div>
-
-<div class="card">
-<h3>Violations</h3>
-<ul>${filtered.map(r=>`<li>${r.violation}</li>`).join("")}</ul>
+<h3>Key Risks</h3>
+<ul>${risk.issues.map(r=>`<li>${r.violation}</li>`).join("")}</ul>
 </div>
 
 <div class="card">
 <h3>Penalties</h3>
-<ul>${filtered.map(r=>`<li>${r.penalty}</li>`).join("")}</ul>
+<ul>${risk.issues.map(r=>`<li>${r.penalty}</li>`).join("")}</ul>
 </div>
 
 <div class="card">
 <h3>Recommendations</h3>
-<ul>${filtered.map(r=>`<li>${r.recommendation}</li>`).join("")}</ul>
+<ul>${risk.issues.map(r=>`<li>${r.recommendation}</li>`).join("")}</ul>
 </div>
 
 <div class="card">
-<h3>State Variations</h3>
-<ul>${filtered.map(r=>`<li>${r.state_variation}</li>`).join("")}</ul>
+<h3>All Requirements</h3>
+<ul>${rules.map(r=>`<li>${r.requirement}</li>`).join("")}</ul>
 </div>
 
 `;
 
 });
-
 </script>
 
 </body>
