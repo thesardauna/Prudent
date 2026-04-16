@@ -1,9 +1,0 @@
-event_id,business_type,requirement,violation_type,penalty_applied,financial_loss,year,location,source
-EVT-NG-2023-001,FinTech,Operating License,Unlicensed Operations,Cease and Desist / N10m Fine,N50000000,2023,Lagos,CBN Enforcement Report
-EVT-NG-2023-002,Restaurant,Food Handling Permit,Expired Health Certificate,Premises Sealed / N50k Fine,N250000,2023,Abuja,AMAC Health Inspection
-EVT-NG-2024-003,Retail,Signage Permit,Unauthorized Billboard,Signage Removal / N150k Fine,N450000,2024,Ikeja,LASAA Enforcement
-EVT-NG-2022-004,Manufacturing,Environmental Audit (EAR),Failure to File Audit Report,Sanctions / N2m Fine,N3500000,2022,Ogun,NESREA Gazette
-EVT-NG-2023-005,Consulting,SCUML Registration,Non-reporting of Cash Transaction,Operational Suspension,N1200000,2023,Port Harcourt,EFCC/SCUML Bulletin
-EVT-NG-2024-006,SME,Business Premises Registration,Default on Annual Dues,Lock-up / N20k Penalty,N100000,2024,Kano,KIRS Revenue Drive
-EVT-NG-2023-007,Pharmacy,PCN License,Operating without Pharmacist,Premises Sealed,N5000000,2023,Onitsha,PCN Inspection
-EVT-NG-2024-008,Logistics,Interstate Haulage Permit,Fake Paperwork,Vehicle Impounded / N100k Fine,N350000,2024,Lokoja,Kogi State Internal Revenue
