@@ -1,9 +1,0 @@
-report_id,business_id,business_name,compliance_score,risk_level,total_requirements,fulfilled_requirements,missing_requirements,recommendations,status,date_generated
-RPT-2024-001,NG-001,Dangote Cement PLC,95%,Low,20,19,None (Minor updates),Maintain current documentation schedule,Compliant,2024-03-25
-RPT-2024-002,NG-002,Flutterwave Technology Solutions,88%,Medium,15,13,Data Privacy Audit,Complete NDPR compliance audit immediately,Action Required,2024-03-25
-RPT-2024-003,NG-003,Iya Basira Kitchen,40%,High,10,4,TIN; VAT; Trade License,Register for TIN and settle local govt dues,Non-Compliant,2024-03-25
-RPT-2024-004,NG-004,Mainstream Rice Millers,75%,Medium,12,9,NAFDAC Renewal; EAR,Renew expired NAFDAC permit for new batch,Pending,2024-03-25
-RPT-2024-005,NG-005,HealthPlus Pharmacy,92%,Low,18,17,PCN Renewal,Finalize Pharmacists Council of Nigeria annual dues,Compliant,2024-03-25
-RPT-2024-006,NG-006,Oando Filling Station,85%,Medium,14,12,NMDPRA License Update,Renew midstream/downstream regulatory license,Action Required,2024-03-25
-RPT-2024-007,NG-007,Zinox Technologies,90%,Low,15,14,ITF Filing,Remit 1% training fund contribution for 2023,Compliant,2024-03-25
-RPT-2024-008,NG-008,Global Logistics Express,55%,High,11,6,VAT; State Haulage Permit,Register for VAT and obtain interstate permits,Non-Compliant,2024-03-25
