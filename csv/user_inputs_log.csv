@@ -1,9 +1,0 @@
-log_id,business_type,location,size,input_timestamp,compliance_score_generated,user_action
-LOG-NG-901,FinTech,Lagos,Large,2024-03-25T08:30:22Z,92%,Download PDF Report
-LOG-NG-902,Restaurant,Kano,Small,2024-03-25T09:15:45Z,45%,View Missing Requirements
-LOG-NG-903,Manufacturing,Ogun,Large,2024-03-25T10:05:12Z,81%,Email Authority
-LOG-NG-904,Tech Startup,FCT,Medium,2024-03-25T11:40:30Z,68%,Initiate TIN Registration
-LOG-NG-905,Pharmacy,Anambra,Small,2024-03-25T13:20:18Z,88%,Update License Expiry
-LOG-NG-906,Logistics,Rivers,Medium,2024-03-25T14:55:05Z,52%,Request Legal Consultation
-LOG-NG-907,Agric-Export,Oyo,Medium,2024-03-25T16:10:44Z,74%,Check NAFDAC Status
-LOG-NG-908,Consulting,Edo,Small,2024-03-25T17:30:59Z,95%,Share Score to LinkedIn
