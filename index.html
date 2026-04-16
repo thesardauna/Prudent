@@ -8,50 +8,32 @@
 <style>
 :root{
   --primary:#200080;
-  --primary-2:#3a1bb3;
   --bg:#f7f9fc;
   --surface:#ffffff;
-  --surface-2:#fdfdff;
   --text:#182230;
   --muted:#667085;
-  --border:#dbe2ea;
+  --border:#e3e8ef;
   --danger:#d92d20;
   --warn:#dc6803;
   --ok:#039855;
-  --shadow:0 10px 30px rgba(16,24,40,.08);
 }
 
 body{
   margin:0;
-  font-family:Arial,sans-serif;
+  font-family:Arial;
   background:var(--bg);
-  color:var(--text);
-  padding:24px;
+  padding:20px;
 }
 
 .container{
-  max-width:1100px;
+  max-width:1000px;
   margin:auto;
-  background:var(--surface);
-  border-radius:18px;
-  box-shadow:var(--shadow);
-  overflow:hidden;
-}
-
-.hero{
   background:#fff;
   padding:20px;
-  border-bottom:1px solid var(--border);
+  border-radius:15px;
 }
 
-.hero h1{
-  margin:0;
-  color:var(--primary);
-}
-
-.content{
-  padding:20px;
-}
+h1{color:var(--primary);}
 
 .grid{
   display:grid;
@@ -61,41 +43,33 @@ body{
 
 .full{grid-column:1/-1;}
 
-label{font-weight:bold;}
-
 input,select{
   width:100%;
   padding:10px;
-  border-radius:10px;
+  border-radius:8px;
   border:1px solid var(--border);
 }
 
 button{
   padding:12px;
-  border:none;
-  border-radius:10px;
   background:var(--primary);
   color:#fff;
+  border:none;
+  border-radius:8px;
   cursor:pointer;
-}
-
-button:hover{background:var(--primary-2);}
-
-.report{
-  margin-top:25px;
 }
 
 .card{
   background:#fff;
   border:1px solid var(--border);
-  border-radius:12px;
   padding:15px;
-  margin-bottom:15px;
+  margin-top:15px;
+  border-radius:10px;
 }
 
 .badge{
-  padding:6px 10px;
-  border-radius:20px;
+  padding:5px 10px;
+  border-radius:15px;
   color:#fff;
 }
 
@@ -109,18 +83,25 @@ button:hover{background:var(--primary-2);}
 <body>
 
 <div class="container">
-<div class="hero">
-<h1>Prudent Compliance Assessment</h1>
-</div>
 
-<div class="content">
+<h1>Prudent Compliance Check</h1>
 
 <form id="form">
 
 <div class="grid">
+
 <div class="full">
 <label>Business Name</label>
 <input name="business_name" required>
+</div>
+
+<div>
+<label>Business Type</label>
+<select name="business_type">
+<option>Sole Proprietorship</option>
+<option>Partnership</option>
+<option>LLC</option>
+</select>
 </div>
 
 <div>
@@ -146,37 +127,43 @@ button:hover{background:var(--primary-2);}
 <div>
 <label>CAC</label>
 <select name="has_cac">
-<option>Yes</option><option>No</option>
+<option>Compliant</option>
+<option>Non-Compliant</option>
 </select>
 </div>
 
 <div>
 <label>TIN</label>
 <select name="has_tin">
-<option>Yes</option><option>No</option>
+<option>Compliant</option>
+<option>Non-Compliant</option>
 </select>
 </div>
 
 <div>
 <label>VAT</label>
 <select name="has_vat">
-<option>Yes</option><option>No</option>
+<option>Compliant</option>
+<option>Non-Compliant</option>
 </select>
 </div>
 
 <div>
 <label>NAFDAC</label>
 <select name="has_nafdac">
-<option>Yes</option><option>No</option>
+<option>Compliant</option>
+<option>Non-Compliant</option>
 </select>
 </div>
 
 <div>
 <label>Permit</label>
 <select name="has_permit">
-<option>Yes</option><option>No</option>
+<option>Compliant</option>
+<option>Non-Compliant</option>
 </select>
 </div>
+
 </div>
 
 <br>
@@ -184,43 +171,45 @@ button:hover{background:var(--primary-2);}
 
 </form>
 
-<div id="report" class="report"></div>
+<div id="report"></div>
 
-</div>
 </div>
 
 <script>
 
-async function loadCSV(path){
-  const res = await fetch(path);
+// Load CSV
+async function loadCSV(){
+  const res = await fetch("csv/general_rules.csv");
   const text = await res.text();
   const lines = text.split("\n");
   const headers = lines[0].split(",");
+  
   return lines.slice(1).map(line=>{
     const values = line.split(",");
-    let obj={};
-    headers.forEach((h,i)=>obj[h.trim()]=values[i]);
+    let obj = {};
+    headers.forEach((h,i)=>obj[h.trim()] = values[i]);
     return obj;
   });
 }
 
-let authority, rules, explanations, penalties, stateRules;
+let rules = [];
+loadCSV().then(data=>rules=data);
 
-async function init(){
-  authority = await loadCSV("csv/authority_directory.csv");
-  rules = await loadCSV("csv/regulatory_rules.csv");
-  explanations = await loadCSV("csv/regulation_explanations.csv");
-  penalties = await loadCSV("csv/risk_events.csv");
-  stateRules = await loadCSV("csv/state_rules.csv");
-}
-
-init();
-
+// Match logic
 function match(row,data){
   return (
-    (!row.state || row.state==data.state || row.state=="All") &&
-    (!row.sector || row.sector==data.sector || row.sector=="All")
+    (row.business_type=="All" || row.business_type==data.business_type) &&
+    (row.sector=="All" || row.sector==data.sector)
   );
+}
+
+// Score logic
+function scoreCompliance(data){
+  let score = 0;
+  Object.values(data).forEach(v=>{
+    if(v=="Compliant") score += 10;
+  });
+  return score;
 }
 
 document.getElementById("form").addEventListener("submit",function(e){
@@ -228,53 +217,56 @@ e.preventDefault();
 
 const data = Object.fromEntries(new FormData(this));
 
-const a = authority.filter(r=>match(r,data));
-const r = rules.filter(r=>match(r,data));
-const ex = explanations.filter(r=>match(r,data));
-const p = penalties.filter(r=>match(r,data));
-const s = stateRules.filter(r=>match(r,data));
+const filtered = rules.filter(r=>match(r,data));
 
-let score = 0;
-if(data.has_cac=="Yes") score+=20;
-if(data.has_tin=="Yes") score+=20;
-if(data.has_vat=="Yes") score+=15;
-if(data.has_nafdac=="Yes") score+=20;
-if(data.has_permit=="Yes") score+=25;
-
-let risk = score>70?"low":score>40?"medium":"high";
+let score = scoreCompliance(data);
+let risk = score>60?"low":score>30?"medium":"high";
 
 document.getElementById("report").innerHTML = `
+
 <div class="card">
 <h2>${data.business_name}</h2>
-<p>Score: ${score}%</p>
+<p><b>Score:</b> ${score}%</p>
 <span class="badge ${risk}">${risk.toUpperCase()} RISK</span>
 </div>
 
 <div class="card">
-<h3>Authorities</h3>
-<ul>${a.map(x=>`<li>${x.authority || Object.values(x)[0]}</li>`).join("")}</ul>
+<h3>Regulators</h3>
+<ul>${filtered.map(r=>`<li>${r.regulator}</li>`).join("")}</ul>
 </div>
 
 <div class="card">
-<h3>Rules</h3>
-<ul>${r.map(x=>`<li>${x.rule || Object.values(x)[0]}</li>`).join("")}</ul>
+<h3>Requirements</h3>
+<ul>${filtered.map(r=>`<li>${r.requirement}</li>`).join("")}</ul>
 </div>
 
 <div class="card">
-<h3>Explanations</h3>
-<ul>${ex.map(x=>`<li>${x.explanation || Object.values(x)[0]}</li>`).join("")}</ul>
+<h3>Compliance Status</h3>
+<ul>${filtered.map(r=>`<li>${r.compliance_status}</li>`).join("")}</ul>
+</div>
+
+<div class="card">
+<h3>Violations</h3>
+<ul>${filtered.map(r=>`<li>${r.violation}</li>`).join("")}</ul>
 </div>
 
 <div class="card">
 <h3>Penalties</h3>
-<ul>${p.map(x=>`<li>${x.penalty || Object.values(x)[0]}</li>`).join("")}</ul>
+<ul>${filtered.map(r=>`<li>${r.penalty}</li>`).join("")}</ul>
 </div>
 
 <div class="card">
-<h3>State Rules</h3>
-<ul>${s.map(x=>`<li>${x.rule || Object.values(x)[0]}</li>`).join("")}</ul>
+<h3>Recommendations</h3>
+<ul>${filtered.map(r=>`<li>${r.recommendation}</li>`).join("")}</ul>
 </div>
+
+<div class="card">
+<h3>State Variations</h3>
+<ul>${filtered.map(r=>`<li>${r.state_variation}</li>`).join("")}</ul>
+</div>
+
 `;
+
 });
 
 </script>
