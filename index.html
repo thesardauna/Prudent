@@ -1,191 +1,440 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Prudent Compliance Engine</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{font-family:Arial;background:#f7f9fc;padding:20px;}
-.container{max-width:1000px;margin:auto;background:#fff;padding:20px;border-radius:15px;}
-h1{color:#200080;}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-sans);color:var(--color-text-primary);}
+.page{padding:2rem 0;}
+.header{margin-bottom:2rem;}
+.header h1{font-size:22px;font-weight:500;}
+.header p{font-size:14px;color:var(--color-text-secondary);margin-top:4px;}
+.sec-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-tertiary);margin-bottom:10px;}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;}
+.card+.card,.card+.metric-grid,.metric-grid+.card{margin-top:1rem;}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;}
 .full{grid-column:1/-1;}
-input,select{padding:10px;border:1px solid #ddd;border-radius:8px;width:100%;}
-button{padding:12px;background:#200080;color:#fff;border:none;border-radius:8px;}
-.card{border:1px solid #eee;padding:15px;margin-top:15px;border-radius:10px;}
-.badge{padding:5px 10px;border-radius:15px;color:#fff;}
-.high{background:#d92d20;}
-.medium{background:#dc6803;}
-.low{background:#039855;}
+label{display:block;font-size:13px;color:var(--color-text-secondary);margin-bottom:5px;}
+input,select{width:100%;font-size:14px;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);appearance:none;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
+.toggle-row:last-child{border-bottom:none;}
+.toggle-meta{font-size:12px;color:var(--color-text-secondary);margin-top:2px;}
+.pill-group{display:flex;gap:6px;flex-shrink:0;}
+.pill{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--color-text-secondary);transition:all 0.15s;}
+.pill.ok{background:#EAF3DE;color:#3B6D11;border-color:#97C459;}
+.pill.no{background:#FCEBEB;color:#A32D2D;border-color:#F09595;}
+.btn-row{display:flex;gap:10px;margin-top:1.5rem;}
+.btn{flex:1;padding:11px;font-size:14px;font-weight:500;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);cursor:pointer;transition:background 0.15s;}
+.btn:hover{background:var(--color-background-secondary);}
+.btn-primary{background:#534AB7;color:#fff;border-color:#534AB7;}
+.btn-primary:hover{background:#3C3489;}
+.btn-pdf{background:#1D9E75;color:#fff;border-color:#1D9E75;}
+.btn-pdf:hover{background:#0F6E56;}
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:1.5rem 0;}
+.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem;}
+.metric-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;}
+.metric-value{font-size:24px;font-weight:500;}
+.badge{display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;}
+.badge-high{background:#FCEBEB;color:#A32D2D;}
+.badge-medium{background:#FAEEDA;color:#854F0B;}
+.badge-low{background:#EAF3DE;color:#3B6D11;}
+.risk-track{height:6px;border-radius:3px;background:var(--color-background-secondary);margin:8px 0;}
+.risk-fill{height:100%;border-radius:3px;}
+.list-item{display:flex;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:14px;}
+.list-item:last-child{border-bottom:none;}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:6px;}
+.auth-card{display:flex;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px;}
+.auth-card:last-child{border-bottom:none;}
+.auth-icon{width:36px;height:36px;border-radius:var(--border-radius-md);background:#EEEDFE;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:#3C3489;flex-shrink:0;}
 </style>
 
-</head>
-
-<body>
-
-<div class="container">
-
-<h1>Prudent Compliance Engine</h1>
-
-<form id="form">
-
-<div class="grid">
-
-<div class="full">
-<label>Business Name</label>
-<input name="business_name" required>
+<div class="page">
+<div class="header">
+  <h1>Prudent Compliance Engine</h1>
+  <p>Nigerian business regulatory compliance assessment</p>
 </div>
 
-<div>
-<label>Business Type</label>
-<select name="business_type" id="business_type"></select>
+<div class="card">
+  <div class="sec-label">Business details</div>
+  <div class="grid2">
+    <div class="full"><label>Business name</label><input id="biz_name" placeholder="e.g. Aiko Foods Ltd"></div>
+    <div><label>Business type</label>
+      <select id="biz_type">
+        <option>Sole Proprietorship</option><option>Partnership</option>
+        <option>Limited Liability Company</option><option>PLC</option><option>NGO / Non-Profit</option>
+      </select>
+    </div>
+    <div><label>Sector</label>
+      <select id="sector">
+        <option>Food &amp; Beverage</option><option>Healthcare &amp; Pharma</option>
+        <option>Financial Services</option><option>Retail &amp; Trading</option>
+        <option>Construction</option><option>Technology</option>
+        <option>Agriculture</option><option>Education</option>
+      </select>
+    </div>
+    <div class="full"><label>State of operation</label>
+      <select id="state" onchange="updateStateRules()">
+        <option>FCT Abuja</option><option>Lagos</option><option>Kano</option>
+        <option>Bauchi</option><option>Rivers</option><option>Oyo</option>
+        <option>Abia</option><option>Adamawa</option><option>Edo</option><option>Enugu</option>
+      </select>
+    </div>
+  </div>
 </div>
 
-<div>
-<label>Sector</label>
-<select name="sector" id="sector"></select>
+<div class="card" style="margin-top:1rem;">
+  <div class="sec-label">Federal compliance status</div>
+  <div id="fed-toggles"></div>
 </div>
 
-<div>
-<label>State</label>
-<select name="state">
-<option>Bauchi</option>
-<option>Lagos</option>
-<option>Kano</option>
-<option>FCT Abuja</option>
-</select>
+<div class="card" style="margin-top:1rem;">
+  <div class="sec-label">State-level compliance</div>
+  <div id="state-info" style="font-size:13px;color:var(--color-text-secondary);padding:6px 0;"></div>
+  <div id="state-toggles"></div>
 </div>
 
-<div><label>CAC</label><select name="has_cac"><option>Compliant</option><option>Non-Compliant</option></select></div>
-<div><label>TIN</label><select name="has_tin"><option>Compliant</option><option>Non-Compliant</option></select></div>
-<div><label>VAT</label><select name="has_vat"><option>Compliant</option><option>Non-Compliant</option></select></div>
-<div><label>NAFDAC</label><select name="has_nafdac"><option>Compliant</option><option>Non-Compliant</option></select></div>
-<div><label>Permit</label><select name="has_permit"><option>Compliant</option><option>Non-Compliant</option></select></div>
-
+<div class="btn-row">
+  <button class="btn btn-primary" onclick="generate()">Generate report</button>
+  <button class="btn btn-pdf" onclick="exportPDF()" id="pdf-btn" style="display:none;">Download PDF</button>
 </div>
-
-<br>
-<button type="submit">Generate Report</button>
-
-</form>
 
 <div id="report"></div>
-
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
+const fedReqs=[
+  {key:"cac",label:"CAC registration",regulator:"CAC",regulatorFull:"Corporate Affairs Commission (CAC)",contact:"helpdesk@cac.gov.ng",phone:"+234 818 222 9020",website:"www.cac.gov.ng",location:"Abuja",risk:"High",violation:"Operating without CAC registration",penalty:"₦500,000 fine + business shutdown",rec:"Register immediately at cac.gov.ng",explanation:"Getting your business name officially recorded with the federal government."},
+  {key:"tin",label:"Tax Identification Number (TIN)",regulator:"FIRS",regulatorFull:"Federal Inland Revenue Service (FIRS)",contact:"enquiries@firs.gov.ng",phone:"+234 9460 2700",website:"www.firs.gov.ng",location:"Abuja",risk:"High",violation:"No TIN — tax evasion risk",penalty:"₦500,000 fine + 5% of unpaid taxes",rec:"Apply for TIN at firs.gov.ng or any FIRS office",explanation:"A unique 10-digit number for all corporate tax filings."},
+  {key:"vat",label:"VAT registration",regulator:"FIRS",regulatorFull:"Federal Inland Revenue Service (FIRS)",contact:"enquiries@firs.gov.ng",phone:"+234 9460 2700",website:"www.firs.gov.ng",location:"Abuja",risk:"Medium",violation:"Non-remittance of VAT at 7.5%",penalty:"₦10,000/month + interest",rec:"Register for VAT with FIRS and file monthly returns",explanation:"Value Added Tax — 7.5% added to goods and services."},
+  {key:"nafdac",label:"NAFDAC permit",regulator:"NAFDAC",regulatorFull:"NAFDAC",contact:"nafdac@nafdac.gov.ng",phone:"+234 1 4608800",website:"www.nafdac.gov.ng",location:"Lagos/Abuja",risk:"High",violation:"Manufacturing/selling unregistered products",penalty:"₦500,000 fine + product seizure",rec:"Apply for product registration at nafdac.gov.ng",explanation:"Certification ensuring food, drugs and consumer goods meet safety standards."},
+  {key:"scuml",label:"SCUML / EFCC clearance",regulator:"SCUML (EFCC)",regulatorFull:"SCUML (EFCC)",contact:"helpdesk@scuml.org",phone:"+234 818 377 2899",website:"www.scuml.org",location:"Abuja",risk:"High",violation:"Anti-money laundering non-compliance",penalty:"License revocation + criminal prosecution",rec:"Obtain SCUML certificate at scuml.org",explanation:"Anti-money laundering clearance for businesses prone to large cash transactions."},
+];
 
-// CSV loader
-async function loadCSV(path){
-  const res = await fetch(path);
-  const text = await res.text();
+const stateRulesData={
+  "FCT Abuja":{authority:"Abuja Municipal Area Council (AMAC)",contact:"info@amac.fct.gov.ng",phone:"+234 9 291 4305",website:"www.amac.fct.gov.ng",requirement:"Trade License",description:"Municipal permit to operate a service point in FCT",processingTime:"5-10 Days",fee:"₦20,000 – ₦150,000",risk:"Medium"},
+  "Lagos":{authority:"Lagos State Internal Revenue Service (LIRS)",contact:"info@lirs.gov.ng",phone:"+234 700 225 55477",website:"www.lirs.gov.ng",requirement:"LIRS/PAYE Registration + Signage Permit (LASAA)",description:"State tax registration and outdoor signage permit",processingTime:"2-3 Days",fee:"₦10,000 App fee + variable",risk:"Medium"},
+  "Kano":{authority:"Kano State Internal Revenue Service (KIRS)",contact:"info@kirs.kano.gov.ng",phone:"+234 803 123 4567",website:"www.kirs.kano.gov.ng",requirement:"Business Premises Certificate",description:"Mandatory state certification for offices and shops",processingTime:"1-5 Days",fee:"₦10,000 (New) / ₦5,000 (Renewal)",risk:"Medium"},
+  "Bauchi":{authority:"Min. of Commerce, Bauchi",contact:"N/A",phone:"N/A",website:"N/A",requirement:"Form FA 35/36 Registration",description:"Official registration of occupation and premises",processingTime:"1-3 Days",fee:"₦15,000 (Urban) / ₦5,000 (Rural)",risk:"Low"},
+  "Rivers":{authority:"Rivers State Internal Revenue Service",contact:"N/A",phone:"N/A",website:"N/A",requirement:"Business Premises Permit",description:"Annual state commercial levy",processingTime:"3-5 Days",fee:"₦10,000",risk:"Medium"},
+  "Oyo":{authority:"Oyo State Internal Revenue Service",contact:"N/A",phone:"N/A",website:"N/A",requirement:"Business Premises Permit",description:"Annual state commercial registration",processingTime:"3-5 Days",fee:"₦10,000",risk:"Low"},
+  "Abia":{authority:"Abia State IRS",contact:"N/A",phone:"N/A",website:"N/A",requirement:"Business Premises Permit",description:"Annual state registration for commercial property",processingTime:"3-5 Days",fee:"₦10,000 (Urban) / ₦2,000 (Rural)",risk:"Medium"},
+  "Adamawa":{authority:"Yola North LGA",contact:"N/A",phone:"N/A",website:"N/A",requirement:"Trade License",description:"Local government permit for operating a shop",processingTime:"5-10 Days",fee:"₦5,000 – ₦20,000",risk:"Low"},
+  "Edo":{authority:"Edo State IRS",contact:"N/A",phone:"N/A",website:"N/A",requirement:"Business Premises Permit",description:"Annual registration for physical locations",processingTime:"3-5 Days",fee:"₦10,000",risk:"Medium"},
+  "Enugu":{authority:"Enugu North LGA",contact:"N/A",phone:"N/A",website:"N/A",requirement:"Shop Rate",description:"Local government shop/kiosk levy",processingTime:"3 Days",fee:"₦2,500 – ₦7,500",risk:"Low"},
+};
 
-  const lines = text.trim().split("\n");
-  const headers = lines[0].split(",").map(h=>h.trim().toLowerCase());
+const fedStates={};
+fedReqs.forEach(r=>{fedStates[r.key]="yes";});
+let stateStatus="yes";
+let currentState="FCT Abuja";
 
-  return lines.slice(1).map(line=>{
-    const values = line.split(",");
-    let obj={};
-    headers.forEach((h,i)=>obj[h]=values[i]?.trim());
-    return obj;
-  });
-}
-
-let dataCSV=[];
-
-async function init(){
-  dataCSV = await loadCSV("csv/general_rules.csv");
-
-  // populate business types
-  const types = [...new Set(dataCSV.map(r=>r.business_type))];
-  document.getElementById("business_type").innerHTML =
-    types.map(t=>`<option>${t}</option>`).join("");
-
-  // populate sectors
-  const sectors = [...new Set(dataCSV.map(r=>r.sector))];
-  document.getElementById("sector").innerHTML =
-    sectors.map(s=>`<option>${s}</option>`).join("");
-}
-
-init();
-
-// risk engine
-function calculateRisk(rows){
-  let score = 0;
-  let issues = [];
-
-  rows.forEach(r=>{
-    if(r.compliance_status === "Non-Compliant" || r.compliance_status === "Partial"){
-      
-      if(r.risk_level === "High") score += 25;
-      else if(r.risk_level === "Medium") score += 15;
-      else score += 5;
-
-      issues.push(r);
-    }
-  });
-
-  let level = score>50?"high":score>20?"medium":"low";
-  return {score,level,issues};
-}
-
-// submit
-document.getElementById("form").addEventListener("submit",function(e){
-e.preventDefault();
-
-const formData = Object.fromEntries(new FormData(this));
-
-// filter rules
-const rules = dataCSV.filter(r =>
-  r.business_type === formData.business_type ||
-  r.sector === formData.sector
-);
-
-// calculate risk
-const risk = calculateRisk(rules);
-
-// extract authorities
-const authorities = [...new Set(rules.map(r=>r.regulator))];
-
-// render
-document.getElementById("report").innerHTML = `
-
-<div class="card">
-<h2>${formData.business_name}</h2>
-<p><b>Risk Score:</b> ${risk.score}</p>
-<span class="badge ${risk.level}">${risk.level.toUpperCase()}</span>
-</div>
-
-<div class="card">
-<h3>Authorities</h3>
-<ul>${authorities.map(a=>`<li>${a}</li>`).join("")}</ul>
-</div>
-
-<div class="card">
-<h3>Key Risks</h3>
-<ul>${risk.issues.map(r=>`<li>${r.violation}</li>`).join("")}</ul>
-</div>
-
-<div class="card">
-<h3>Penalties</h3>
-<ul>${risk.issues.map(r=>`<li>${r.penalty}</li>`).join("")}</ul>
-</div>
-
-<div class="card">
-<h3>Recommendations</h3>
-<ul>${risk.issues.map(r=>`<li>${r.recommendation}</li>`).join("")}</ul>
-</div>
-
-<div class="card">
-<h3>All Requirements</h3>
-<ul>${rules.map(r=>`<li>${r.requirement}</li>`).join("")}</ul>
-</div>
-
-`;
-
+const fedWrap=document.getElementById("fed-toggles");
+fedReqs.forEach(r=>{
+  const row=document.createElement("div");
+  row.className="toggle-row";
+  row.innerHTML=`<div><div style="font-size:14px;">${r.label}</div><div class="toggle-meta">${r.regulatorFull} &bull; ${r.risk} risk</div></div>
+  <div class="pill-group">
+    <div class="pill ok" id="fy-${r.key}" onclick="setFed('${r.key}','yes')">Compliant</div>
+    <div class="pill" id="fn-${r.key}" onclick="setFed('${r.key}','no')">Non-compliant</div>
+  </div>`;
+  fedWrap.appendChild(row);
 });
-</script>
 
-</body>
-</html>
+function setFed(key,val){
+  fedStates[key]=val;
+  document.getElementById("fy-"+key).className="pill"+(val==="yes"?" ok":"");
+  document.getElementById("fn-"+key).className="pill"+(val==="no"?" no":"");
+}
+
+function updateStateRules(){
+  currentState=document.getElementById("state").value;
+  const sr=stateRulesData[currentState];
+  document.getElementById("state-info").innerHTML=`<strong style="color:var(--color-text-primary)">${sr.requirement}</strong> — ${sr.description} &bull; ${sr.fee} &bull; ${sr.processingTime}`;
+  const sw=document.getElementById("state-toggles");
+  sw.innerHTML=`<div class="toggle-row"><div><div style="font-size:14px;">${sr.requirement}</div><div class="toggle-meta">${sr.authority} &bull; ${sr.risk} risk</div></div>
+  <div class="pill-group">
+    <div class="pill ok" id="sy" onclick="setSt('yes')">Compliant</div>
+    <div class="pill" id="sn" onclick="setSt('no')">Non-compliant</div>
+  </div></div>`;
+  stateStatus="yes";
+}
+updateStateRules();
+
+function setSt(val){
+  stateStatus=val;
+  document.getElementById("sy").className="pill"+(val==="yes"?" ok":"");
+  document.getElementById("sn").className="pill"+(val==="no"?" no":"");
+}
+
+let lastReport={};
+
+function generate(){
+  const name=document.getElementById("biz_name").value||"Your Business";
+  const sector=document.getElementById("sector").value;
+  const state=document.getElementById("state").value;
+  const btype=document.getElementById("biz_type").value;
+  const sr=stateRulesData[state];
+
+  const fedIssues=fedReqs.filter(r=>fedStates[r.key]==="no");
+  const stateIssue=stateStatus==="no"?[{
+    label:sr.requirement,regulator:sr.authority,risk:sr.risk,
+    violation:`Non-compliant with ${sr.requirement}`,penalty:sr.fee+" fee if caught",
+    rec:`Obtain ${sr.requirement} from ${sr.authority}. Processing time: ${sr.processingTime}`
+  }]:[];
+
+  const allIssues=[...fedIssues,...stateIssue];
+  let score=0;
+  allIssues.forEach(r=>{score+=r.risk==="High"?25:r.risk==="Medium"?15:5;});
+  const lvl=score>50?"high":score>20?"medium":"low";
+  const barColor=lvl==="high"?"#E24B4A":lvl==="medium"?"#EF9F27":"#639922";
+  const pct=Math.min(100,score);
+
+  const relevantAuths=fedReqs.filter(r=>fedStates[r.key]==="no");
+  const uniqueRegs=[...new Map(relevantAuths.map(r=>[r.regulator,r])).values()];
+
+  lastReport={name,sector,state,btype,score,lvl,pct,barColor,allIssues,fedIssues,stateIssue,sr,uniqueRegs};
+
+  const html=buildReportHTML(lastReport);
+  document.getElementById("report").innerHTML=html;
+  document.getElementById("pdf-btn").style.display="";
+}
+
+function buildReportHTML(d){
+  const {name,sector,state,btype,score,lvl,pct,barColor,allIssues,fedIssues,stateIssue,sr,uniqueRegs}=d;
+  const lvlLabel=lvl==="high"?"High risk":lvl==="medium"?"Medium risk":"Low risk";
+  const now=new Date().toLocaleDateString("en-NG",{year:"numeric",month:"long",day:"numeric"});
+
+  return `
+  <div class="divider"></div>
+  <div class="sec-label">Compliance report &mdash; ${name}</div>
+
+  <div class="metric-grid">
+    <div class="metric">
+      <div class="metric-label">Risk score</div>
+      <div class="metric-value" style="color:${barColor}">${score}</div>
+      <div class="risk-track"><div class="risk-fill" style="width:${pct}%;background:${barColor}"></div></div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Issues found</div>
+      <div class="metric-value">${allIssues.length} <span style="font-size:14px;color:var(--color-text-secondary)">of ${fedReqs.length+1}</span></div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Risk level</div>
+      <div style="margin-top:8px;"><span class="badge badge-${lvl}">${lvlLabel}</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-bottom:8px;">Business profile</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px;">
+      <span style="color:var(--color-text-secondary)">Name: <span style="color:var(--color-text-primary);font-weight:500">${name}</span></span>
+      <span style="color:var(--color-text-secondary)">Type: <span style="color:var(--color-text-primary)">${btype}</span></span>
+      <span style="color:var(--color-text-secondary)">Sector: <span style="color:var(--color-text-primary)">${sector}</span></span>
+      <span style="color:var(--color-text-secondary)">State: <span style="color:var(--color-text-primary)">${state}</span></span>
+      <span style="color:var(--color-text-secondary)">Date: <span style="color:var(--color-text-primary)">${now}</span></span>
+    </div>
+  </div>
+
+  ${uniqueRegs.length?`
+  <div class="card">
+    <div class="sec-label" style="margin-bottom:8px;">Regulatory authorities involved</div>
+    ${uniqueRegs.map(r=>`<div class="auth-card">
+      <div class="auth-icon">${r.regulator.slice(0,3).toUpperCase()}</div>
+      <div>
+        <div style="font-weight:500;font-size:14px;">${r.regulatorFull}</div>
+        <div style="color:var(--color-text-secondary);margin-top:2px;">${r.contact} &bull; ${r.phone}</div>
+        <div style="color:#185FA5;margin-top:2px;">${r.website} &bull; ${r.location}</div>
+      </div>
+    </div>`).join("")}
+    ${stateIssue.length?`<div class="auth-card">
+      <div class="auth-icon">STA</div>
+      <div>
+        <div style="font-weight:500;font-size:14px;">${sr.authority}</div>
+        <div style="color:var(--color-text-secondary);margin-top:2px;">${sr.contact} &bull; ${sr.phone}</div>
+        <div style="color:#185FA5;margin-top:2px;">${sr.website}</div>
+      </div>
+    </div>`:""}
+  </div>`:""}
+
+  ${allIssues.length?`
+  <div class="card">
+    <div class="sec-label" style="margin-bottom:4px;">Violations &amp; penalties</div>
+    ${allIssues.map(r=>`<div class="list-item">
+      <div class="dot" style="background:${r.risk==="High"?"#E24B4A":r.risk==="Medium"?"#EF9F27":"#639922"}"></div>
+      <div>
+        <div style="font-weight:500;">${r.label}</div>
+        <div style="color:var(--color-text-secondary);font-size:13px;margin-top:2px;">${r.violation}</div>
+        <div style="font-size:13px;margin-top:4px;color:#A32D2D;">Penalty: ${r.penalty}</div>
+      </div>
+    </div>`).join("")}
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-bottom:4px;">Recommended actions</div>
+    ${allIssues.map((r,i)=>`<div class="list-item">
+      <div style="font-size:12px;font-weight:500;color:var(--color-text-secondary);min-width:18px;margin-top:1px;">${i+1}.</div>
+      <div>
+        <div style="font-weight:500;">${r.label}</div>
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-top:2px;">${r.rec}</div>
+      </div>
+    </div>`).join("")}
+  </div>`
+  :`<div class="card" style="text-align:center;padding:2rem;">
+    <div style="font-size:14px;font-weight:500;color:#3B6D11;">All compliance requirements met</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-top:4px;">No issues detected for ${name}</div>
+  </div>`}
+
+  <div class="card">
+    <div class="sec-label" style="margin-bottom:4px;">Full compliance checklist</div>
+    ${fedReqs.map(r=>`<div class="list-item">
+      <div class="dot" style="background:${fedStates[r.key]==="yes"?"#639922":"#E24B4A"}"></div>
+      <div style="flex:1;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div>
+          <div style="font-size:14px;">${r.label}</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);">${r.regulatorFull} &bull; ${r.risk} risk</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">${r.explanation}</div>
+        </div>
+        <span class="badge ${fedStates[r.key]==="yes"?"badge-low":"badge-high"}" style="flex-shrink:0;">${fedStates[r.key]==="yes"?"Compliant":"Non-compliant"}</span>
+      </div>
+    </div>`).join("")}
+    <div class="list-item">
+      <div class="dot" style="background:${stateStatus==="yes"?"#639922":"#E24B4A"}"></div>
+      <div style="flex:1;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div>
+          <div style="font-size:14px;">${sr.requirement} (${state})</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);">${sr.authority} &bull; ${sr.risk} risk &bull; Fee: ${sr.fee}</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">${sr.description}</div>
+        </div>
+        <span class="badge ${stateStatus==="yes"?"badge-low":"badge-high"}" style="flex-shrink:0;">${stateStatus==="yes"?"Compliant":"Non-compliant"}</span>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+function exportPDF(){
+  if(!window.jspdf){alert("PDF library not loaded yet. Please try again in a moment.");return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:"mm",format:"a4"});
+  const d=lastReport;
+  const now=new Date().toLocaleDateString("en-NG",{year:"numeric",month:"long",day:"numeric"});
+  const pw=210,m=18,cw=pw-m*2;
+
+  let y=m;
+
+  doc.setFillColor(83,74,183);
+  doc.rect(0,0,210,28,"F");
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(16);doc.setFont("helvetica","bold");
+  doc.text("Prudent Compliance Engine",m,12);
+  doc.setFontSize(9);doc.setFont("helvetica","normal");
+  doc.text("Nigerian Business Regulatory Compliance Report",m,19);
+  doc.text(now,210-m,19,{align:"right"});
+  y=38;
+
+  const scoreColor=d.lvl==="high"?[227,75,74]:d.lvl==="medium"?[239,159,39]:[99,153,34];
+  doc.setFillColor(245,245,250);doc.roundedRect(m,y,cw,22,3,3,"F");
+  doc.setFontSize(9);doc.setFont("helvetica","normal");doc.setTextColor(100,100,120);
+  doc.text("Business Name",m+4,y+6);doc.text("Type",m+50,y+6);doc.text("Sector",m+90,y+6);doc.text("State",m+130,y+6);
+  doc.setFontSize(10);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+  doc.text(d.name.substring(0,18),m+4,y+14);doc.text(d.btype.substring(0,15),m+50,y+14);
+  doc.text(d.sector.substring(0,16),m+90,y+14);doc.text(d.state.substring(0,14),m+130,y+14);
+  y+=30;
+
+  doc.setFillColor(245,245,250);doc.roundedRect(m,y,58,22,3,3,"F");
+  doc.setFontSize(8);doc.setFont("helvetica","normal");doc.setTextColor(100,100,120);
+  doc.text("Risk Score",m+4,y+7);
+  doc.setFontSize(18);doc.setFont("helvetica","bold");doc.setTextColor(...scoreColor);
+  doc.text(String(d.score),m+4,y+18);
+
+  doc.setFillColor(245,245,250);doc.roundedRect(m+62,y,58,22,3,3,"F");
+  doc.setFontSize(8);doc.setFont("helvetica","normal");doc.setTextColor(100,100,120);
+  doc.text("Issues Found",m+66,y+7);
+  doc.setFontSize(18);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+  doc.text(`${d.allIssues.length} of ${fedReqs.length+1}`,m+66,y+18);
+
+  doc.setFillColor(245,245,250);doc.roundedRect(m+124,y,cw-124,22,3,3,"F");
+  doc.setFontSize(8);doc.setFont("helvetica","normal");doc.setTextColor(100,100,120);
+  doc.text("Risk Level",m+128,y+7);
+  doc.setFontSize(13);doc.setFont("helvetica","bold");doc.setTextColor(...scoreColor);
+  doc.text(d.lvl==="high"?"HIGH":d.lvl==="medium"?"MEDIUM":"LOW",m+128,y+17);
+  y+=30;
+
+  if(d.allIssues.length>0){
+    doc.setFontSize(10);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+    doc.text("Violations & Penalties",m,y);y+=5;
+    doc.setDrawColor(230,230,240);doc.line(m,y,m+cw,y);y+=6;
+
+    d.allIssues.forEach(r=>{
+      if(y>265){doc.addPage();y=m;}
+      const dotColor=r.risk==="High"?[227,75,74]:r.risk==="Medium"?[239,159,39]:[99,153,34];
+      doc.setFillColor(...dotColor);doc.circle(m+2,y+2,2,"F");
+      doc.setFontSize(9);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+      doc.text(r.label,m+7,y+3);
+      doc.setFont("helvetica","normal");doc.setTextColor(100,100,120);doc.setFontSize(8);
+      doc.text(r.violation,m+7,y+8);
+      doc.setTextColor(163,45,45);
+      doc.text("Penalty: "+r.penalty,m+7,y+13);
+      doc.setTextColor(30,100,60);
+      const recLines=doc.splitTextToSize("Action: "+r.rec,cw-10);
+      doc.text(recLines,m+7,y+18);
+      y+=18+(recLines.length-1)*5+6;
+      doc.setDrawColor(240,240,245);doc.line(m,y,m+cw,y);y+=4;
+    });
+    y+=4;
+  }
+
+  if(d.uniqueRegs.length>0||d.stateIssue.length>0){
+    if(y>240){doc.addPage();y=m;}
+    doc.setFontSize(10);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+    doc.text("Regulatory Authorities",m,y);y+=5;
+    doc.setDrawColor(230,230,240);doc.line(m,y,m+cw,y);y+=6;
+
+    const auths=[...d.uniqueRegs,...(d.stateIssue.length?[{regulatorFull:d.sr.authority,contact:d.sr.contact,phone:d.sr.phone,website:d.sr.website,location:d.state}]:[])];
+    auths.forEach(r=>{
+      if(y>265){doc.addPage();y=m;}
+      doc.setFontSize(9);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+      doc.text(r.regulatorFull||r.authority,m,y+3);
+      doc.setFont("helvetica","normal");doc.setTextColor(100,100,120);doc.setFontSize(8);
+      if(r.contact&&r.contact!=="N/A") doc.text(r.contact+" | "+r.phone,m,y+8);
+      if(r.website&&r.website!=="N/A") doc.text(r.website+(r.location?" | "+r.location:""),m,y+13);
+      y+=18;
+      doc.setDrawColor(240,240,245);doc.line(m,y,m+cw,y);y+=4;
+    });
+    y+=4;
+  }
+
+  if(y>240){doc.addPage();y=m;}
+  doc.setFontSize(10);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+  doc.text("Full compliance checklist",m,y);y+=5;
+  doc.setDrawColor(230,230,240);doc.line(m,y,m+cw,y);y+=6;
+
+  const allChecks=[...fedReqs.map(r=>({label:r.label,compliant:fedStates[r.key]==="yes",regulator:r.regulatorFull,risk:r.risk,explanation:r.explanation})),
+    {label:d.sr.requirement+" ("+d.state+")",compliant:d.stateStatus==="yes"||d.stateIssue.length===0,regulator:d.sr.authority,risk:d.sr.risk,explanation:d.sr.description}];
+
+  allChecks.forEach(r=>{
+    if(y>265){doc.addPage();y=m;}
+    const c=r.compliant;
+    doc.setFillColor(c?99:227,c?153:75,c?34:74);doc.circle(m+2,y+2,2,"F");
+    doc.setFontSize(9);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+    doc.text(r.label,m+7,y+3);
+    doc.setFont("helvetica","normal");doc.setTextColor(100,100,120);doc.setFontSize(8);
+    doc.text(r.regulator+" | "+r.risk+" risk",m+7,y+8);
+    if(r.explanation){const el=doc.splitTextToSize(r.explanation,cw-10);doc.text(el,m+7,y+13);y+=el.length*4+2;}
+    doc.setFontSize(8);doc.setFont("helvetica","bold");doc.setTextColor(c?27:163,c?110:45,c?17:45);
+    doc.text(c?"COMPLIANT":"NON-COMPLIANT",210-m,y+3,{align:"right"});
+    y+=17;
+    doc.setDrawColor(240,240,245);doc.line(m,y,m+cw,y);y+=4;
+  });
+
+  const pages=doc.internal.getNumberOfPages();
+  for(let i=1;i<=pages;i++){
+    doc.setPage(i);
+    doc.setFontSize(8);doc.setTextColor(160,160,170);
+    doc.text("Prudent Compliance Engine | Confidential | "+now,m,295);
+    doc.text("Page "+i+" of "+pages,210-m,295,{align:"right"});
+  }
+
+  const fname=(lastReport.name||"business").replace(/\s+/g,"_")+"_compliance_report.pdf";
+  doc.save(fname);
+}
+</script>
