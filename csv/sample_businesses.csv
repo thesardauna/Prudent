@@ -1,9 +1,0 @@
-business_id,business_name,type,sector,location,state,lga,size,year_established,has_cac,has_tin,has_vat,has_nafdac,has_permit,last_compliance_check
-NG-001,Dangote Cement PLC,Public Limited Company,Manufacturing,Obajana,Kogi,Lokoja,Large,1981,Yes,Yes,Yes,No,Yes,2023-12-15
-NG-002,Flutterwave Technology Solutions,Limited Liability Company,FinTech,Lekki Phase 1,Lagos,Eti-Osa,Large,2016,Yes,Yes,Yes,No,Yes,2024-01-20
-NG-003,Iya Basira Kitchen,Sole Proprietorship,Hospitality,Akoka,Lagos,Shomolu,Small,2010,Yes,No,No,No,Yes,2023-06-10
-NG-004,Mainstream Rice Millers,Partnership,Agriculture,Kano Road,Kano,Kumbotso,Medium,2018,Yes,Yes,Yes,Yes,Yes,2023-11-05
-NG-005,HealthPlus Pharmacy,Limited Liability Company,Healthcare,Wuse II,FCT,Abuja Municipal,Medium,1999,Yes,Yes,Yes,Yes,Yes,2024-02-12
-NG-006,Oando Filling Station,Limited Liability Company,Oil & Gas,Trans-Amadi,Rivers,Port Harcourt,Medium,1956,Yes,Yes,Yes,No,Yes,2023-09-30
-NG-007,Zinox Technologies,Limited Liability Company,ICT,Gbagada,Lagos,Kosofe,Large,2001,Yes,Yes,Yes,No,Yes,2024-03-01
-NG-008,Global Logistics Express,Private Limited Company,Transport,Mando,Kaduna,Igabi,Small,2021,Yes,Yes,No,No,No,2023-08-22
