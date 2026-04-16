@@ -3,72 +3,281 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prudent AI Compliance Copilot</title>
-<link rel="stylesheet" href="style.css">
+<title>Prudent Compliance Engine</title>
 
-<!-- PapaParse for CSV -->
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+:root{
+  --primary:#200080;
+  --primary-2:#3a1bb3;
+  --bg:#f7f9fc;
+  --surface:#ffffff;
+  --surface-2:#fdfdff;
+  --text:#182230;
+  --muted:#667085;
+  --border:#dbe2ea;
+  --danger:#d92d20;
+  --warn:#dc6803;
+  --ok:#039855;
+  --shadow:0 10px 30px rgba(16,24,40,.08);
+}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding:24px;
+}
+
+.container{
+  max-width:1100px;
+  margin:auto;
+  background:var(--surface);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.hero{
+  background:#fff;
+  padding:20px;
+  border-bottom:1px solid var(--border);
+}
+
+.hero h1{
+  margin:0;
+  color:var(--primary);
+}
+
+.content{
+  padding:20px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
+}
+
+.full{grid-column:1/-1;}
+
+label{font-weight:bold;}
+
+input,select{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+}
+
+button{
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:var(--primary);
+  color:#fff;
+  cursor:pointer;
+}
+
+button:hover{background:var(--primary-2);}
+
+.report{
+  margin-top:25px;
+}
+
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:15px;
+}
+
+.badge{
+  padding:6px 10px;
+  border-radius:20px;
+  color:#fff;
+}
+
+.high{background:var(--danger);}
+.medium{background:var(--warn);}
+.low{background:var(--ok);}
+</style>
+
 </head>
 
 <body>
 
-<header class="header">
-    <h1>Prudent AI Compliance Copilot</h1>
-    <p>Regulatory Intelligence Engine for Nigerian Businesses</p>
-</header>
+<div class="container">
+<div class="hero">
+<h1>Prudent Compliance Assessment</h1>
+</div>
 
-<main class="container">
+<div class="content">
 
-<section class="card">
-    <h2>Business Input</h2>
+<form id="form">
 
-    <form id="form">
+<div class="grid">
+<div class="full">
+<label>Business Name</label>
+<input name="business_name" required>
+</div>
 
-        <input id="business_id" placeholder="Business ID" required>
-        <input id="business_name" placeholder="Business Name" required>
+<div>
+<label>Sector</label>
+<select name="sector">
+<option>Agriculture</option>
+<option>Health</option>
+<option>Technology</option>
+<option>Food & Beverage</option>
+</select>
+</div>
 
-        <input id="sector" placeholder="Sector (e.g AgricTech, Food, Health)">
-        
-        <!-- FULL NIGERIA STATES -->
-        <select id="state" required>
-            <option value="">Select State</option>
-            <option>Abia</option><option>Adamawa</option><option>Akwa Ibom</option>
-            <option>Anambra</option><option>Bauchi</option><option>Bayelsa</option>
-            <option>Benue</option><option>Borno</option><option>Cross River</option>
-            <option>Delta</option><option>Ebonyi</option><option>Edo</option>
-            <option>Ekiti</option><option>Enugu</option><option>FCT</option>
-            <option>Gombe</option><option>Imo</option><option>Jigawa</option>
-            <option>Kaduna</option><option>Kano</option><option>Katsina</option>
-            <option>Kebbi</option><option>Kogi</option><option>Kwara</option>
-            <option>Lagos</option><option>Nasarawa</option><option>Niger</option>
-            <option>Ogun</option><option>Ondo</option><option>Osun</option>
-            <option>Oyo</option><option>Plateau</option><option>Rivers</option>
-            <option>Sokoto</option><option>Taraba</option><option>Yobe</option>
-            <option>Zamfara</option>
-        </select>
+<div>
+<label>State</label>
+<select name="state">
+<option>Bauchi</option>
+<option>Lagos</option>
+<option>Kano</option>
+<option>FCT Abuja</option>
+</select>
+</div>
 
-        <select id="has_cac"><option>Yes</option><option>No</option></select>
-        <select id="has_tin"><option>Yes</option><option>No</option></select>
-        <select id="has_vat"><option>Yes</option><option>No</option></select>
-        <select id="has_nafdac"><option>Yes</option><option>No</option></select>
-        <select id="has_permit"><option>Yes</option><option>No</option></select>
+<div>
+<label>CAC</label>
+<select name="has_cac">
+<option>Yes</option><option>No</option>
+</select>
+</div>
 
-        <button type="submit">Run Compliance Intelligence</button>
-    </form>
-</section>
+<div>
+<label>TIN</label>
+<select name="has_tin">
+<option>Yes</option><option>No</option>
+</select>
+</div>
 
-<section id="reportSection" class="card hidden">
-    <h2>AI Compliance Report</h2>
-    <div id="reportContent"></div>
+<div>
+<label>VAT</label>
+<select name="has_vat">
+<option>Yes</option><option>No</option>
+</select>
+</div>
 
-    <div class="actions">
-        <button onclick="downloadCSV()">Download CSV</button>
-        <button onclick="window.print()">Download PDF</button>
-    </div>
-</section>
+<div>
+<label>NAFDAC</label>
+<select name="has_nafdac">
+<option>Yes</option><option>No</option>
+</select>
+</div>
 
-</main>
+<div>
+<label>Permit</label>
+<select name="has_permit">
+<option>Yes</option><option>No</option>
+</select>
+</div>
+</div>
 
-<script src="script.js"></script>
+<br>
+<button type="submit">Generate Report</button>
+
+</form>
+
+<div id="report" class="report"></div>
+
+</div>
+</div>
+
+<script>
+
+async function loadCSV(path){
+  const res = await fetch(path);
+  const text = await res.text();
+  const lines = text.split("\n");
+  const headers = lines[0].split(",");
+  return lines.slice(1).map(line=>{
+    const values = line.split(",");
+    let obj={};
+    headers.forEach((h,i)=>obj[h.trim()]=values[i]);
+    return obj;
+  });
+}
+
+let authority, rules, explanations, penalties, stateRules;
+
+async function init(){
+  authority = await loadCSV("csv/authority_directory.csv");
+  rules = await loadCSV("csv/regulatory_rules.csv");
+  explanations = await loadCSV("csv/regulation_explanations.csv");
+  penalties = await loadCSV("csv/risk_events.csv");
+  stateRules = await loadCSV("csv/state_rules.csv");
+}
+
+init();
+
+function match(row,data){
+  return (
+    (!row.state || row.state==data.state || row.state=="All") &&
+    (!row.sector || row.sector==data.sector || row.sector=="All")
+  );
+}
+
+document.getElementById("form").addEventListener("submit",function(e){
+e.preventDefault();
+
+const data = Object.fromEntries(new FormData(this));
+
+const a = authority.filter(r=>match(r,data));
+const r = rules.filter(r=>match(r,data));
+const ex = explanations.filter(r=>match(r,data));
+const p = penalties.filter(r=>match(r,data));
+const s = stateRules.filter(r=>match(r,data));
+
+let score = 0;
+if(data.has_cac=="Yes") score+=20;
+if(data.has_tin=="Yes") score+=20;
+if(data.has_vat=="Yes") score+=15;
+if(data.has_nafdac=="Yes") score+=20;
+if(data.has_permit=="Yes") score+=25;
+
+let risk = score>70?"low":score>40?"medium":"high";
+
+document.getElementById("report").innerHTML = `
+<div class="card">
+<h2>${data.business_name}</h2>
+<p>Score: ${score}%</p>
+<span class="badge ${risk}">${risk.toUpperCase()} RISK</span>
+</div>
+
+<div class="card">
+<h3>Authorities</h3>
+<ul>${a.map(x=>`<li>${x.authority || Object.values(x)[0]}</li>`).join("")}</ul>
+</div>
+
+<div class="card">
+<h3>Rules</h3>
+<ul>${r.map(x=>`<li>${x.rule || Object.values(x)[0]}</li>`).join("")}</ul>
+</div>
+
+<div class="card">
+<h3>Explanations</h3>
+<ul>${ex.map(x=>`<li>${x.explanation || Object.values(x)[0]}</li>`).join("")}</ul>
+</div>
+
+<div class="card">
+<h3>Penalties</h3>
+<ul>${p.map(x=>`<li>${x.penalty || Object.values(x)[0]}</li>`).join("")}</ul>
+</div>
+
+<div class="card">
+<h3>State Rules</h3>
+<ul>${s.map(x=>`<li>${x.rule || Object.values(x)[0]}</li>`).join("")}</ul>
+</div>
+`;
+});
+
+</script>
+
 </body>
 </html>
