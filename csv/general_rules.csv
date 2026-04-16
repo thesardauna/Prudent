@@ -1,0 +1,51 @@
+business_type,sector,regulator,requirement,compliance_status,risk_level,violation,penalty,recommendation,state_variation
+Commercial Bank,Financial Services,CBN,Min. Capital,Compliant,Low,None,None,Maintain liquidity,None (Federal)
+Microfinance Bank,Financial Services,CBN,Capital Ratio,Non-Compliant,High,Under-capitalization,License Revocation,Recapitalize,None (Federal)
+Fintech Startup,Technology,NITDA,Data Privacy,Compliant,Medium,None,None,Annual data audit,None (Federal)
+E-commerce,Trade,FCCPC,Consumer Rights,Partial,Medium,Misleading Prices,Heavy Fines,Pricing review,Lagos (LASCOPA)
+Filling Station,Oil & Gas,NMDPRA,Ops License,Compliant,Medium,None,None,Renew fire certs,State Fire Service
+Solar Installer,Energy,NEMSA,Standards,Compliant,Low,None,None,Certify techs,State Planning
+Food Processing,Manufacturing,NAFDAC,Product Reg,Compliant,High,None,None,Labeling review,State Health Dept
+Cement Factory,Manufacturing,NESREA,EIA Report,Partial,High,Dust Emission,Suspension,Install scrubbers,State EPA
+Private Hospital,Healthcare,HEFAMAA,Staff Cert,Compliant,High,None,None,Verify licenses,Lagos Specific
+Pharmacy,Healthcare,PCN,Premises License,Non-Compliant,High,Expired License,Seal of Premises,Renew permit,State Ministry
+Hotel,Tourism,NTDC,Standardization,Compliant,Medium,None,None,Staff training,State Tourism
+Restaurant,Food,LIRS,Consumption Tax,Partial,Medium,Under-reporting,Tax Penalties,Automate POS,State Specific
+Private School,Education,Min. of Edu,Quality Assurance,Compliant,Medium,None,None,Teacher workshops,State Specific
+Training Inst.,Education,ITF,Contributions,Non-Compliant,Low,Late Remittance,Interest,Pay 1% payroll,None (Federal)
+Ride-Hailing,Transport,Min. Transport,Ops Permit,Compliant,Medium,None,None,Driver vetting,Lagos Levy
+Logistics/Courier,Logistics,NIPOST,Courier License,Partial,Low,Illegal Ops,Asset Seizure,Apply for cert,None (Federal)
+Property Dev,Real Estate,LASPPPA,Building Permit,Compliant,High,None,None,Soil test,State Planning
+Estate Agency,Real Estate,LASRETRAD,Registration,Non-Compliant,Medium,Unregistered,Fines/Ban,Register with state,Lagos Specific
+Law Firm,Legal,NBA/SCN,Practicing Fee,Compliant,Low,None,None,Update payments,None (Federal)
+Audit Firm,Accounting,ICAN/ANAN,Peer Review,Compliant,Medium,None,None,Quality checks,None (Federal)
+Poultry Farm,Agriculture,FMARD,Vaccination,Compliant,High,None,None,Biosecurity,State Vet
+Export Business,Trade,NEPC,Exporter Reg,Partial,Medium,Expired Cert,Export Ban,Renew cert,None (Federal)
+Radio Station,Media,NBC,Broadcasting Code,Compliant,High,None,None,Balance news,None (Federal)
+ISP,Telecoms,NCC,QoS Standards,Non-Compliant,Medium,Downtime,Fines,Upgrade infra,State ROW fees
+Private Guard Co,Security,NSCDC,Category License,Compliant,High,None,None,Background checks,None (Federal)
+CCTV Installers,Tech,Police/NSA,Clearance,Partial,Medium,No Vetting,Warning,Get police report,State Laws
+Night Club,Entertainment,State Govt,Noise Control,Non-Compliant,Medium,Noise Pollution,Closure,Soundproof,Lagos (LASEPA)
+Cinema,Entertainment,NFVCB,Film Censorship,Compliant,Low,None,None,Verify ratings,None (Federal)
+Artisanal Mining,Minerals,MCO,Mining Lease,Non-Compliant,High,Illegal Mining,Jail/Fines,Formalize coop,State Cadastre
+Quarry,Construction,Min. Mines,Explosive Permit,Compliant,High,None,None,Safety storage,State Env
+Betting Shop,Gaming,NLRC,Nat. License,Compliant,Medium,None,None,Gaming tags,Lagos (LSLGA)
+Online Casino,Gaming,LSLGA,State Permit,Partial,Medium,Tax Evasion,Suspension,Audit revenue,State Level
+Insurance Broker,Financial,NAICOM,Prof. Indemnity,Compliant,Medium,None,None,Review policy,None (Federal)
+Underwriter,Financial,NAICOM,Solvency Margin,Non-Compliant,High,Deficit Capital,Takeover,Recapitalize,None (Federal)
+Travel Agency,Aviation,NCAA,IATA Member,Compliant,Low,None,None,Staff cert,None (Federal)
+Ground Handling,Aviation,NCAA,Safety Protocol,Compliant,High,None,None,Update gear,None (Federal)
+Waste Management,Utilities,LAWMA,PSP License,Compliant,Medium,None,None,Route optimization,State Waste Agency
+Recycling Plant,Manufacturing,NESREA,Recycling Permit,Partial,Low,Poor Storage,Notice,Improve sorting,State EPA
+Supermarket,Retail,SON,Product Standards,Compliant,Low,None,None,Check expiry dates,State Consumer
+Pharmacy Retail,Retail,PCN,Pharmacist On-site,Non-Compliant,High,Absent Pharm,Fines,Hire locum,State Specific
+Clothing Brand,Creative,FIRS,VAT Remittance,Compliant,Low,None,None,File monthly,State Revenue
+Textile Mill,Manufacturing,SON,ISO Cert,Partial,Medium,Substandard,Seizure,Apply MANCAP,State Industrial
+Shipping Line,Maritime,NIMASA,Vessel Reg,Compliant,High,None,None,Safety drills,None (Federal)
+Freight Forwarder,Maritime,CRFFN,Annual Dues,Non-Compliant,Low,Late Payment,Interest,Pay via portal,None (Federal)
+Charity Found.,Non-Profit,CAC,Annual Returns,Compliant,Low,None,None,Audit accounts,SCUML Reg
+Advocacy Group,Non-Profit,SCUML,AML Compliance,Partial,High,No Reporting,Bank Freeze,Report >$1k trans,None (Federal)
+Football Club,Sports,NFF/LMC,Club License,Compliant,Medium,None,None,Facility upgrade,State Sports Council
+Gym/Fitness,Sports,Min. Health,Sanitation,Compliant,Low,None,None,Cleaning logs,State Inspector
+Civil Engineering,Construction,COREN,Firm Reg,Compliant,High,None,None,PE project lead,State Public Works
+Architect Firm,Construction,ARCON,Practice Seal,Non-Compliant,High,Unstamped,Permit Denial,Ensure stamps,State Planning
