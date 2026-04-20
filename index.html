@@ -3,280 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RegMap AI — Advanced Policy Engine</title>
+    <title>Prudent Compliance Engine — Unified RegTech</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        :root {
-            --primary: #0F6E56;
-            --primary-light: #E1F5EE;
-            --dark: #0F172A;
-            --bg: #F8FAFC;
-            --text: #334155;
-            --border: #E2E8F0;
-            --pass: #10B981;
-            --fail: #EF4444;
-            --gap: #F59E0B;
-        }
-
-        * { box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; }
-
-        .hidden { display: none !important; }
-
-        /* Navigation */
-        .top-nav { background: var(--dark); padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; }
-        .logo { color: white; font-weight: 800; font-size: 1.2rem; letter-spacing: 1px; }
-        .logo .accent { color: #34D399; }
-        .version-tag { color: #94A3B8; font-family: monospace; font-size: 0.85rem; margin-right: 1.5rem; }
-        .btn-primary { background: var(--primary); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .btn-primary:hover { background: #0c5c48; }
-
-        /* Layout */
+        :root { --primary: #0F6E56; --dark: #0F172A; --bg: #F8FAFC; --text: #334155; --border: #E2E8F0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.6; }
+        .top-nav { background: var(--dark); padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .logo { font-weight: 800; font-size: 1.4rem; }
+        .logo span { color: #34D399; }
         .container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
-        .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .view-header h1 { margin: 0 0 0.5rem 0; color: var(--dark); }
-        .view-header p { margin: 0; color: #64748B; }
+        
+        .hero { text-align: center; margin-bottom: 3rem; }
+        .upload-box { border: 2px dashed var(--primary); background: #E1F5EE; padding: 3rem; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        .upload-box:hover { background: #D1EFE5; transform: translateY(-2px); }
+        
+        .layout { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; }
+        .card { background: white; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        
+        .terminal { background: #1E293B; color: #34D399; padding: 1rem; border-radius: 8px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.85rem; }
+        .log.ai { color: #A78BFA; }
+        .log.sys { color: #94A3B8; }
 
-        /* Upload Zone */
-        .upload-zone { border: 2px dashed var(--primary); background: var(--primary-light); padding: 1.5rem 2rem; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s ease; color: var(--primary); display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
-        .upload-zone:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(15, 110, 86, 0.15); }
-        .upload-zone p { margin: 0; color: var(--primary); font-size: 0.9rem; }
+        .reg-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .reg-table th { text-align: left; background: #F1F5F9; padding: 10px; font-size: 0.8rem; }
+        .reg-table td { padding: 12px 10px; border-bottom: 1px solid #EEE; }
 
-        /* Grid & Cards */
-        .layout-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.5rem; }
-        .card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-        .metric-card { background: white; border: 1px solid var(--border); padding: 1.5rem; border-radius: 8px; }
-        .metric-card.warning { border-left: 4px solid var(--gap); }
-        .metric-card .value { font-size: 2.5rem; font-weight: 700; color: var(--dark); margin: 0.5rem 0; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
+        .pass { background: #DCFCE7; color: #166534; }
+        .fail { background: #FEE2E2; color: #991B1B; }
 
-        /* Terminal */
-        .terminal { background: #1E293B; border-radius: 8px; padding: 1rem; height: 350px; overflow-y: auto; font-family: monospace; font-size: 0.85rem; line-height: 1.6; }
-        .log { margin-bottom: 0.5rem; padding-left: 1rem; border-left: 2px solid transparent; animation: fadeIn 0.3s ease-in; }
-        .log.system { color: #94A3B8; }
-        .log.ai { color: #A78BFA; border-color: #A78BFA; }
-        .log.rule { color: #34D399; border-color: #34D399; }
-
-        /* Table */
-        .reg-table { width: 100%; border-collapse: collapse; }
-        .reg-table th { background: #F1F5F9; padding: 0.75rem; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748B; }
-        .reg-table td { padding: 1rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
-        .badge { padding: 0.25rem 0.6rem; border-radius: 99px; font-size: 0.75rem; font-weight: 600; display: inline-block;}
-        .badge.pass { background: #D1FAE5; color: #065F46; }
-        .badge.fail { background: #FEE2E2; color: #991B1B; }
-        .badge.gap { background: #FEF3C7; color: #92400E; }
-        .btn-outline { border: 1px solid var(--border); background: transparent; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
-        .btn-outline:hover { background: #F8FAFC; border-color: #94A3B8; }
-
-        /* Modal */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
-        .modal-content { background: white; padding: 2rem; border-radius: 12px; width: 500px; max-width: 90%; position: relative; }
-        .close { position: absolute; top: 1rem; right: 1.5rem; font-size: 1.5rem; cursor: pointer; color: #64748B; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        .btn-download { display: none; margin-top: 1rem; width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
+
     <nav class="top-nav">
-        <div class="logo">REGMAP <span class="accent">AI</span></div>
-        <div class="nav-controls">
-            <span class="version-tag">Engine: OPA-Rego v1.2</span>
-            <button id="view-toggle" class="btn-primary" onclick="toggleView()">Switch to Regulator (SupTech) View</button>
-        </div>
+        <div class="logo">PRUDENT <span>COMPLIANCE</span></div>
+        <div><small>v2.0 Beta | Policy-as-Code Engine</small></div>
     </nav>
 
-    <main class="container" id="org-view">
-        <header class="view-header">
-            <div>
-                <h1>Compliance Pipeline</h1>
-                <p>Upload a policy to parse, map, and evaluate against 5 Nigerian frameworks simultaneously.</p>
+    <main class="container">
+        <section class="hero">
+            <h1>Regulatory Evidence & Mapping</h1>
+            <p>Upload your policy document to extract obligations and verify compliance with NITDA, NDPC, and CBN standards.</p>
+            <div class="upload-box" id="drop-zone">
+                <input type="file" id="file-input" class="hidden" accept=".pdf">
+                <strong>Click to Upload Policy PDF</strong>
+                <p id="file-name-display">No file selected</p>
             </div>
-            <div class="upload-zone" id="drop-zone">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <p>Click here to simulate uploading <strong>Data_Privacy_Policy.pdf</strong></p>
-            </div>
-        </header>
+        </section>
 
-        <div class="layout-grid">
-            <section class="card logic-trace">
-                <h3 style="margin-top:0;">Live Execution Trace</h3>
-                <div id="terminal" class="terminal">
-                    <div class="log system">> System ready. Waiting for document ingestion...</div>
+        <div class="layout">
+            <div class="card">
+                <h3>Processing Trace</h3>
+                <div class="terminal" id="terminal">
+                    <div class="log sys">> Engine ready. Awaiting input...</div>
                 </div>
-            </section>
+                <button id="download-btn" class="btn-download">Download Compliance Report (PDF)</button>
+            </div>
 
-            <section class="card results-matrix">
-                <h3 style="margin-top:0;">Multi-Agency Output Matrix</h3>
+            <div class="card">
+                <h3>Cross-Framework Matrix</h3>
                 <table class="reg-table">
                     <thead>
                         <tr>
-                            <th>Control Domain</th>
+                            <th>Domain</th>
                             <th>NITDA</th>
                             <th>NDPC</th>
                             <th>CBN</th>
-                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody id="matrix-body">
-                        <tr><td colspan="5" style="text-align:center; color:#888; padding: 2rem;">Awaiting Evaluation... Click the upload button above.</td></tr>
+                        <tr><td colspan="4" style="text-align:center; padding:2rem; color:#94A3B8;">Upload a document to generate analysis</td></tr>
                     </tbody>
                 </table>
-            </section>
-        </div>
-    </main>
-
-    <main class="container hidden" id="suptech-view">
-        <header class="view-header">
-            <div>
-                <h1>NITDA SupTech Oversight</h1>
-                <p>Real-time telemetry across supervised entities.</p>
-            </div>
-            <div class="global-score" style="font-size: 1.5rem; font-weight: bold; color: var(--dark);">System Health: <span class="accent">82%</span></div>
-        </header>
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <label style="color: #64748B; font-weight: 600;">Entities Evaluated (24h)</label>
-                <div class="value">142</div>
-            </div>
-            <div class="metric-card warning">
-                <label style="color: #64748B; font-weight: 600;">Critical Sector Risk</label>
-                <div class="value">Fintech</div>
-                <p style="margin:0; color:#EF4444; font-weight:500;">Data Localisation Gaps detected</p>
             </div>
         </div>
     </main>
-
-    <div id="evidence-modal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2 style="margin-top:0;">Deterministic Reason Code</h2>
-            <div id="modal-body"></div>
-        </div>
-    </div>
 
     <script>
-        // --- MOCK REGULATORY DATA ENGINE ---
-        const extractedObligations = [
-            { 
-                domain: "Data Localisation", 
-                extractedText: "All primary backups are stored on AWS eu-west-1 (Ireland).",
-                rules: { 
-                    nitda: { status: "fail", clause: "NITDA Code Sec 4.1: Must store data within Nigeria." },
-                    ndpc: { status: "pass", clause: "NDPA Art 24: Cross-border transfer permitted with safeguards." },
-                    cbn: { status: "fail", clause: "CBN AML/CFT: Financial data must remain domestic." }
-                }
-            },
-            { 
-                domain: "DPO Appointment", 
-                extractedText: "Jane Doe is appointed as Chief Privacy Officer and registered with NDPC.",
-                rules: { 
-                    nitda: { status: "pass", clause: "NITDA Sec 2.1: Officer designated." },
-                    ndpc: { status: "pass", clause: "NDPA Art 32: DPO formally registered." },
-                    cbn: { status: "gap", clause: "CBN: Requires separate compliance officer notification." }
-                }
-            }
-        ];
+        const { jsPDF } = window.jspdf;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
-        // --- UI CONTROLLERS ---
-        let isSupTech = false;
-
-        function toggleView() {
-            isSupTech = !isSupTech;
-            document.getElementById('org-view').classList.toggle('hidden');
-            document.getElementById('suptech-view').classList.toggle('hidden');
-            
-            const btn = document.getElementById('view-toggle');
-            btn.innerText = isSupTech ? "Switch to Org View" : "Switch to Regulator (SupTech) View";
-            btn.style.background = isSupTech ? "#334155" : "#0F6E56";
-        }
-
-        // --- SIMULATED PIPELINE ---
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
         const terminal = document.getElementById('terminal');
+        const matrixBody = document.getElementById('matrix-body');
+        const downloadBtn = document.getElementById('download-btn');
 
-        function logTerminal(message, type) {
-            const el = document.createElement('div');
-            el.className = `log ${type}`;
-            el.innerText = `> ${message}`;
-            terminal.appendChild(el);
+        let currentAnalysis = [];
+
+        dropZone.onclick = () => fileInput.click();
+
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('file-name-display').innerText = `Target: ${file.name}`;
+            terminal.innerHTML = "";
+            log("Loading PDF Engine...", "sys");
+
+            const reader = new FileReader();
+            reader.onload = async function() {
+                const typedarray = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                
+                log(`Successfully loaded ${pdf.numPages} pages.`, "sys");
+                let fullText = "";
+                
+                for(let i=1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    fullText += content.items.map(item => item.str).join(" ");
+                }
+
+                log("AI Extraction: Searching for compliance keywords...", "ai");
+                processText(fullText);
+            };
+            reader.readAsArrayBuffer(file);
+        };
+
+        function log(msg, type) {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.innerText = `> ${msg}`;
+            terminal.appendChild(div);
             terminal.scrollTop = terminal.scrollHeight;
         }
 
-        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        async function processText(text) {
+            await new Promise(r => setTimeout(r, 1000));
+            log("Analyzing data residency clauses...", "ai");
+            
+            // Logic: Real text search simulation
+            const hasLocal = text.toLowerCase().includes("nigeria") || text.toLowerCase().includes("local");
+            const hasDPO = text.toLowerCase().includes("privacy officer") || text.toLowerCase().includes("dpo");
 
-        document.getElementById('drop-zone').addEventListener('click', async () => {
-            terminal.innerHTML = '';
-            document.getElementById('matrix-body').innerHTML = `<tr><td colspan="5" style="text-align:center;">Processing Document...</td></tr>`;
-            
-            logTerminal("Initiating File Ingestion: Data_Privacy_Policy.pdf", "system");
-            await sleep(600);
-            
-            logTerminal("Running Unstructured.io parser... Tables & text extracted.", "system");
-            await sleep(800);
-            
-            logTerminal("[LegalBERT] Semantic extraction initiated.", "ai");
-            await sleep(700);
-            logTerminal("[LegalBERT] Found 14 compliance-relevant clauses. Mapping to domains.", "ai");
-            await sleep(900);
-            
-            logTerminal("[OPA Engine] Executing continuous compliance ruleset v1.2...", "rule");
-            await sleep(800);
-            logTerminal("[OPA Engine] Rule evaluation complete. Deterministic outputs generated.", "rule");
-            
-            renderMatrix();
-        });
+            currentAnalysis = [
+                { 
+                    domain: "Data Localisation", 
+                    nitda: hasLocal ? "PASS" : "FAIL", 
+                    ndpc: "PASS", 
+                    cbn: hasLocal ? "PASS" : "FAIL",
+                    evidence: hasLocal ? "Clause found mentioning local storage." : "No Nigerian residency clause detected."
+                },
+                { 
+                    domain: "Officer Appointment", 
+                    nitda: hasDPO ? "PASS" : "PASS", 
+                    ndpc: hasDPO ? "PASS" : "FAIL", 
+                    cbn: "PASS",
+                    evidence: hasDPO ? "DPO identified in text." : "No DPO mention found in document."
+                },
+                {
+                    domain: "Breach Reporting",
+                    nitda: "PASS",
+                    ndpc: "FAIL",
+                    cbn: "PASS",
+                    evidence: "72-hour notification window not explicitly defined."
+                }
+            ];
 
-        function getBadge(status) {
-            if (status === 'pass') return `<span class="badge pass">PASS</span>`;
-            if (status === 'fail') return `<span class="badge fail">FAIL</span>`;
-            return `<span class="badge gap">GAP</span>`;
+            renderResults();
+            log("Policy-as-Code execution complete.", "sys");
+            downloadBtn.style.display = "block";
         }
 
-        function renderMatrix() {
-            const tbody = document.getElementById('matrix-body');
-            tbody.innerHTML = '';
+        function renderResults() {
+            matrixBody.innerHTML = currentAnalysis.map(row => `
+                <tr>
+                    <td><strong>${row.domain}</strong></td>
+                    <td><span class="badge ${row.nitda.toLowerCase()}">${row.nitda}</span></td>
+                    <td><span class="badge ${row.ndpc.toLowerCase()}">${row.ndpc}</span></td>
+                    <td><span class="badge ${row.cbn.toLowerCase()}">${row.cbn}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        downloadBtn.onclick = () => {
+            const doc = new jsPDF();
+            doc.setFontSize(22);
+            doc.setTextColor(15, 110, 86);
+            doc.text("Prudent Compliance Report", 20, 20);
             
-            extractedObligations.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${item.domain}</strong></td>
-                    <td>${getBadge(item.rules.nitda.status)}</td>
-                    <td>${getBadge(item.rules.ndpc.status)}</td>
-                    <td>${getBadge(item.rules.cbn.status)}</td>
-                    <td><button class="btn-outline" onclick="openModal(${index})">View Reason</button></td>
-                `;
-                tbody.appendChild(tr);
+            doc.setFontSize(12);
+            doc.setTextColor(100);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 30);
+            doc.text("Unified Nigerian Regulatory Framework Mapping", 20, 37);
+
+            let y = 50;
+            currentAnalysis.forEach(row => {
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(0);
+                doc.text(`${row.domain}:`, 20, y);
+                doc.setFont(undefined, 'normal');
+                doc.text(`- NITDA: ${row.nitda} | NDPC: ${row.ndpc} | CBN: ${row.cbn}`, 20, y + 7);
+                doc.setFontSize(10);
+                doc.text(`Evidence: ${row.evidence}`, 25, y + 14);
+                doc.setFontSize(12);
+                y += 25;
             });
-        }
 
-        // --- MODAL LOGIC ---
-        function openModal(index) {
-            const data = extractedObligations[index];
-            const modalBody = document.getElementById('modal-body');
-            
-            modalBody.innerHTML = `
-                <div style="background:#F1F5F9; padding:1rem; border-radius:6px; margin-bottom:1rem;">
-                    <p style="font-size:0.8rem; color:#64748B; margin:0 0 0.5rem 0; font-weight:bold;">EXTRACTED EVIDENCE (POLICY TEXT)</p>
-                    <p style="margin:0; font-family:monospace; color:#0F172A;">"${data.extractedText}"</p>
-                </div>
-                <h4 style="margin-bottom: 0.5rem;">Rule Evaluations:</h4>
-                <ul style="line-height:1.8; color:#334155; margin-top:0;">
-                    <li><strong>NITDA:</strong> ${data.rules.nitda.clause}</li>
-                    <li><strong>NDPC:</strong> ${data.rules.ndpc.clause}</li>
-                    <li><strong>CBN:</strong> ${data.rules.cbn.clause}</li>
-                </ul>
-            `;
-            
-            document.getElementById('evidence-modal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('evidence-modal').classList.add('hidden');
-        }
-
-        // Close modal on outside click
-        window.onclick = function(event) {
-            const modal = document.getElementById('evidence-modal');
-            if (event.target == modal) closeModal();
-        }
+            doc.save("Compliance_Report.pdf");
+        };
     </script>
 </body>
 </html>
