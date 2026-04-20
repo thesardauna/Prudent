@@ -1,479 +1,89 @@
-
-<style>
-*{box-sizing:border-box;margin:0;padding:0;}
-
-body{
-  font-family:var(--font-sans);
-  color:var(--color-text-primary);
-  background:linear-gradient(180deg,#f8f9fc 0%,#f4f6fb 100%);
-  line-height:1.5;
-  -webkit-font-smoothing:antialiased;
-}
-
-.page{
-  padding:2.5rem 0;
-  max-width:980px;
-  margin:auto;
-}
-
-.header{
-  margin-bottom:2.5rem;
-}
-
-.header h1{
-  font-size:26px;
-  font-weight:600;
-  letter-spacing:-0.01em;
-}
-
-.header p{
-  font-size:14px;
-  color:var(--color-text-secondary);
-  margin-top:6px;
-}
-
-.sec-label{
-  font-size:11px;
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:0.08em;
-  color:var(--color-text-tertiary);
-  margin-bottom:12px;
-}
-
-.card{
-  background:var(--color-background-primary);
-  border:1px solid rgba(0,0,0,0.05);
-  border-radius:14px;
-  padding:1.5rem;
-  box-shadow:0 4px 18px rgba(0,0,0,0.04);
-  transition:all 0.2s ease;
-}
-
-.card:hover{
-  box-shadow:0 8px 28px rgba(0,0,0,0.06);
-}
-
-.card+.card,
-.card+.metric-grid,
-.metric-grid+.card{
-  margin-top:1.2rem;
-}
-
-.grid2{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  gap:14px;
-}
-
-.full{grid-column:1/-1;}
-
-label{
-  display:block;
-  font-size:13px;
-  color:var(--color-text-secondary);
-  margin-bottom:6px;
-  font-weight:500;
-}
-
-input,select{
-  width:100%;
-  font-size:14px;
-  padding:10px 13px;
-  border:1px solid rgba(0,0,0,0.08);
-  border-radius:10px;
-  background:#fff;
-  color:var(--color-text-primary);
-  transition:all 0.2s ease;
-}
-
-input:focus,select:focus{
-  outline:none;
-  border-color:#534AB7;
-  box-shadow:0 0 0 3px rgba(83,74,183,0.1);
-}
-
-.toggle-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px 0;
-  border-bottom:1px solid rgba(0,0,0,0.05);
-}
-
-.toggle-row:last-child{border-bottom:none;}
-
-.toggle-meta{
-  font-size:12px;
-  color:var(--color-text-secondary);
-  margin-top:3px;
-}
-
-.pill-group{
-  display:flex;
-  gap:6px;
-  flex-shrink:0;
-}
-
-.pill{
-  padding:6px 14px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:500;
-  cursor:pointer;
-  border:1px solid rgba(0,0,0,0.08);
-  background:#f5f6fa;
-  color:var(--color-text-secondary);
-  transition:all 0.15s ease;
-}
-
-.pill:hover{
-  transform:translateY(-1px);
-}
-
-.pill.ok{
-  background:#EAF3DE;
-  color:#3B6D11;
-  border-color:#97C459;
-}
-
-.pill.no{
-  background:#FCEBEB;
-  color:#A32D2D;
-  border-color:#F09595;
-}
-
-.btn-row{
-  display:flex;
-  gap:12px;
-  margin-top:1.8rem;
-}
-
-.btn{
-  flex:1;
-  padding:12px;
-  font-size:14px;
-  font-weight:600;
-  border-radius:10px;
-  border:1px solid rgba(0,0,0,0.08);
-  background:#fff;
-  color:var(--color-text-primary);
-  cursor:pointer;
-  transition:all 0.2s ease;
-}
-
-.btn:hover{
-  transform:translateY(-1px);
-  box-shadow:0 6px 18px rgba(0,0,0,0.08);
-}
-
-.btn-primary{
-  background:#534AB7;
-  color:#fff;
-  border-color:#534AB7;
-}
-
-.btn-primary:hover{
-  background:#3C3489;
-}
-
-.btn-pdf{
-  background:#1D9E75;
-  color:#fff;
-  border-color:#1D9E75;
-}
-
-.btn-pdf:hover{
-  background:#0F6E56;
-}
-
-.divider{
-  height:1px;
-  background:linear-gradient(to right,transparent,rgba(0,0,0,0.08),transparent);
-  margin:2rem 0;
-}
-
-.metric-grid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:14px;
-}
-
-.metric{
-  background:#fafbff;
-  border-radius:12px;
-  padding:1.2rem;
-  border:1px solid rgba(0,0,0,0.05);
-}
-
-.metric-label{
-  font-size:12px;
-  color:var(--color-text-secondary);
-  margin-bottom:5px;
-}
-
-.metric-value{
-  font-size:26px;
-  font-weight:600;
-}
-
-.badge{
-  display:inline-flex;
-  align-items:center;
-  padding:5px 14px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:600;
-}
-
-.badge-high{background:#FCEBEB;color:#A32D2D;}
-.badge-medium{background:#FAEEDA;color:#854F0B;}
-.badge-low{background:#EAF3DE;color:#3B6D11;}
-
-.risk-track{
-  height:6px;
-  border-radius:6px;
-  background:#eef0f6;
-  margin:10px 0;
-  overflow:hidden;
-}
-
-.risk-fill{
-  height:100%;
-  border-radius:6px;
-  transition:width 0.3s ease;
-}
-
-.list-item{
-  display:flex;
-  gap:12px;
-  padding:12px 0;
-  border-bottom:1px solid rgba(0,0,0,0.05);
-  font-size:14px;
-}
-
-.list-item:last-child{border-bottom:none;}
-
-.dot{
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  flex-shrink:0;
-  margin-top:6px;
-}
-
-.auth-card{
-  display:flex;
-  gap:14px;
-  padding:12px 0;
-  border-bottom:1px solid rgba(0,0,0,0.05);
-  font-size:13px;
-}
-
-.auth-card:last-child{border-bottom:none;}
-
-.auth-icon{
-  width:38px;
-  height:38px;
-  border-radius:10px;
-  background:#EEEDFE;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:11px;
-  font-weight:600;
-  color:#3C3489;
-  flex-shrink:0;
-}
-</style>
-
-<div class="page">
-<div class="header">
-  <h1>Prudent Compliance Engine</h1>
-  <p>Nigerian business regulatory compliance assessment</p>
-</div>
-
-<div class="card">
-  <div class="sec-label">Business details</div>
-  <div class="grid2">
-    <div class="full"><label>Business name</label><input id="biz_name" placeholder="e.g. Aiko Foods Ltd"></div>
-    <div><label>Business type</label>
-      <select id="biz_type">
-        <option>Sole Proprietorship</option><option>Partnership</option>
-        <option>Limited Liability Company</option><option>PLC</option><option>NGO / Non-Profit</option>
-      </select>
-    </div>
-    <div><label>Sector</label>
-      <select id="sector">
-        <option>Food &amp; Beverage</option><option>Healthcare &amp; Pharma</option>
-        <option>Financial Services</option><option>Retail &amp; Trading</option>
-        <option>Construction</option><option>Technology</option>
-        <option>Agriculture</option><option>Education</option>
-      </select>
-    </div>
-    <div class="full"><label>State of operation</label>
-      <select id="state" onchange="updateStateRules()">
-        <option>FCT Abuja</option><option>Lagos</option><option>Kano</option>
-        <option>Bauchi</option><option>Rivers</option><option>Oyo</option>
-        <option>Abia</option><option>Adamawa</option><option>Edo</option><option>Enugu</option>
-      </select>
-    </div>
-  </div>
-</div>
-
-<div class="card" style="margin-top:1rem;">
-  <div class="sec-label">Federal compliance status</div>
-  <div id="fed-toggles"></div>
-</div>
-
-<div class="card" style="margin-top:1rem;">
-  <div class="sec-label">State-level compliance</div>
-  <div id="state-info" style="font-size:13px;color:var(--color-text-secondary);padding:6px 0;"></div>
-  <div id="state-toggles"></div>
-</div>
-
-<div class="btn-row">
-  <button class="btn btn-primary" onclick="generate()">Generate report</button>
-  <button class="btn btn-pdf" onclick="exportPDF()" id="pdf-btn" style="display:none;">Download PDF</button>
-</div>
-
-<div id="report"></div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-let rules = [];
-let fedStates = {};
-let evidenceStore = {};
-let auditLog = [];
-
-// Load rules dynamically
-async function loadRules(){
-  const res = await fetch("rules.json");
-  const data = await res.json();
-  rules = data.federal;
-
-  const wrap = document.getElementById("fed-toggles");
-  wrap.innerHTML = "";
-
-  rules.forEach(r=>{
-    fedStates[r.key] = "no";
-
-    const row = document.createElement("div");
-    row.className = "toggle-row";
-
-    row.innerHTML = `
-      <div>
-        <div style="font-size:14px;">${r.label}</div>
-        <div class="toggle-meta">${r.regulator} • ${r.risk} risk</div>
-        <input type="file" onchange="uploadEvidence('${r.key}', this.files[0])">
-      </div>
-
-      <div class="pill-group">
-        <div class="pill ok" id="fy-${r.key}" onclick="setFed('${r.key}','yes')">Compliant</div>
-        <div class="pill no" id="fn-${r.key}" onclick="setFed('${r.key}','no')">Non-compliant</div>
-      </div>
-    `;
-    wrap.appendChild(row);
-  });
-}
-
-// Evidence upload
-function uploadEvidence(key, file){
-  evidenceStore[key] = file;
-  logAction("Uploaded evidence for " + key);
-}
-
-// Toggle compliance
-function setFed(key, val){
-  fedStates[key] = val;
-  logAction("Set " + key + " to " + val);
-
-  document.getElementById("fy-"+key).className = "pill" + (val==="yes"?" ok":"");
-  document.getElementById("fn-"+key).className = "pill" + (val==="no"?" no":"");
-}
-
-// Improved scoring
-function calculateScore(issues, sector){
-  let score = issues.reduce((acc, r)=>{
-    if(r.risk === "High") return acc + 30;
-    if(r.risk === "Medium") return acc + 20;
-    return acc + 10;
-  }, 0);
-
-  if(sector === "Financial Services"){
-    score *= 1.2;
-  }
-
-  return Math.round(score);
-}
-
-// Generate report
-function generate(){
-  const name = document.getElementById("biz_name").value || "Your Business";
-  const sector = document.getElementById("sector").value;
-
-  const issues = rules.filter(r=>{
-    return !evidenceStore[r.key];
-  });
-
-  const score = calculateScore(issues, sector);
-  const lvl = score > 60 ? "high" : score > 25 ? "medium" : "low";
-
-  const reportHTML = `
-    <div class="divider"></div>
-    <div class="sec-label">Compliance Report</div>
-
-    <div class="metric-grid">
-      <div class="metric">
-        <div class="metric-label">Risk Score</div>
-        <div class="metric-value">${score}</div>
-      </div>
-
-      <div class="metric">
-        <div class="metric-label">Issues</div>
-        <div class="metric-value">${issues.length}</div>
-      </div>
-
-      <div class="metric">
-        <div class="metric-label">Risk Level</div>
-        <div class="badge badge-${lvl}">
-          ${lvl.toUpperCase()}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RegMap AI — Advanced Policy Engine</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="logo">REGMAP <span class="accent">AI</span></div>
+        <div class="nav-controls">
+            <span class="version-tag">Engine: OPA-Rego v1.2</span>
+            <button id="view-toggle" class="btn-primary" onclick="toggleView()">Switch to Regulator (SupTech) View</button>
         </div>
-      </div>
-    </div>
+    </nav>
 
-    <div class="card">
-      <div class="sec-label">Violations</div>
-      ${
-        issues.length === 0
-        ? "<p>All requirements satisfied</p>"
-        : issues.map(r=>`
-          <div class="list-item">
+    <main class="container" id="org-view">
+        <header class="view-header">
             <div>
-              <strong>${r.label}</strong><br>
-              Missing: ${r.required_evidence}<br>
-              Penalty: ${r.penalty}
+                <h1>Compliance Pipeline</h1>
+                <p>Upload a policy to parse, map, and evaluate against 5 Nigerian frameworks simultaneously.</p>
             </div>
-          </div>
-        `).join("")
-      }
+            <div class="upload-zone" id="drop-zone">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p>Drop <strong>Data_Privacy_Policy.pdf</strong> to Evaluate</p>
+            </div>
+        </header>
+
+        <div class="layout-grid">
+            <section class="card logic-trace">
+                <h3>Live Execution Trace</h3>
+                <div id="terminal" class="terminal">
+                    <div class="log system">System ready. Waiting for document ingestion...</div>
+                </div>
+            </section>
+
+            <section class="card results-matrix">
+                <h3>Multi-Agency Output Matrix</h3>
+                <table class="reg-table">
+                    <thead>
+                        <tr>
+                            <th>Control Domain</th>
+                            <th>NITDA</th>
+                            <th>NDPC</th>
+                            <th>CBN</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matrix-body">
+                        <tr><td colspan="5" style="text-align:center; color:#888;">Awaiting Evaluation...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </main>
+
+    <main class="container hidden" id="suptech-view">
+        <header class="view-header">
+            <div>
+                <h1>NITDA SupTech Oversight</h1>
+                <p>Real-time telemetry across supervised entities.</p>
+            </div>
+            <div class="global-score">System Health: <span class="accent">82%</span></div>
+        </header>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <label>Entities Evaluated (24h)</label>
+                <div class="value">142</div>
+            </div>
+            <div class="metric-card warning">
+                <label>Critical Sector Risk</label>
+                <div class="value">Fintech</div>
+                <p>Data Localisation Gaps detected</p>
+            </div>
+        </div>
+    </main>
+
+    <div id="evidence-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Deterministic Reason Code</h2>
+            <div id="modal-body"></div>
+        </div>
     </div>
-  `;
 
-  document.getElementById("report").innerHTML = reportHTML;
-
-  logAction("Generated report for " + name);
-}
-
-// Audit trail
-function logAction(action){
-  auditLog.push({
-    action,
-    time: new Date().toISOString()
-  });
-}
-
-// Init
-loadRules();
-</script>
+    <script src="script.js"></script>
+</body>
+</html>
