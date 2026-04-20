@@ -1,164 +1,127 @@
-let csvData = {};
-
-const files = [
-    "regulatory_rules.csv",
-    "risk_matrix.csv",
-    "state_rules.csv",
-    "risk_events.csv",
-    "authority_directory.csv",
-    "compliance_checklist_template.csv",
-    "regulation_explanations.csv"
+// --- MOCK REGULATORY DATA ENGINE ---
+const extractedObligations = [
+    { 
+        domain: "Data Localisation", 
+        extractedText: "All primary backups are stored on AWS eu-west-1 (Ireland).",
+        rules: { 
+            nitda: { status: "fail", clause: "NITDA Code Sec 4.1: Must store data within Nigeria." },
+            ndpc: { status: "pass", clause: "NDPA Art 24: Cross-border transfer permitted with safeguards." },
+            cbn: { status: "fail", clause: "CBN AML/CFT: Financial data must remain domestic." }
+        }
+    },
+    { 
+        domain: "DPO Appointment", 
+        extractedText: "Jane Doe is appointed as Chief Privacy Officer and registered with NDPC.",
+        rules: { 
+            nitda: { status: "pass", clause: "NITDA Sec 2.1: Officer designated." },
+            ndpc: { status: "pass", clause: "NDPA Art 32: DPO formally registered." },
+            cbn: { status: "gap", clause: "CBN: Requires separate compliance officer notification." }
+        }
+    }
 ];
 
-/* LOAD ALL CSV */
-files.forEach(file => {
-    Papa.parse(`csv/${file}`, {
-        download: true,
-        header: true,
-        complete: res => {
-            csvData[file] = res.data;
-        }
-    });
-});
+// --- UI CONTROLLERS ---
+let isSupTech = false;
 
-let currentReport;
-
-/* FORM */
-document.getElementById("form").addEventListener("submit", e => {
-    e.preventDefault();
-    currentReport = generateReport();
-    displayReport(currentReport);
-});
-
-/* GENERATE REPORT */
-function generateReport() {
-
-    let state = document.getElementById("state").value;
-    let sector = document.getElementById("sector").value.toLowerCase();
-
-    let fulfilled = 0;
-
-    if (val("has_cac") === "Yes") fulfilled++;
-    if (val("has_tin") === "Yes") fulfilled++;
-    if (val("has_vat") === "Yes") fulfilled++;
-    if (val("has_nafdac") === "Yes") fulfilled++;
-    if (val("has_permit") === "Yes") fulfilled++;
-
-    let risk =
-        fulfilled >= 4 ? "Low Risk" :
-        fulfilled >= 2 ? "Medium Risk" :
-        "High Risk";
-
-    /* FILTER CSV DATA */
-    let rules = csvData["regulatory_rules.csv"] || [];
-    let stateRules = csvData["state_rules.csv"] || [];
-    let risks = csvData["risk_events.csv"] || [];
-    let authorities = csvData["authority_directory.csv"] || [];
-
-    let relevantRules = rules.filter(r =>
-        r.sector?.toLowerCase().includes(sector)
-    );
-
-    let relevantStateRules = stateRules.filter(r =>
-        r.state === state
-    );
-
-    let relevantRisks = risks.filter(r =>
-        r.sector?.toLowerCase().includes(sector)
-    );
-
-    return {
-        business_name: val("business_name"),
-        compliance_score: fulfilled + "/5",
-        risk_level: risk,
-        rules: relevantRules,
-        state_rules: relevantStateRules,
-        risks: relevantRisks,
-        authorities
-    };
+function toggleView() {
+    isSupTech = !isSupTech;
+    document.getElementById('org-view').classList.toggle('hidden');
+    document.getElementById('suptech-view').classList.toggle('hidden');
+    
+    const btn = document.getElementById('view-toggle');
+    btn.innerText = isSupTech ? "Switch to Org View" : "Switch to Regulator (SupTech) View";
+    btn.style.background = isSupTech ? "#334155" : "#0F6E56";
 }
 
-/* DISPLAY RICH REPORT */
-function displayReport(report) {
+// --- SIMULATED PIPELINE ---
+const terminal = document.getElementById('terminal');
 
-    let html = "";
+function logTerminal(message, type) {
+    const el = document.createElement('div');
+    el.className = `log ${type}`;
+    el.innerText = `> ${message}`;
+    terminal.appendChild(el);
+    terminal.scrollTop = terminal.scrollHeight;
+}
 
-    html += `
-    <div class="report-section">
-        <h3>Overview</h3>
-        <p><b>${report.business_name}</b></p>
-        <p>Score: ${report.compliance_score}</p>
-        <span class="badge ${report.risk_level.split(" ")[0].toLowerCase()}">
-            ${report.risk_level}
-        </span>
-    </div>
-    `;
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    /* REGULATORY RULES */
-    html += `<div class="report-section"><h3>Applicable Regulations</h3><ul>`;
-    report.rules.slice(0,10).forEach(r=>{
-        html+=`<li>${r.rule || "Regulation rule"}</li>`;
+document.getElementById('drop-zone').addEventListener('click', async () => {
+    terminal.innerHTML = '';
+    document.getElementById('matrix-body').innerHTML = `<tr><td colspan="5" style="text-align:center;">Processing...</td></tr>`;
+    
+    logTerminal("Initiating File Ingestion: Data_Privacy_Policy.pdf", "system");
+    await sleep(600);
+    
+    logTerminal("Running Unstructured.io parser... Tables & text extracted.", "system");
+    await sleep(800);
+    
+    logTerminal("[LegalBERT] Semantic extraction initiated.", "ai");
+    await sleep(700);
+    logTerminal("[LegalBERT] Found 14 compliance-relevant clauses. Mapping to domains.", "ai");
+    await sleep(900);
+    
+    logTerminal("[OPA Engine] Executing continuous compliance ruleset v1.2...", "rule");
+    await sleep(800);
+    logTerminal("[OPA Engine] Rule evaluation complete. Deterministic outputs generated.", "rule");
+    
+    renderMatrix();
+});
+
+function getBadge(status) {
+    if (status === 'pass') return `<span class="badge pass">PASS</span>`;
+    if (status === 'fail') return `<span class="badge fail">FAIL</span>`;
+    return `<span class="badge gap">GAP</span>`;
+}
+
+function renderMatrix() {
+    const tbody = document.getElementById('matrix-body');
+    tbody.innerHTML = '';
+    
+    extractedObligations.forEach((item, index) => {
+        // Calculate overall domain status
+        const statuses = Object.values(item.rules).map(r => r.status);
+        const overall = statuses.includes('fail') ? 'fail' : (statuses.includes('gap') ? 'gap' : 'pass');
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${item.domain}</strong></td>
+            <td>${getBadge(item.rules.nitda.status)}</td>
+            <td>${getBadge(item.rules.ndpc.status)}</td>
+            <td>${getBadge(item.rules.cbn.status)}</td>
+            <td><button class="btn-outline" onclick="openModal(${index})">View Reason</button></td>
+        `;
+        tbody.appendChild(tr);
     });
-    html += `</ul></div>`;
+}
 
-    /* STATE RULES */
-    html += `<div class="report-section"><h3>State Laws</h3><ul>`;
-    report.state_rules.slice(0,10).forEach(r=>{
-        html+=`<li>${r.rule || "State law"}</li>`;
-    });
-    html += `</ul></div>`;
-
-    /* RISKS */
-    html += `<div class="report-section"><h3>Risk Exposure</h3><ul>`;
-    report.risks.slice(0,10).forEach(r=>{
-        html+=`<li>${r.risk || "Risk factor"}</li>`;
-    });
-    html += `</ul></div>`;
-
-    /* AUTHORITIES */
-    html += `<div class="report-section"><h3>Relevant Authorities</h3><ul>`;
-    report.authorities.slice(0,10).forEach(a=>{
-        html+=`<li>${a.name || "Authority"}</li>`;
-    });
-    html += `</ul></div>`;
-
-    /* RECOMMENDATIONS */
-    html += `
-    <div class="report-section">
-        <h3>AI Recommendations</h3>
-        <ul>
-            <li>Complete all missing registrations</li>
-            <li>Follow state-specific compliance rules</li>
-            <li>Schedule compliance audit</li>
-            <li>Engage regulatory authorities</li>
+// --- MODAL LOGIC ---
+function openModal(index) {
+    const data = extractedObligations[index];
+    const modalBody = document.getElementById('modal-body');
+    
+    modalBody.innerHTML = `
+        <div style="background:#F1F5F9; padding:1rem; border-radius:6px; margin-bottom:1rem;">
+            <p style="font-size:0.8rem; color:#64748B; margin:0 0 0.5rem 0;">EXTRACTED EVIDENCE (POLICY TEXT)</p>
+            <p style="margin:0; font-family:monospace; color:#0F172A;">"${data.extractedText}"</p>
+        </div>
+        <h4>Rule Evaluations:</h4>
+        <ul style="line-height:1.8; color:#334155;">
+            <li><strong>NITDA:</strong> ${data.rules.nitda.clause}</li>
+            <li><strong>NDPC:</strong> ${data.rules.ndpc.clause}</li>
+            <li><strong>CBN:</strong> ${data.rules.cbn.clause}</li>
         </ul>
-    </div>
     `;
-
-    document.getElementById("reportContent").innerHTML = html;
-    document.getElementById("reportSection").classList.remove("hidden");
+    
+    document.getElementById('evidence-modal').classList.remove('hidden');
 }
 
-/* UTIL */
-function val(id){
-    return document.getElementById(id).value;
+function closeModal() {
+    document.getElementById('evidence-modal').classList.add('hidden');
 }
 
-/* CSV DOWNLOAD */
-function downloadCSV(){
-    if(!currentReport) return;
-
-    let row = [
-        currentReport.business_name,
-        currentReport.compliance_score,
-        currentReport.risk_level
-    ];
-
-    let csv = "Business,Score,Risk\n" + row.join(",");
-
-    let blob = new Blob([csv], {type:"text/csv"});
-    let a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "report.csv";
-    a.click();
+// Close modal on outside click
+window.onclick = function(event) {
+    const modal = document.getElementById('evidence-modal');
+    if (event.target == modal) closeModal();
 }
