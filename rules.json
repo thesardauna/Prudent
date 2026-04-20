@@ -1,0 +1,20 @@
+{
+  "federal": [
+    {
+      "key": "cac",
+      "label": "CAC registration",
+      "regulator": "Corporate Affairs Commission",
+      "risk": "High",
+      "penalty": "₦500,000 fine + shutdown",
+      "required_evidence": "CAC Certificate"
+    },
+    {
+      "key": "tin",
+      "label": "Tax Identification Number",
+      "regulator": "FIRS",
+      "risk": "High",
+      "penalty": "₦500,000 fine + tax penalties",
+      "required_evidence": "TIN Document"
+    }
+  ]
+}
