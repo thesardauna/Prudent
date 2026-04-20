@@ -1,260 +1,681 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prudent AI | Open-Source RegTech Pipeline</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background: #0F172A; color: #F8FAFC; }
-        .header-font { font-family: 'Space Grotesk', sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .terminal-scroll::-webkit-scrollbar { width: 4px; }
-        .terminal-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .badge-pulse { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-    </style>
-</head>
-<body class="antialiased p-4 md:p-8">
 
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  font-family:var(--font-sans);
+  color:var(--color-text-primary);
+  background:linear-gradient(180deg,#f8f9fc 0%,#f4f6fb 100%);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+
+.page{
+  padding:2.5rem 0;
+  max-width:980px;
+  margin:auto;
+}
+
+.header{
+  margin-bottom:2.5rem;
+}
+
+.header h1{
+  font-size:26px;
+  font-weight:600;
+  letter-spacing:-0.01em;
+}
+
+.header p{
+  font-size:14px;
+  color:var(--color-text-secondary);
+  margin-top:6px;
+}
+
+.sec-label{
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  color:var(--color-text-tertiary);
+  margin-bottom:12px;
+}
+
+.card{
+  background:var(--color-background-primary);
+  border:1px solid rgba(0,0,0,0.05);
+  border-radius:14px;
+  padding:1.5rem;
+  box-shadow:0 4px 18px rgba(0,0,0,0.04);
+  transition:all 0.2s ease;
+}
+
+.card:hover{
+  box-shadow:0 8px 28px rgba(0,0,0,0.06);
+}
+
+.card+.card,
+.card+.metric-grid,
+.metric-grid+.card{
+  margin-top:1.2rem;
+}
+
+.grid2{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:14px;
+}
+
+.full{grid-column:1/-1;}
+
+label{
+  display:block;
+  font-size:13px;
+  color:var(--color-text-secondary);
+  margin-bottom:6px;
+  font-weight:500;
+}
+
+input,select{
+  width:100%;
+  font-size:14px;
+  padding:10px 13px;
+  border:1px solid rgba(0,0,0,0.08);
+  border-radius:10px;
+  background:#fff;
+  color:var(--color-text-primary);
+  transition:all 0.2s ease;
+}
+
+input:focus,select:focus{
+  outline:none;
+  border-color:#534AB7;
+  box-shadow:0 0 0 3px rgba(83,74,183,0.1);
+}
+
+.toggle-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 0;
+  border-bottom:1px solid rgba(0,0,0,0.05);
+}
+
+.toggle-row:last-child{border-bottom:none;}
+
+.toggle-meta{
+  font-size:12px;
+  color:var(--color-text-secondary);
+  margin-top:3px;
+}
+
+.pill-group{
+  display:flex;
+  gap:6px;
+  flex-shrink:0;
+}
+
+.pill{
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:500;
+  cursor:pointer;
+  border:1px solid rgba(0,0,0,0.08);
+  background:#f5f6fa;
+  color:var(--color-text-secondary);
+  transition:all 0.15s ease;
+}
+
+.pill:hover{
+  transform:translateY(-1px);
+}
+
+.pill.ok{
+  background:#EAF3DE;
+  color:#3B6D11;
+  border-color:#97C459;
+}
+
+.pill.no{
+  background:#FCEBEB;
+  color:#A32D2D;
+  border-color:#F09595;
+}
+
+.btn-row{
+  display:flex;
+  gap:12px;
+  margin-top:1.8rem;
+}
+
+.btn{
+  flex:1;
+  padding:12px;
+  font-size:14px;
+  font-weight:600;
+  border-radius:10px;
+  border:1px solid rgba(0,0,0,0.08);
+  background:#fff;
+  color:var(--color-text-primary);
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+
+.btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 6px 18px rgba(0,0,0,0.08);
+}
+
+.btn-primary{
+  background:#534AB7;
+  color:#fff;
+  border-color:#534AB7;
+}
+
+.btn-primary:hover{
+  background:#3C3489;
+}
+
+.btn-pdf{
+  background:#1D9E75;
+  color:#fff;
+  border-color:#1D9E75;
+}
+
+.btn-pdf:hover{
+  background:#0F6E56;
+}
+
+.divider{
+  height:1px;
+  background:linear-gradient(to right,transparent,rgba(0,0,0,0.08),transparent);
+  margin:2rem 0;
+}
+
+.metric-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+
+.metric{
+  background:#fafbff;
+  border-radius:12px;
+  padding:1.2rem;
+  border:1px solid rgba(0,0,0,0.05);
+}
+
+.metric-label{
+  font-size:12px;
+  color:var(--color-text-secondary);
+  margin-bottom:5px;
+}
+
+.metric-value{
+  font-size:26px;
+  font-weight:600;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 14px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+}
+
+.badge-high{background:#FCEBEB;color:#A32D2D;}
+.badge-medium{background:#FAEEDA;color:#854F0B;}
+.badge-low{background:#EAF3DE;color:#3B6D11;}
+
+.risk-track{
+  height:6px;
+  border-radius:6px;
+  background:#eef0f6;
+  margin:10px 0;
+  overflow:hidden;
+}
+
+.risk-fill{
+  height:100%;
+  border-radius:6px;
+  transition:width 0.3s ease;
+}
+
+.list-item{
+  display:flex;
+  gap:12px;
+  padding:12px 0;
+  border-bottom:1px solid rgba(0,0,0,0.05);
+  font-size:14px;
+}
+
+.list-item:last-child{border-bottom:none;}
+
+.dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  flex-shrink:0;
+  margin-top:6px;
+}
+
+.auth-card{
+  display:flex;
+  gap:14px;
+  padding:12px 0;
+  border-bottom:1px solid rgba(0,0,0,0.05);
+  font-size:13px;
+}
+
+.auth-card:last-child{border-bottom:none;}
+
+.auth-icon{
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  background:#EEEDFE;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:600;
+  color:#3C3489;
+  flex-shrink:0;
+}
+</style>
+
+<div class="page">
+<div class="header">
+  <h1>Prudent Compliance Engine</h1>
+  <p>Nigerian business regulatory compliance assessment</p>
+</div>
+
+<div class="card">
+  <div class="sec-label">Business details</div>
+  <div class="grid2">
+    <div class="full"><label>Business name</label><input id="biz_name" placeholder="e.g. Aiko Foods Ltd"></div>
+    <div><label>Business type</label>
+      <select id="biz_type">
+        <option>Sole Proprietorship</option><option>Partnership</option>
+        <option>Limited Liability Company</option><option>PLC</option><option>NGO / Non-Profit</option>
+      </select>
+    </div>
+    <div><label>Sector</label>
+      <select id="sector">
+        <option>Food &amp; Beverage</option><option>Healthcare &amp; Pharma</option>
+        <option>Financial Services</option><option>Retail &amp; Trading</option>
+        <option>Construction</option><option>Technology</option>
+        <option>Agriculture</option><option>Education</option>
+      </select>
+    </div>
+    <div class="full"><label>State of operation</label>
+      <select id="state" onchange="updateStateRules()">
+        <option>FCT Abuja</option><option>Lagos</option><option>Kano</option>
+        <option>Bauchi</option><option>Rivers</option><option>Oyo</option>
+        <option>Abia</option><option>Adamawa</option><option>Edo</option><option>Enugu</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:1rem;">
+  <div class="sec-label">Federal compliance status</div>
+  <div id="fed-toggles"></div>
+</div>
+
+<div class="card" style="margin-top:1rem;">
+  <div class="sec-label">State-level compliance</div>
+  <div id="state-info" style="font-size:13px;color:var(--color-text-secondary);padding:6px 0;"></div>
+  <div id="state-toggles"></div>
+</div>
+
+<div class="btn-row">
+  <button class="btn btn-primary" onclick="generate()">Generate report</button>
+  <button class="btn btn-pdf" onclick="exportPDF()" id="pdf-btn" style="display:none;">Download PDF</button>
+</div>
+
+<div id="report"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const fedReqs=[
+  {key:"cac",label:"CAC registration",regulator:"CAC",regulatorFull:"Corporate Affairs Commission (CAC)",contact:"helpdesk@cac.gov.ng",phone:"+234 818 222 9020",website:"www.cac.gov.ng",location:"Abuja",risk:"High",violation:"Operating without CAC registration",penalty:"₦500,000 fine + business shutdown",rec:"Register immediately at cac.gov.ng",explanation:"Getting your business name officially recorded with the federal government."},
+  {key:"tin",label:"Tax Identification Number (TIN)",regulator:"FIRS",regulatorFull:"Federal Inland Revenue Service (FIRS)",contact:"enquiries@firs.gov.ng",phone:"+234 9460 2700",website:"www.firs.gov.ng",location:"Abuja",risk:"High",violation:"No TIN — tax evasion risk",penalty:"₦500,000 fine + 5% of unpaid taxes",rec:"Apply for TIN at firs.gov.ng or any FIRS office",explanation:"A unique 10-digit number for all corporate tax filings."},
+  {key:"vat",label:"VAT registration",regulator:"FIRS",regulatorFull:"Federal Inland Revenue Service (FIRS)",contact:"enquiries@firs.gov.ng",phone:"+234 9460 2700",website:"www.firs.gov.ng",location:"Abuja",risk:"Medium",violation:"Non-remittance of VAT at 7.5%",penalty:"₦10,000/month + interest",rec:"Register for VAT with FIRS and file monthly returns",explanation:"Value Added Tax — 7.5% added to goods and services."},
+  {key:"nafdac",label:"NAFDAC permit",regulator:"NAFDAC",regulatorFull:"NAFDAC",contact:"nafdac@nafdac.gov.ng",phone:"+234 1 4608800",website:"www.nafdac.gov.ng",location:"Lagos/Abuja",risk:"High",violation:"Manufacturing/selling unregistered products",penalty:"₦500,000 fine + product seizure",rec:"Apply for product registration at nafdac.gov.ng",explanation:"Certification ensuring food, drugs and consumer goods meet safety standards."},
+  {key:"scuml",label:"SCUML / EFCC clearance",regulator:"SCUML (EFCC)",regulatorFull:"SCUML (EFCC)",contact:"helpdesk@scuml.org",phone:"+234 818 377 2899",website:"www.scuml.org",location:"Abuja",risk:"High",violation:"Anti-money laundering non-compliance",penalty:"License revocation + criminal prosecution",rec:"Obtain SCUML certificate at scuml.org",explanation:"Anti-money laundering clearance for businesses prone to large cash transactions."},
+];
+
+const stateRulesData={
+  "FCT Abuja":{authority:"Abuja Municipal Area Council (AMAC)",contact:"info@amac.fct.gov.ng",phone:"+234 9 291 4305",website:"www.amac.fct.gov.ng",requirement:"Trade License",description:"Municipal permit to operate a service point in FCT",processingTime:"5-10 Days",fee:"₦20,000 – ₦150,000",risk:"Medium"},
+  "Lagos":{authority:"Lagos State Internal Revenue Service (LIRS)",contact:"info@lirs.gov.ng",phone:"+234 700 225 55477",website:"www.lirs.gov.ng",requirement:"LIRS/PAYE Registration + Signage Permit (LASAA)",description:"State tax registration and outdoor signage permit",processingTime:"2-3 Days",fee:"₦10,000 App fee + variable",risk:"Medium"},
+  "Kano":{authority:"Kano State Internal Revenue Service (KIRS)",contact:"info@kirs.kano.gov.ng",phone:"+234 803 123 4567",website:"www.kirs.kano.gov.ng",requirement:"Business Premises Certificate",description:"Mandatory state certification for offices and shops",processingTime:"1-5 Days",fee:"₦10,000 (New) / ₦5,000 (Renewal)",risk:"Medium"},
+  "Bauchi":{authority:"Min. of Commerce, Bauchi",contact:"N/A",phone:"N/A",website:"N/A",requirement:"Form FA 35/36 Registration",description:"Official registration of occupation and premises",processingTime:"1-3 Days",fee:"₦15,000 (Urban) / ₦5,000 (Rural)",risk:"Low"},
+  "Rivers":{authority:"Rivers State Internal Revenue Service",contact:"N/A",phone:"N/A",website:"N/A",requirement:"Business Premises Permit",description:"Annual state commercial levy",processingTime:"3-5 Days",fee:"₦10,000",risk:"Medium"},
+  "Oyo":{authority:"Oyo State Internal Revenue Service",contact:"N/A",phone:"N/A",website:"N/A",requirement:"Business Premises Permit",description:"Annual state commercial registration",processingTime:"3-5 Days",fee:"₦10,000",risk:"Low"},
+  "Abia":{authority:"Abia State IRS",contact:"N/A",phone:"N/A",website:"N/A",requirement:"Business Premises Permit",description:"Annual state registration for commercial property",processingTime:"3-5 Days",fee:"₦10,000 (Urban) / ₦2,000 (Rural)",risk:"Medium"},
+  "Adamawa":{authority:"Yola North LGA",contact:"N/A",phone:"N/A",website:"N/A",requirement:"Trade License",description:"Local government permit for operating a shop",processingTime:"5-10 Days",fee:"₦5,000 – ₦20,000",risk:"Low"},
+  "Edo":{authority:"Edo State IRS",contact:"N/A",phone:"N/A",website:"N/A",requirement:"Business Premises Permit",description:"Annual registration for physical locations",processingTime:"3-5 Days",fee:"₦10,000",risk:"Medium"},
+  "Enugu":{authority:"Enugu North LGA",contact:"N/A",phone:"N/A",website:"N/A",requirement:"Shop Rate",description:"Local government shop/kiosk levy",processingTime:"3 Days",fee:"₦2,500 – ₦7,500",risk:"Low"},
+};
+
+const fedStates={};
+fedReqs.forEach(r=>{fedStates[r.key]="yes";});
+let stateStatus="yes";
+let currentState="FCT Abuja";
+
+const fedWrap=document.getElementById("fed-toggles");
+fedReqs.forEach(r=>{
+  const row=document.createElement("div");
+  row.className="toggle-row";
+  row.innerHTML=`<div><div style="font-size:14px;">${r.label}</div><div class="toggle-meta">${r.regulatorFull} &bull; ${r.risk} risk</div></div>
+  <div class="pill-group">
+    <div class="pill ok" id="fy-${r.key}" onclick="setFed('${r.key}','yes')">Compliant</div>
+    <div class="pill" id="fn-${r.key}" onclick="setFed('${r.key}','no')">Non-compliant</div>
+  </div>`;
+  fedWrap.appendChild(row);
+});
+
+function setFed(key,val){
+  fedStates[key]=val;
+  document.getElementById("fy-"+key).className="pill"+(val==="yes"?" ok":"");
+  document.getElementById("fn-"+key).className="pill"+(val==="no"?" no":"");
+}
+
+function updateStateRules(){
+  currentState=document.getElementById("state").value;
+  const sr=stateRulesData[currentState];
+  document.getElementById("state-info").innerHTML=`<strong style="color:var(--color-text-primary)">${sr.requirement}</strong> — ${sr.description} &bull; ${sr.fee} &bull; ${sr.processingTime}`;
+  const sw=document.getElementById("state-toggles");
+  sw.innerHTML=`<div class="toggle-row"><div><div style="font-size:14px;">${sr.requirement}</div><div class="toggle-meta">${sr.authority} &bull; ${sr.risk} risk</div></div>
+  <div class="pill-group">
+    <div class="pill ok" id="sy" onclick="setSt('yes')">Compliant</div>
+    <div class="pill" id="sn" onclick="setSt('no')">Non-compliant</div>
+  </div></div>`;
+  stateStatus="yes";
+}
+updateStateRules();
+
+function setSt(val){
+  stateStatus=val;
+  document.getElementById("sy").className="pill"+(val==="yes"?" ok":"");
+  document.getElementById("sn").className="pill"+(val==="no"?" no":"");
+}
+
+let lastReport={};
+
+function generate(){
+  const name=document.getElementById("biz_name").value||"Your Business";
+  const sector=document.getElementById("sector").value;
+  const state=document.getElementById("state").value;
+  const btype=document.getElementById("biz_type").value;
+  const sr=stateRulesData[state];
+
+  const fedIssues=fedReqs.filter(r=>fedStates[r.key]==="no");
+  const stateIssue=stateStatus==="no"?[{
+    label:sr.requirement,regulator:sr.authority,risk:sr.risk,
+    violation:`Non-compliant with ${sr.requirement}`,penalty:sr.fee+" fee if caught",
+    rec:`Obtain ${sr.requirement} from ${sr.authority}. Processing time: ${sr.processingTime}`
+  }]:[];
+
+  const allIssues=[...fedIssues,...stateIssue];
+  let score=0;
+  allIssues.forEach(r=>{score+=r.risk==="High"?25:r.risk==="Medium"?15:5;});
+  const lvl=score>50?"high":score>20?"medium":"low";
+  const barColor=lvl==="high"?"#E24B4A":lvl==="medium"?"#EF9F27":"#639922";
+  const pct=Math.min(100,score);
+
+  const relevantAuths=fedReqs.filter(r=>fedStates[r.key]==="no");
+  const uniqueRegs=[...new Map(relevantAuths.map(r=>[r.regulator,r])).values()];
+
+  lastReport={name,sector,state,btype,score,lvl,pct,barColor,allIssues,fedIssues,stateIssue,sr,uniqueRegs};
+
+  const html=buildReportHTML(lastReport);
+  document.getElementById("report").innerHTML=html;
+  document.getElementById("pdf-btn").style.display="";
+}
+
+function buildReportHTML(d){
+  const {name,sector,state,btype,score,lvl,pct,barColor,allIssues,fedIssues,stateIssue,sr,uniqueRegs}=d;
+  const lvlLabel=lvl==="high"?"High risk":lvl==="medium"?"Medium risk":"Low risk";
+  const now=new Date().toLocaleDateString("en-NG",{year:"numeric",month:"long",day:"numeric"});
+
+  return `
+  <div class="divider"></div>
+  <div class="sec-label">Compliance report &mdash; ${name}</div>
+
+  <div class="metric-grid">
+    <div class="metric">
+      <div class="metric-label">Risk score</div>
+      <div class="metric-value" style="color:${barColor}">${score}</div>
+      <div class="risk-track"><div class="risk-fill" style="width:${pct}%;background:${barColor}"></div></div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Issues found</div>
+      <div class="metric-value">${allIssues.length} <span style="font-size:14px;color:var(--color-text-secondary)">of ${fedReqs.length+1}</span></div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Risk level</div>
+      <div style="margin-top:8px;"><span class="badge badge-${lvl}">${lvlLabel}</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-bottom:8px;">Business profile</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:14px;">
+      <span style="color:var(--color-text-secondary)">Name: <span style="color:var(--color-text-primary);font-weight:500">${name}</span></span>
+      <span style="color:var(--color-text-secondary)">Type: <span style="color:var(--color-text-primary)">${btype}</span></span>
+      <span style="color:var(--color-text-secondary)">Sector: <span style="color:var(--color-text-primary)">${sector}</span></span>
+      <span style="color:var(--color-text-secondary)">State: <span style="color:var(--color-text-primary)">${state}</span></span>
+      <span style="color:var(--color-text-secondary)">Date: <span style="color:var(--color-text-primary)">${now}</span></span>
+    </div>
+  </div>
+
+  ${uniqueRegs.length?`
+  <div class="card">
+    <div class="sec-label" style="margin-bottom:8px;">Regulatory authorities involved</div>
+    ${uniqueRegs.map(r=>`<div class="auth-card">
+      <div class="auth-icon">${r.regulator.slice(0,3).toUpperCase()}</div>
+      <div>
+        <div style="font-weight:500;font-size:14px;">${r.regulatorFull}</div>
+        <div style="color:var(--color-text-secondary);margin-top:2px;">${r.contact} &bull; ${r.phone}</div>
+        <div style="color:#185FA5;margin-top:2px;">${r.website} &bull; ${r.location}</div>
+      </div>
+    </div>`).join("")}
+    ${stateIssue.length?`<div class="auth-card">
+      <div class="auth-icon">STA</div>
+      <div>
+        <div style="font-weight:500;font-size:14px;">${sr.authority}</div>
+        <div style="color:var(--color-text-secondary);margin-top:2px;">${sr.contact} &bull; ${sr.phone}</div>
+        <div style="color:#185FA5;margin-top:2px;">${sr.website}</div>
+      </div>
+    </div>`:""}
+  </div>`:""}
+
+  ${allIssues.length?`
+  <div class="card">
+    <div class="sec-label" style="margin-bottom:4px;">Violations &amp; penalties</div>
+    ${allIssues.map(r=>`<div class="list-item">
+      <div class="dot" style="background:${r.risk==="High"?"#E24B4A":r.risk==="Medium"?"#EF9F27":"#639922"}"></div>
+      <div>
+        <div style="font-weight:500;">${r.label}</div>
+        <div style="color:var(--color-text-secondary);font-size:13px;margin-top:2px;">${r.violation}</div>
+        <div style="font-size:13px;margin-top:4px;color:#A32D2D;">Penalty: ${r.penalty}</div>
+      </div>
+    </div>`).join("")}
+  </div>
+
+  <div class="card">
+    <div class="sec-label" style="margin-bottom:4px;">Recommended actions</div>
+    ${allIssues.map((r,i)=>`<div class="list-item">
+      <div style="font-size:12px;font-weight:500;color:var(--color-text-secondary);min-width:18px;margin-top:1px;">${i+1}.</div>
+      <div>
+        <div style="font-weight:500;">${r.label}</div>
+        <div style="font-size:13px;color:var(--color-text-secondary);margin-top:2px;">${r.rec}</div>
+      </div>
+    </div>`).join("")}
+  </div>`
+  :`<div class="card" style="text-align:center;padding:2rem;">
+    <div style="font-size:14px;font-weight:500;color:#3B6D11;">All compliance requirements met</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-top:4px;">No issues detected for ${name}</div>
+  </div>`}
+
+  <div class="card">
+    <div class="sec-label" style="margin-bottom:4px;">Full compliance checklist</div>
+    ${fedReqs.map(r=>`<div class="list-item">
+      <div class="dot" style="background:${fedStates[r.key]==="yes"?"#639922":"#E24B4A"}"></div>
+      <div style="flex:1;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
         <div>
-            <div class="flex items-center gap-2 mb-1">
-                <div class="w-3 h-3 bg-emerald-500 rounded-full badge-pulse"></div>
-                <span class="text-[10px] font-bold tracking-widest text-emerald-500 uppercase">Production GRC Environment</span>
-            </div>
-            <h1 class="text-4xl font-black header-font text-white">PRUDENT <span class="text-emerald-400 italic text-3xl">TRUST CENTER</span></h1>
-            <p class="text-slate-400 text-sm mt-1">Unified SupTech Visibility for Nigerian Digital Frameworks</p>
+          <div style="font-size:14px;">${r.label}</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);">${r.regulatorFull} &bull; ${r.risk} risk</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">${r.explanation}</div>
         </div>
-        <div class="flex gap-3">
-            <div class="glass px-4 py-2 rounded-xl text-right">
-                <div class="text-[10px] text-slate-500 font-bold uppercase">Lead Auditor</div>
-                <div class="text-sm font-bold text-white">Salihu Abdullahi</div>
-            </div>
-            <button onclick="toggleView()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-900/20">REGULATOR HEATMAP</button>
+        <span class="badge ${fedStates[r.key]==="yes"?"badge-low":"badge-high"}" style="flex-shrink:0;">${fedStates[r.key]==="yes"?"Compliant":"Non-compliant"}</span>
+      </div>
+    </div>`).join("")}
+    <div class="list-item">
+      <div class="dot" style="background:${stateStatus==="yes"?"#639922":"#E24B4A"}"></div>
+      <div style="flex:1;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div>
+          <div style="font-size:14px;">${sr.requirement} (${state})</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);">${sr.authority} &bull; ${sr.risk} risk &bull; Fee: ${sr.fee}</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">${sr.description}</div>
         </div>
+        <span class="badge ${stateStatus==="yes"?"badge-low":"badge-high"}" style="flex-shrink:0;">${stateStatus==="yes"?"Compliant":"Non-compliant"}</span>
+      </div>
     </div>
+  </div>
+  `;
+}
 
-    <div class="max-w-7xl mx-auto grid grid-cols-12 gap-6">
-        
-        <div class="col-span-12 lg:col-span-4 space-y-6">
-            
-            <div class="glass p-6 rounded-2xl">
-                <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">Pipeline Step 1: Data Ingestion</h3>
-                <div id="drop-zone" class="border-2 border-dashed border-slate-700 bg-slate-800/50 hover:bg-slate-800 hover:border-emerald-500/50 p-10 rounded-2xl text-center cursor-pointer transition-all group">
-                    <input type="file" id="file-input" class="hidden" accept=".pdf">
-                    <svg class="w-10 h-10 text-slate-500 mx-auto mb-3 group-hover:text-emerald-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                    <p class="text-xs font-bold text-slate-300">Upload Evidence (PDF)</p>
-                    <p id="file-status" class="text-[10px] text-slate-500 mt-2">Supports NITDA, NDPC, CBN policies</p>
-                </div>
-            </div>
+function exportPDF(){
+  if(!window.jspdf){alert("PDF library not loaded yet. Please try again in a moment.");return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:"mm",format:"a4"});
+  const d=lastReport;
+  const now=new Date().toLocaleDateString("en-NG",{year:"numeric",month:"long",day:"numeric"});
+  const pw=210,m=18,cw=pw-m*2;
 
-            <div class="bg-black p-6 rounded-2xl border border-slate-800">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest">Pipeline Step 2: XAI Logic Trace</h3>
-                    <span class="text-[10px] font-mono text-emerald-500">v4.0.2-LATEST</span>
-                </div>
-                <div id="terminal" class="font-mono text-[11px] h-60 overflow-y-auto terminal-scroll text-slate-400 space-y-1">
-                    <div class="text-emerald-500/50"># Engine Ready. Standby for binary stream...</div>
-                </div>
-                <button id="report-btn" class="hidden w-full mt-6 bg-white text-slate-900 py-3 rounded-xl font-black text-xs hover:bg-emerald-400 transition-colors">GENERATE CITED AUDIT PACK</button>
-            </div>
+  let y=m;
 
-            <div class="glass p-5 rounded-2xl">
-                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Target Stack Integration</h3>
-                <div class="grid grid-cols-2 gap-2 text-[9px] font-bold">
-                    <div class="bg-slate-800 p-2 rounded-lg text-slate-400 border border-slate-700">OPA (REGO)</div>
-                    <div class="bg-slate-800 p-2 rounded-lg text-slate-400 border border-slate-700">DOCLING (IBM)</div>
-                    <div class="bg-slate-800 p-2 rounded-lg text-slate-400 border border-slate-700">FINOS ORR</div>
-                    <div class="bg-slate-800 p-2 rounded-lg text-slate-400 border border-slate-700">OPENLANE CORE</div>
-                </div>
-            </div>
-        </div>
+  doc.setFillColor(83,74,183);
+  doc.rect(0,0,210,28,"F");
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(16);doc.setFont("helvetica","bold");
+  doc.text("Prudent Compliance Engine",m,12);
+  doc.setFontSize(9);doc.setFont("helvetica","normal");
+  doc.text("Nigerian Business Regulatory Compliance Report",m,19);
+  doc.text(now,210-m,19,{align:"right"});
+  y=38;
 
-        <div class="col-span-12 lg:col-span-8">
-            <div class="glass rounded-3xl overflow-hidden min-h-[600px] flex flex-col">
-                <div class="px-8 py-6 border-b border-white/5 flex justify-between items-end">
-                    <div>
-                        <h2 class="text-xl font-bold header-font">Compliance Matrix</h2>
-                        <p class="text-xs text-slate-500 italic">Crosswalk: NITDA | NDPC | CBN Frameworks</p>
-                    </div>
-                    <div id="score-ring" class="hidden flex items-baseline gap-2">
-                        <span class="text-3xl font-black text-emerald-400" id="percent">0%</span>
-                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Posture Score</span>
-                    </div>
-                </div>
+  const scoreColor=d.lvl==="high"?[227,75,74]:d.lvl==="medium"?[239,159,39]:[99,153,34];
+  doc.setFillColor(245,245,250);doc.roundedRect(m,y,cw,22,3,3,"F");
+  doc.setFontSize(9);doc.setFont("helvetica","normal");doc.setTextColor(100,100,120);
+  doc.text("Business Name",m+4,y+6);doc.text("Type",m+50,y+6);doc.text("Sector",m+90,y+6);doc.text("State",m+130,y+6);
+  doc.setFontSize(10);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+  doc.text(d.name.substring(0,18),m+4,y+14);doc.text(d.btype.substring(0,15),m+50,y+14);
+  doc.text(d.sector.substring(0,16),m+90,y+14);doc.text(d.state.substring(0,14),m+130,y+14);
+  y+=30;
 
-                <div class="p-0 overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-white/5 text-[10px] uppercase font-black tracking-widest text-slate-500">
-                            <tr>
-                                <th class="px-8 py-4">Regulatory Control</th>
-                                <th class="px-8 py-4">Evidence finding</th>
-                                <th class="px-8 py-4 text-center">Status</th>
-                                <th class="px-8 py-4">Citation (vCode)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="matrix-body" class="divide-y divide-white/5">
-                            <tr>
-                                <td colspan="4" class="px-8 py-32 text-center text-slate-600">
-                                    <p class="text-sm font-bold opacity-30 italic">Pipeline inactive. Ingest policy evidence to begin.</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+  doc.setFillColor(245,245,250);doc.roundedRect(m,y,58,22,3,3,"F");
+  doc.setFontSize(8);doc.setFont("helvetica","normal");doc.setTextColor(100,100,120);
+  doc.text("Risk Score",m+4,y+7);
+  doc.setFontSize(18);doc.setFont("helvetica","bold");doc.setTextColor(...scoreColor);
+  doc.text(String(d.score),m+4,y+18);
 
-                <div class="mt-auto p-8 bg-emerald-500/5 border-t border-emerald-500/10">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <p class="text-xs text-slate-400 leading-relaxed">
-                            <b class="text-white">Evidence-First Assurance:</b> This system uses deterministic mapping. Every "PASS" status is grounded in a specific clause from the ingested document, cross-referenced with versioned regulatory schemas.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  doc.setFillColor(245,245,250);doc.roundedRect(m+62,y,58,22,3,3,"F");
+  doc.setFontSize(8);doc.setFont("helvetica","normal");doc.setTextColor(100,100,120);
+  doc.text("Issues Found",m+66,y+7);
+  doc.setFontSize(18);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+  doc.text(`${d.allIssues.length} of ${fedReqs.length+1}`,m+66,y+18);
 
-    <script>
-        const { jsPDF } = window.jspdf;
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+  doc.setFillColor(245,245,250);doc.roundedRect(m+124,y,cw-124,22,3,3,"F");
+  doc.setFontSize(8);doc.setFont("helvetica","normal");doc.setTextColor(100,100,120);
+  doc.text("Risk Level",m+128,y+7);
+  doc.setFontSize(13);doc.setFont("helvetica","bold");doc.setTextColor(...scoreColor);
+  doc.text(d.lvl==="high"?"HIGH":d.lvl==="medium"?"MEDIUM":"LOW",m+128,y+17);
+  y+=30;
 
-        const fileInput = document.getElementById('file-input');
-        const dropZone = document.getElementById('drop-zone');
-        const terminal = document.getElementById('terminal');
-        const reportBtn = document.getElementById('report-btn');
-        let complianceData = [];
+  if(d.allIssues.length>0){
+    doc.setFontSize(10);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+    doc.text("Violations & Penalties",m,y);y+=5;
+    doc.setDrawColor(230,230,240);doc.line(m,y,m+cw,y);y+=6;
 
-        dropZone.onclick = () => fileInput.click();
+    d.allIssues.forEach(r=>{
+      if(y>265){doc.addPage();y=m;}
+      const dotColor=r.risk==="High"?[227,75,74]:r.risk==="Medium"?[239,159,39]:[99,153,34];
+      doc.setFillColor(...dotColor);doc.circle(m+2,y+2,2,"F");
+      doc.setFontSize(9);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+      doc.text(r.label,m+7,y+3);
+      doc.setFont("helvetica","normal");doc.setTextColor(100,100,120);doc.setFontSize(8);
+      doc.text(r.violation,m+7,y+8);
+      doc.setTextColor(163,45,45);
+      doc.text("Penalty: "+r.penalty,m+7,y+13);
+      doc.setTextColor(30,100,60);
+      const recLines=doc.splitTextToSize("Action: "+r.rec,cw-10);
+      doc.text(recLines,m+7,y+18);
+      y+=18+(recLines.length-1)*5+6;
+      doc.setDrawColor(240,240,245);doc.line(m,y,m+cw,y);y+=4;
+    });
+    y+=4;
+  }
 
-        fileInput.onchange = async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+  if(d.uniqueRegs.length>0||d.stateIssue.length>0){
+    if(y>240){doc.addPage();y=m;}
+    doc.setFontSize(10);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+    doc.text("Regulatory Authorities",m,y);y+=5;
+    doc.setDrawColor(230,230,240);doc.line(m,y,m+cw,y);y+=6;
 
-            document.getElementById('file-status').innerText = `PROCESSED: ${file.name}`;
-            terminal.innerHTML = "";
-            log("BOOTING PRUDENT XAI PIPELINE...", "text-white font-bold");
-            
-            const reader = new FileReader();
-            reader.onload = async function() {
-                const typedarray = new Uint8Array(this.result);
-                const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                log(`[Docling-Mock] Parsing ${pdf.numPages} pages...`);
-                
-                let text = "";
-                for(let i=1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const content = await page.getTextContent();
-                    text += content.items.map(item => item.str).join(" ");
-                }
-                
-                analyze(text);
-            };
-            reader.readAsArrayBuffer(file);
-        };
+    const auths=[...d.uniqueRegs,...(d.stateIssue.length?[{regulatorFull:d.sr.authority,contact:d.sr.contact,phone:d.sr.phone,website:d.sr.website,location:d.state}]:[])];
+    auths.forEach(r=>{
+      if(y>265){doc.addPage();y=m;}
+      doc.setFontSize(9);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+      doc.text(r.regulatorFull||r.authority,m,y+3);
+      doc.setFont("helvetica","normal");doc.setTextColor(100,100,120);doc.setFontSize(8);
+      if(r.contact&&r.contact!=="N/A") doc.text(r.contact+" | "+r.phone,m,y+8);
+      if(r.website&&r.website!=="N/A") doc.text(r.website+(r.location?" | "+r.location:""),m,y+13);
+      y+=18;
+      doc.setDrawColor(240,240,245);doc.line(m,y,m+cw,y);y+=4;
+    });
+    y+=4;
+  }
 
-        function log(msg, className = "text-slate-500") {
-            const div = document.createElement('div');
-            div.className = className;
-            div.innerHTML = `<span class="text-slate-700 mr-2">${new Date().toLocaleTimeString()}</span> ${msg}`;
-            terminal.appendChild(div);
-            terminal.scrollTop = terminal.scrollHeight;
-        }
+  if(y>240){doc.addPage();y=m;}
+  doc.setFontSize(10);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+  doc.text("Full compliance checklist",m,y);y+=5;
+  doc.setDrawColor(230,230,240);doc.line(m,y,m+cw,y);y+=6;
 
-        async function analyze(text) {
-            log("[Unstructured.io] Extracting semantic blocks...", "text-sky-400");
-            await sleep(800);
-            log("[OPA-Rego] Evaluating against NITDA Code 2022...", "text-emerald-400");
-            
-            const hasLocal = /nigeria|local|hosting|server|bauchi|lagos|abuja/i.test(text);
-            const hasDPO = /dpo|officer|privacy|compliance/i.test(text);
-            const hasAudit = /audit|review|assessment/i.test(text);
+  const allChecks=[...fedReqs.map(r=>({label:r.label,compliant:fedStates[r.key]==="yes",regulator:r.regulatorFull,risk:r.risk,explanation:r.explanation})),
+    {label:d.sr.requirement+" ("+d.state+")",compliant:d.stateStatus==="yes"||d.stateIssue.length===0,regulator:d.sr.authority,risk:d.sr.risk,explanation:d.sr.description}];
 
-            complianceData = [
-                {
-                    control: "Data Localisation",
-                    finding: hasLocal ? "Infrastructure identified in Nigeria." : "No hosting evidence found.",
-                    status: hasLocal ? "PASS" : "FAIL",
-                    citation: "NITDA CP §4.1(a)",
-                    framework: "NITDA"
-                },
-                {
-                    control: "DPO Designation",
-                    finding: hasDPO ? "DPO contact role detected." : "Governance gap: No DPO cited.",
-                    status: hasDPO ? "PASS" : "FAIL",
-                    citation: "NDPA 2023 Art. 32",
-                    framework: "NDPC"
-                },
-                {
-                    control: "Continuous Audit",
-                    finding: hasAudit ? "Annual review cycle defined." : "Missing assessment schedule.",
-                    status: hasAudit ? "PASS" : "GAP",
-                    citation: "CBN Cyber §3.4",
-                    framework: "CBN"
-                }
-            ];
+  allChecks.forEach(r=>{
+    if(y>265){doc.addPage();y=m;}
+    const c=r.compliant;
+    doc.setFillColor(c?99:227,c?153:75,c?34:74);doc.circle(m+2,y+2,2,"F");
+    doc.setFontSize(9);doc.setFont("helvetica","bold");doc.setTextColor(30,30,40);
+    doc.text(r.label,m+7,y+3);
+    doc.setFont("helvetica","normal");doc.setTextColor(100,100,120);doc.setFontSize(8);
+    doc.text(r.regulator+" | "+r.risk+" risk",m+7,y+8);
+    if(r.explanation){const el=doc.splitTextToSize(r.explanation,cw-10);doc.text(el,m+7,y+13);y+=el.length*4+2;}
+    doc.setFontSize(8);doc.setFont("helvetica","bold");doc.setTextColor(c?27:163,c?110:45,c?17:45);
+    doc.text(c?"COMPLIANT":"NON-COMPLIANT",210-m,y+3,{align:"right"});
+    y+=17;
+    doc.setDrawColor(240,240,245);doc.line(m,y,m+cw,y);y+=4;
+  });
 
-            render();
-            log("[FINOS-ORR] Pipeline output generated successfully.", "text-emerald-500 font-bold");
-            reportBtn.classList.remove('hidden');
-        }
+  const pages=doc.internal.getNumberOfPages();
+  for(let i=1;i<=pages;i++){
+    doc.setPage(i);
+    doc.setFontSize(8);doc.setTextColor(160,160,170);
+    doc.text("Prudent Compliance Engine | Confidential | "+now,m,295);
+    doc.text("Page "+i+" of "+pages,210-m,295,{align:"right"});
+  }
 
-        function render() {
-            const body = document.getElementById('matrix-body');
-            body.innerHTML = complianceData.map(r => `
-                <tr class="hover:bg-white/5 transition-colors">
-                    <td class="px-8 py-5">
-                        <div class="text-sm font-bold text-white">${r.control}</div>
-                        <div class="text-[9px] text-slate-500 font-black uppercase tracking-tighter">${r.framework} FRAMEWORK</div>
-                    </td>
-                    <td class="px-8 py-5 text-xs text-slate-400 italic">${r.finding}</td>
-                    <td class="px-8 py-5 text-center">${getBadge(r.status)}</td>
-                    <td class="px-8 py-5 font-mono text-[10px] text-emerald-500">${r.citation}</td>
-                </tr>
-            `).join('');
-            
-            const score = Math.round((complianceData.filter(x => x.status === "PASS").length / complianceData.length) * 100);
-            document.getElementById('score-ring').classList.remove('hidden');
-            document.getElementById('percent').innerText = `${score}%`;
-        }
-
-        function getBadge(s) {
-            const colors = { 
-                "PASS": "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-                "FAIL": "bg-rose-500/10 text-rose-400 border-rose-500/20",
-                "GAP": "bg-amber-500/10 text-amber-400 border-amber-500/20"
-            };
-            return `<span class="px-2 py-1 rounded text-[10px] font-black border ${colors[s]}">${s}</span>`;
-        }
-
-        function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
-
-        function toggleView() {
-            alert("Regulator Visibility View (Openlane Integration) - Accessing NITDA Sectoral Heatmap...");
-        }
-
-        reportBtn.onclick = () => {
-            const doc = new jsPDF();
-            doc.setFont("helvetica", "bold");
-            doc.text("REGULATORY COMPLIANCE ATTESTATION", 20, 20);
-            doc.setFontSize(10);
-            doc.text(`Lead Auditor: Salihu Abdullahi`, 20, 30);
-            doc.text(`Source Pipeline: Prudent AI Engine v4.0`, 20, 35);
-            doc.setFont("helvetica", "normal");
-            let y = 50;
-            complianceData.forEach(r => {
-                doc.text(`${r.control} [${r.framework}]: ${r.status}`, 20, y);
-                doc.text(`Evidence: ${r.finding}`, 20, y+5);
-                y += 15;
-            });
-            doc.save("Prudent_Audit_Report.pdf");
-        }
-    </script>
-</body>
-</html>
+  const fname=(lastReport.name||"business").replace(/\s+/g,"_")+"_compliance_report.pdf";
+  doc.save(fname);
+}
+</script>
