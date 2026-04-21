@@ -527,30 +527,54 @@ function setEv(key, val) {
   });
 }
 
-/* ─── AI API CALL ─── */
+/* ─── GEMINI API CALL ─── */
+const GEMINI_API_KEY = 'AIzaSyD0s-lQcHKvi1gxoJ-fET2iRcTPjMMb69A';
+const GEMINI_MODEL   = 'gemini-2.0-flash';
 
-// Client-side (index.html)
 async function callGemini(prompt) {
+  const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  const payload = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { maxOutputTokens: 4096, temperature: 0.3 }
+  });
+
+  // Try direct call first (no-referrer suppresses the referer header)
   try {
-    const res = await fetch('/api/analyze', {  // Your backend endpoint
+    const res = await fetch(targetUrl, {
       method: 'POST',
+      referrerPolicy: 'no-referrer',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
+      body: payload
     });
-    
-    if (!res.ok) {
-      throw new Error(`Backend error: ${res.status}`);
+    if (res.ok) {
+      const data = await res.json();
+      const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
+      if (text) return text;
     }
-    
-    const data = await res.json();
-    return data.analysis || '';
-  } catch (err) {
-    console.error('Analysis failed:', err);
-    throw err;
+    const errText = await res.text().catch(() => '');
+    console.warn('Direct Gemini call failed:', res.status, errText.substring(0, 200));
+  } catch(e) {
+    console.warn('Direct Gemini call threw:', e.message);
   }
+
+  // Fallback: allorigins CORS proxy (strips referrer server-side)
+  const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+  const res2 = await fetch(proxyUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: payload
+  });
+  if (!res2.ok) {
+    const err = await res2.text().catch(() => String(res2.status));
+    throw new Error('Gemini ' + res2.status + ': ' + err.substring(0, 300));
+  }
+  const data2 = await res2.json();
+  const text2 = data2?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
+  if (!text2) throw new Error('Empty response from Gemini');
+  return text2;
 }
- 
-}  /* ─── ANALYSIS ─── */
+
+/* ─── ANALYSIS ─── */
 async function runAnalysis() {
   goTo(4);
   const ra = document.getElementById('reportArea');
@@ -702,18 +726,27 @@ Keep all guidance specific to the Nigerian regulatory context.`;
     console.error('Gemini API error:', err);
     document.getElementById('aiSpinner').style.display='none';
     document.getElementById('aiDot').style.background='var(--warn)';
-    document.getElementById('aiStatus').textContent='AI analysis error — check console';
+
+    const isCors = err.message?.includes('fetch') || err.message?.toLowerCase().includes('failed to fetch') || err.message?.includes('cors');
+    const errTitle = isCors ? 'API Key Referrer Restriction' : 'Gemini API Error';
+    const errGuide = isCors
+      ? `Your Gemini API key has <strong>HTTP referrer restrictions</strong> that are blocking requests from this domain.<br><br>
+         To fix: Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--accent)">Google Cloud Console → APIs & Services → Credentials</a>, select your API key, and either:<br>
+         &nbsp;&nbsp;• Set <strong>Application restrictions → None</strong> (unrestricted), or<br>
+         &nbsp;&nbsp;• Add <strong><code style="font-family:var(--mono);background:var(--surface3);padding:2px 5px;border-radius:3px">thesardauna.github.io/*</code></strong> to the allowed referrers list.`
+      : (err.message || 'Unknown error');
+
+    document.getElementById('aiStatus').textContent = errTitle;
     document.getElementById('aiContent').innerHTML=`
 <div style="color:var(--text2)">
-<strong style="color:var(--warn)">Gemini API Error</strong><br><br>
-${err.message || 'Unknown error'}<br><br>
-<strong style="color:var(--accent)">Gaps identified for ${orgName}:</strong><br><br>
-${nonCompliant.length?`<strong>Non-Compliant (${nonCompliant.length}):</strong><br>${nonCompliant.map(o=>`• ${o.label} — ${o.fw}: Requires ${o.desc}`).join('<br>')}`:'' }
-${partial.length?`<br><br><strong style="color:var(--warn)">Partial (${partial.length}):</strong><br>${partial.map(o=>`• ${o.label} — ${o.fw}: ${o.desc}`).join('<br>')}`:'' }
+<strong style="color:var(--warn)">${errTitle}</strong><br><br>
+${errGuide}<br><br>
+<hr style="border:none;border-top:1px solid var(--border);margin:14px 0">
+<strong style="color:var(--accent)">Gaps identified for ${orgName} (${nonCompliant.length + partial.length} total):</strong><br><br>
+${nonCompliant.length?`<strong style="color:var(--danger)">Non-Compliant (${nonCompliant.length}):</strong><br>${nonCompliant.map(o=>`• ${o.label} — ${o.fw}`).join('<br>')}`:'' }
+${partial.length?`<br><br><strong style="color:var(--warn)">Partial (${partial.length}):</strong><br>${partial.map(o=>`• ${o.label} — ${o.fw}`).join('<br>')}`:'' }
 <br><br>
-<strong>Frameworks:</strong> ${fwList}<br>
-<strong>Entity:</strong> ${orgName} (${entityType})<br>
-<strong>Risk Score:</strong> ${score}/100 (${lvl.toUpperCase()})
+<strong>Frameworks:</strong> ${fwList} &nbsp;·&nbsp; <strong>Risk Score:</strong> ${score}/100 (${lvl.toUpperCase()})
 </div>`;
     document.getElementById('exportRow').style.display='flex';
   }
