@@ -234,13 +234,13 @@ header{padding:28px 0 24px;display:flex;align-items:center;justify-content:space
       </div>
       <div class="logo-text">
         <h1>Prudent AI Compliance Engine</h1>
-        <p>NIGERIAN DIGITAL REGULATORY COMPLIANCE · AI-POWERED · CLAUDE</p>
+        <p>NIGERIAN DIGITAL REGULATORY COMPLIANCE · AI-POWERED · GEMINI</p>
       </div>
     </div>
     <div class="header-badges">
       <span class="hbadge hbadge-green">MULTI-FRAMEWORK</span>
       <span class="hbadge hbadge-purple">OBLIGATION EXTRACTION</span>
-      <span class="hbadge hbadge-blue">CLAUDE POWERED</span>
+      <span class="hbadge hbadge-blue">GEMINI POWERED</span>
     </div>
   </header>
 
@@ -292,7 +292,7 @@ header{padding:28px 0 24px;display:flex;align-items:center;justify-content:space
           <div class="fw-tick"><svg viewBox="0 0 10 8"><polyline points="1,4 3.5,7 9,1"/></svg></div>
           <div class="fw-icon" style="background:var(--purple-light);color:var(--purple)">GAID</div>
           <div class="fw-name">GAID 2025</div>
-          <div class="fw-desc">General Application & Implementation Directive · NDPC September 2025 · DPIA, vendor DPAs, AI systems</div>
+          <div class="fw-desc">General Application &amp; Implementation Directive · NDPC September 2025 · DPIA, vendor DPAs, AI systems</div>
         </div>
 
         <div class="fw-card" data-fw="nitda" onclick="toggleFW(this)">
@@ -305,7 +305,7 @@ header{padding:28px 0 24px;display:flex;align-items:center;justify-content:space
         <div class="fw-card" data-fw="cbn" onclick="toggleFW(this)">
           <div class="fw-tick"><svg viewBox="0 0 10 8"><polyline points="1,4 3.5,7 9,1"/></svg></div>
           <div class="fw-icon" style="background:var(--warn-light);color:var(--warn)">CBN</div>
-          <div class="fw-name">CBN AML/CFT & KYC</div>
+          <div class="fw-name">CBN AML/CFT &amp; KYC</div>
           <div class="fw-desc">Anti-money laundering · KYC guidelines · Risk-based cybersecurity framework 2024 · SCUML</div>
         </div>
 
@@ -313,7 +313,7 @@ header{padding:28px 0 24px;display:flex;align-items:center;justify-content:space
           <div class="fw-tick"><svg viewBox="0 0 10 8"><polyline points="1,4 3.5,7 9,1"/></svg></div>
           <div class="fw-icon" style="background:var(--danger-light);color:var(--danger)">NCC</div>
           <div class="fw-name">NCC Consumer Regulations</div>
-          <div class="fw-desc">Telecoms & digital services · Consumer protection · Type approval · Spectrum management</div>
+          <div class="fw-desc">Telecoms &amp; digital services · Consumer protection · Type approval · Spectrum management</div>
         </div>
 
         <div class="fw-card" data-fw="sec" onclick="toggleFW(this)">
@@ -327,7 +327,7 @@ header{padding:28px 0 24px;display:flex;align-items:center;justify-content:space
     </div>
 
     <div class="info-box">
-      <p>This engine implements the RegTech integrated model: <strong>Regulation → Obligation → Control → Evidence → Assessment → Alert → Reporting → Regulatory Visibility</strong>. Each selected framework is parsed by Claude AI to extract specific obligations applicable to your entity type. You then declare your evidence status per control, and Claude generates a structured gap analysis with source-cited remediation steps, a cross-framework control crosswalk, and a prioritised action plan exportable as PDF.</p>
+      <p>This engine implements the RegTech integrated model: <strong>Regulation → Obligation → Control → Evidence → Assessment → Alert → Reporting → Regulatory Visibility</strong>. Each selected framework is parsed by Gemini AI to extract specific obligations applicable to your entity type. You then declare your evidence status per control, and Gemini generates a structured gap analysis with source-cited remediation steps, a cross-framework control crosswalk, and a prioritised action plan exportable as PDF.</p>
     </div>
 
     <div class="btn-row">
@@ -405,7 +405,7 @@ header{padding:28px 0 24px;display:flex;align-items:center;justify-content:space
   <!-- ═══════════════ PANEL 3 — EVIDENCE -->
   <div id="panel3" class="panel">
     <div class="card">
-      <div class="card-title">Control & Evidence Status — rate each obligation</div>
+      <div class="card-title">Control &amp; Evidence Status — rate each obligation</div>
       <div id="evidenceRows"></div>
     </div>
     <div class="btn-row">
@@ -422,6 +422,8 @@ header{padding:28px 0 24px;display:flex;align-items:center;justify-content:space
 </div>
 
 <script>
+/* ─── CONFIG ─── */
+
 /* ─── STATE ─── */
 const selectedFWs = new Set(['ndpa','gaid']);
 let evStatus = {};
@@ -525,6 +527,27 @@ function setEv(key, val) {
   });
 }
 
+/* ─── AI API CALL (Anthropic — only whitelisted API in this environment) ─── */
+async function callGemini(prompt) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4096,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`API error ${res.status}: ${err}`);
+  }
+  const data = await res.json();
+  const text = (data.content || []).map(b => b.text || '').join('');
+  if (!text) throw new Error('Empty response from API');
+  return text;
+}
+
 /* ─── ANALYSIS ─── */
 async function runAnalysis() {
   goTo(4);
@@ -596,14 +619,14 @@ async function runAnalysis() {
   </div>
 
   <div class="card" id="aiCard">
-    <div class="card-title">AI Obligation Analysis — Claude · Obligation Extraction</div>
+    <div class="card-title">AI Obligation Analysis — Gemini · Obligation Extraction</div>
     <div class="ai-box">
       <div class="ai-header">
         <div class="ai-dot" id="aiDot"></div>
         <span class="ai-label-text" id="aiStatus">Extracting obligations and generating gap analysis…</span>
         <div class="spinner" id="aiSpinner"></div>
       </div>
-      <div class="ai-content" id="aiContent" style="color:var(--text2);font-size:12px">Calling Claude API — analysing ${nonCompliant.length} non-compliant and ${partial.length} partial obligations across ${fwList}…</div>
+      <div class="ai-content" id="aiContent" style="color:var(--text2);font-size:12px">Calling Gemini API — analysing ${nonCompliant.length} non-compliant and ${partial.length} partial obligations across ${fwList}…</div>
     </div>
   </div>
 
@@ -656,22 +679,12 @@ P3 (Medium-term — 90–180 days): [list actions]
 Keep all guidance specific to the Nigerian regulatory context.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{role:'user',content:prompt}]
-      })
-    });
-    const data = await res.json();
-    const text = (data.content||[]).map(b=>b.text||'').join('')||'No response received.';
+    const text = await callGemini(prompt);
 
     document.getElementById('aiSpinner').style.display='none';
     document.getElementById('aiDot').style.animation='none';
     document.getElementById('aiDot').style.background='#1a5c3e';
-    document.getElementById('aiStatus').textContent='Analysis complete — Claude';
+    document.getElementById('aiStatus').textContent='Analysis complete — Gemini';
 
     const formatted = text
       .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
@@ -684,20 +697,21 @@ Keep all guidance specific to the Nigerian regulatory context.`;
     document.getElementById('exportRow').style.display='flex';
 
   } catch(err) {
+    console.error('Gemini API error:', err);
     document.getElementById('aiSpinner').style.display='none';
-    document.getElementById('aiStatus').textContent='AI analysis (API key required for live mode)';
+    document.getElementById('aiDot').style.background='var(--warn)';
+    document.getElementById('aiStatus').textContent='AI analysis error — check console';
     document.getElementById('aiContent').innerHTML=`
 <div style="color:var(--text2)">
-<strong style="color:var(--warn)">API Key Required for Live Analysis</strong><br><br>
-To enable Claude AI obligation extraction, add your Anthropic API key to the fetch headers (<code style="font-family:var(--mono);background:var(--surface3);padding:2px 6px;border-radius:4px;font-size:12px">x-api-key: YOUR_KEY</code>).<br><br>
-<strong style="color:var(--accent)">What Claude would extract for your ${nonCompliant.length+partial.length} gaps:</strong><br><br>
+<strong style="color:var(--warn)">Gemini API Error</strong><br><br>
+${err.message || 'Unknown error'}<br><br>
+<strong style="color:var(--accent)">Gaps identified for ${orgName}:</strong><br><br>
 ${nonCompliant.length?`<strong>Non-Compliant (${nonCompliant.length}):</strong><br>${nonCompliant.map(o=>`• ${o.label} — ${o.fw}: Requires ${o.desc}`).join('<br>')}`:'' }
 ${partial.length?`<br><br><strong style="color:var(--warn)">Partial (${partial.length}):</strong><br>${partial.map(o=>`• ${o.label} — ${o.fw}: ${o.desc}`).join('<br>')}`:'' }
 <br><br>
-<strong>Frameworks Covered:</strong> ${fwList}<br>
+<strong>Frameworks:</strong> ${fwList}<br>
 <strong>Entity:</strong> ${orgName} (${entityType})<br>
-<strong>Risk Score:</strong> ${score}/100 (${lvl.toUpperCase()})<br><br>
-Claude would generate: obligation-by-obligation remediation steps, required evidence per control, regulatory contacts, cross-framework control crosswalk, and a prioritised action plan — all cited to specific Nigerian regulatory clauses.
+<strong>Risk Score:</strong> ${score}/100 (${lvl.toUpperCase()})
 </div>`;
     document.getElementById('exportRow').style.display='flex';
   }
@@ -728,7 +742,7 @@ function exportPDF() {
   doc.setFontSize(15);doc.setFont('helvetica','bold');
   doc.text('Prudent AI Compliance Engine',m,13);
   doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(200,230,215);
-  doc.text('Nigerian Digital Regulatory Compliance Report',m,20);
+  doc.text('Nigerian Digital Regulatory Compliance Report — Powered by Gemini',m,20);
   doc.text(today,210-m,20,{align:'right'});
   y=38;
 
@@ -800,7 +814,7 @@ function exportPDF() {
     if(y>240){doc.addPage();y=m;}
     y+=5;
     doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(26,92,62);
-    doc.text('AI OBLIGATION ANALYSIS — CLAUDE',m,y);y+=5;
+    doc.text('AI OBLIGATION ANALYSIS — GEMINI',m,y);y+=5;
     doc.setDrawColor(220,218,212);doc.line(m,y,m+cw,y);y+=5;
     doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(50,50,45);
     const lines=doc.splitTextToSize(aiText.replace(/[^\x00-\x7F]/g,'').substring(0,2500),cw);
