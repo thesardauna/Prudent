@@ -529,48 +529,36 @@ function setEv(key, val) {
 
 /* ─── AI API CALL (Anthropic — only whitelisted API in this environment) ─── */
 async function callGemini(prompt) {
-  const API_KEY = "AIzaSyD0s-lQcHKvi1gxoJ-fET2iRcTPjMMb69A";
+  const API_KEY = 'AIzaSyD0s-lQcHKvi1gxoJ-fET2iRcTPjMMb69A';
+  
+  // 1. Correct Endpoint: Using gemini-1.5-flash-latest for better compatibility
+  const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+  
+  // 2. CORS Proxy: This is REQUIRED to fix "Failed to fetch" in a standalone HTML file
+  const proxy = 'https://corsproxy.io/?';
+  const url = proxy + encodeURIComponent(targetUrl);
 
-  const endpoint =
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" +
-    API_KEY;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }]
+    })
+  });
 
-  // Public proxy (works better than corsproxy.io)
-  const proxy = "https://api.allorigins.win/raw?url=";
-
-  try {
-    const res = await fetch(proxy + encodeURIComponent(endpoint), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: prompt }],
-          },
-        ],
-      }),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error("HTTP " + res.status + " - " + text);
-    }
-
-    const data = await res.json();
-
-    const text =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "No response from Gemini";
-
-    return text;
-  } catch (err) {
-    console.error("Gemini Error:", err);
-    throw err;
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.error?.message || `API Error: ${res.status}`);
   }
-}  
-  /* ─── ANALYSIS ─── */
+
+  const data = await res.json();
+  
+  // 3. Extracting the response from the correct Gemini data path
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  
+  if (!text) throw new Error('Could not read response from Gemini API.');
+  return text;
+}  /* ─── ANALYSIS ─── */
 async function runAnalysis() {
   goTo(4);
   const ra = document.getElementById('reportArea');
