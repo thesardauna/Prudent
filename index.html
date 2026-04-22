@@ -4,106 +4,870 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prudent AI Compliance Engine</title>
-
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="styles.css">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-</head>
+<style>
+:root {
+  --bg: #f7f6f2;
+  --bg2: #efefea;
+  --surface: #ffffff;
+  --surface2: #f9f8f5;
+  --surface3: #f2f1ec;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #1a1a18;
+  --text2: #5a5a52;
+  --text3: #9a9a90;
+  --accent: #1a5c3e;
+  --accent2: #236b49;
+  --accent-light: #e8f5ee;
+  --accent-mid: rgba(26,92,62,0.12);
+  --warn: #b85c00;
+  --warn-light: #fff3e8;
+  --warn-mid: rgba(184,92,0,0.1);
+  --danger: #b52a2a;
+  --danger-light: #fff0f0;
+  --danger-mid: rgba(181,42,42,0.1);
+  --info: #1a4a7a;
+  --info-light: #e8f0f8;
+  --info-mid: rgba(26,74,122,0.1);
+  --purple: #5a3a8a;
+  --purple-light: #f0ecf8;
+  --purple-mid: rgba(90,58,138,0.1);
+  --gold: #8a6a1a;
+  --gold-light: #faf5e8;
+  --serif: 'DM Serif Display', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'DM Mono', 'Courier New', monospace;
+  --radius: 12px;
+  --radius-sm: 7px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;font-size:14px}
 
+/* ── PAPER TEXTURE ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.4
+}
+
+/* ── LAYOUT ── */
+.shell{max-width:1060px;margin:0 auto;padding:0 28px 100px;position:relative;z-index:1}
+
+/* ── HEADER ── */
+header{padding:28px 0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1.5px solid var(--border2)}
+.logo-block{display:flex;align-items:center;gap:16px}
+.logo-mark{width:44px;height:44px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 12px rgba(26,92,62,0.25)}
+.logo-mark svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8}
+.logo-text h1{font-family:var(--serif);font-size:20px;font-weight:400;letter-spacing:-0.01em;color:var(--text)}
+.logo-text p{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:2px;letter-spacing:0.05em}
+.header-badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.hbadge{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:20px;letter-spacing:0.04em;font-weight:500;border:1px solid}
+.hbadge-green{background:var(--accent-light);color:var(--accent);border-color:rgba(26,92,62,0.2)}
+.hbadge-purple{background:var(--purple-light);color:var(--purple);border-color:rgba(90,58,138,0.2)}
+.hbadge-blue{background:var(--info-light);color:var(--info);border-color:rgba(26,74,122,0.2)}
+
+/* ── CHAIN BAR ── */
+.chain-bar{display:flex;align-items:center;margin:22px 0;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.chain-node{flex:1;padding:10px 6px;text-align:center;font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:0.05em;border-right:1px solid var(--border);transition:all .3s;position:relative}
+.chain-node:last-child{border-right:none}
+.chain-node.active{background:var(--accent-light);color:var(--accent)}
+.chain-node.done{color:var(--accent2);background:rgba(26,92,62,0.04)}
+.chain-node .cn-label{display:block;font-weight:500;text-transform:uppercase}
+.chain-node .cn-num{display:block;font-size:9px;color:var(--text3);margin-top:2px}
+.chain-node.active .cn-num{color:rgba(26,92,62,0.5)}
+
+/* ── STEPPER TABS ── */
+.stepper{display:flex;gap:8px;margin:20px 0 24px}
+.step-tab{flex:1;padding:12px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;text-align:left;box-shadow:var(--shadow-sm)}
+.step-tab .st-num{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.06em;display:block;margin-bottom:4px}
+.step-tab .st-label{font-size:12px;font-weight:500;color:var(--text2)}
+.step-tab.active{background:var(--surface);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-mid)}
+.step-tab.active .st-num{color:var(--accent)}
+.step-tab.active .st-label{color:var(--accent)}
+.step-tab.done{border-color:rgba(26,92,62,0.25);background:rgba(26,92,62,0.02)}
+.step-tab.done .st-label{color:var(--accent2)}
+.step-tab:hover:not(.active):not(.done){border-color:var(--border2);background:var(--surface2)}
+
+/* ── PANELS ── */
+.panel{display:none}
+.panel.active{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+.card-title{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── FRAMEWORK GRID ── */
+.fw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.fw-card{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;background:var(--surface2)}
+.fw-card:hover{border-color:var(--border2);background:var(--surface);box-shadow:var(--shadow-sm)}
+.fw-card.sel{border-color:var(--accent);background:var(--accent-light);box-shadow:0 0 0 3px var(--accent-mid)}
+.fw-icon{font-family:var(--mono);font-size:10px;font-weight:500;padding:4px 9px;border-radius:5px;display:inline-block;margin-bottom:10px;letter-spacing:.05em}
+.fw-name{font-size:13px;font-weight:600;margin-bottom:5px;line-height:1.3;color:var(--text)}
+.fw-desc{font-size:11px;color:var(--text2);line-height:1.55}
+.fw-tick{position:absolute;top:12px;right:12px;width:20px;height:20px;border-radius:50%;background:var(--accent);display:none;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(26,92,62,0.3)}
+.fw-tick svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:2.5}
+.fw-card.sel .fw-tick{display:flex}
+
+/* ── FORM ELEMENTS ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.full{grid-column:1/-1}
+.field label{display:block;font-size:11px;font-family:var(--mono);color:var(--text2);letter-spacing:.05em;margin-bottom:7px;text-transform:uppercase}
+.field input,.field select,.field textarea{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 13px;font-family:var(--sans);font-size:13px;color:var(--text);transition:all .2s;outline:none;-webkit-appearance:none;appearance:none}
+.field textarea{resize:vertical;min-height:90px;line-height:1.6}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-mid);background:var(--surface)}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a5a52' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+
+/* ── EVIDENCE ROWS ── */
+.ev-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.ev-row:last-child{border-bottom:none;padding-bottom:0}
+.ev-info{flex:1;min-width:0}
+.ev-label{font-size:13px;font-weight:500;margin-bottom:4px;color:var(--text)}
+.ev-meta{font-size:11px;color:var(--text3);font-family:var(--mono);letter-spacing:.03em}
+.ev-desc{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.55}
+.pill-group{display:flex;gap:5px;flex-shrink:0;padding-top:2px}
+.pill{padding:6px 12px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1.5px solid transparent;font-family:var(--mono);transition:all .15s;letter-spacing:.02em}
+.pill-c{background:var(--accent-light);color:var(--accent);border-color:rgba(26,92,62,0.2)}
+.pill-p{background:var(--warn-light);color:var(--warn);border-color:rgba(184,92,0,0.2)}
+.pill-n{background:var(--danger-light);color:var(--danger);border-color:rgba(181,42,42,0.2)}
+.pill-off{background:transparent;color:var(--text3);border-color:var(--border)}
+.pill-off:hover{border-color:var(--border2);background:var(--surface3)}
+
+/* ── BUTTONS ── */
+.btn-row{display:flex;gap:10px;margin-top:18px}
+.btn{flex:1;padding:12px 18px;border-radius:var(--radius-sm);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;border:1.5px solid var(--border);background:var(--surface);color:var(--text2)}
+.btn:hover{border-color:var(--border2);color:var(--text);background:var(--surface3)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600;box-shadow:0 2px 8px rgba(26,92,62,0.25)}
+.btn-primary:hover{background:var(--accent2);border-color:var(--accent2);box-shadow:0 4px 16px rgba(26,92,62,0.3)}
+.btn-pdf{background:var(--info-light);color:var(--info);border-color:rgba(26,74,122,0.2);font-weight:600}
+.btn-pdf:hover{background:rgba(26,74,122,0.12)}
+
+/* ── METRICS ── */
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;box-shadow:var(--shadow-sm)}
+.metric-lbl{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px}
+.metric-val{font-size:28px;font-weight:600;font-family:var(--mono);line-height:1}
+.risk-bar{height:4px;border-radius:4px;background:var(--bg2);margin-top:10px;overflow:hidden}
+.risk-fill{height:100%;border-radius:4px;transition:width .6s ease}
+
+/* ── OBLIGATION LIST ── */
+.obl-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.obl-item:last-child{border-bottom:none}
+.obl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.obl-content{flex:1;min-width:0}
+.obl-name{font-size:13px;font-weight:500;margin-bottom:3px;color:var(--text)}
+.obl-fw{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.04em;margin-bottom:5px}
+.obl-status{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.04em}
+.st-c{background:var(--accent-light);color:var(--accent)}
+.st-p{background:var(--warn-light);color:var(--warn)}
+.st-n{background:var(--danger-light);color:var(--danger)}
+
+/* ── AI OUTPUT BOX ── */
+.ai-box{background:var(--surface2);border:1.5px solid rgba(26,92,62,0.15);border-radius:var(--radius);padding:20px;margin-top:14px;position:relative}
+.ai-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.ai-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.5s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.ai-label-text{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.05em;text-transform:uppercase}
+.ai-content{font-size:13px;color:var(--text);line-height:1.8;white-space:pre-wrap;word-break:break-word}
+.ai-content strong{color:var(--accent);font-weight:600}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(26,92,62,0.15);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── INFO BOX ── */
+.info-box{background:var(--info-light);border:1px solid rgba(26,74,122,0.15);border-radius:var(--radius-sm);padding:16px;margin-top:0}
+.info-box p{font-size:13px;color:var(--info);line-height:1.7}
+.info-box strong{font-weight:600}
+
+/* ── RISK BADGE ── */
+.risk-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:500}
+.rb-high{background:var(--danger-light);color:var(--danger)}
+.rb-medium{background:var(--warn-light);color:var(--warn)}
+.rb-low{background:var(--accent-light);color:var(--accent)}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:20px 0}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── INTRO STRIPE ── */
+.intro-stripe{background:linear-gradient(135deg,var(--accent) 0%,#236b49 100%);border-radius:var(--radius);padding:20px 24px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;box-shadow:0 4px 20px rgba(26,92,62,0.2)}
+.intro-stripe h2{font-family:var(--serif);font-size:20px;font-weight:400;color:#fff;line-height:1.3}
+.intro-stripe p{font-size:12px;color:rgba(255,255,255,0.75);margin-top:4px;max-width:480px;line-height:1.6}
+.intro-badge{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 16px;flex-shrink:0}
+.intro-badge span{font-family:var(--mono);font-size:11px;color:#fff;display:block;letter-spacing:.05em}
+.intro-badge strong{font-size:22px;font-weight:700;color:#fff;display:block;font-family:var(--sans)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:700px){
+  .fw-grid{grid-template-columns:1fr 1fr}
+  .metric-grid{grid-template-columns:1fr 1fr}
+  .stepper{flex-wrap:wrap}
+  .chain-bar{display:none}
+  .form-grid{grid-template-columns:1fr}
+  .full{grid-column:1}
+  .shell{padding:0 16px 80px}
+}
+@media(max-width:480px){
+  .fw-grid{grid-template-columns:1fr}
+  .pill-group{flex-wrap:wrap}
+}
+</style>
+</head>
 <body>
 
 <div class="shell">
 
-<!-- HEADER -->
-<header>
-  <div class="logo-block">
-    <div class="logo-mark">
-      <svg viewBox="0 0 22 22">
-        <path d="M11 2L20 7V15L11 20L2 15V7L11 2Z"/>
-        <path d="M11 2V20M2 7L20 15M20 7L2 15"/>
-      </svg>
+  <!-- HEADER -->
+  <header>
+    <div class="logo-block">
+      <div class="logo-mark">
+        <svg viewBox="0 0 22 22"><path d="M11 2L20 7V15L11 20L2 15V7L11 2Z"/><path d="M11 2V20M2 7L20 15M20 7L2 15"/></svg>
+      </div>
+      <div class="logo-text">
+        <h1>Prudent AI Compliance Engine</h1>
+        <p>NIGERIAN DIGITAL REGULATORY COMPLIANCE · AI-POWERED · GEMINI</p>
+      </div>
     </div>
-    <div class="logo-text">
-      <h1>Prudent AI Compliance Engine</h1>
-      <p>NIGERIAN DIGITAL REGULATORY COMPLIANCE · AI-POWERED · GEMINI</p>
+    <div class="header-badges">
+      <span class="hbadge hbadge-green">MULTI-FRAMEWORK</span>
+      <span class="hbadge hbadge-purple">OBLIGATION EXTRACTION</span>
+      <span class="hbadge hbadge-blue">GEMINI POWERED</span>
+    </div>
+  </header>
+
+  <!-- CHAIN BAR -->
+  <div class="chain-bar" id="chainBar">
+    <div class="chain-node active" id="cn1"><span class="cn-label">Regulation</span><span class="cn-num">STEP 01</span></div>
+    <div class="chain-node" id="cn2"><span class="cn-label">Obligation</span><span class="cn-num">STEP 02</span></div>
+    <div class="chain-node" id="cn3"><span class="cn-label">Control</span><span class="cn-num">STEP 03</span></div>
+    <div class="chain-node" id="cn4"><span class="cn-label">Evidence</span><span class="cn-num">STEP 04</span></div>
+    <div class="chain-node" id="cn5"><span class="cn-label">Assessment</span><span class="cn-num">STEP 05</span></div>
+    <div class="chain-node" id="cn6"><span class="cn-label">Alert</span><span class="cn-num">STEP 06</span></div>
+    <div class="chain-node" id="cn7"><span class="cn-label">Report</span><span class="cn-num">STEP 07</span></div>
+  </div>
+
+  <!-- STEPPER -->
+  <div class="stepper">
+    <div class="step-tab active" id="stab1" onclick="goTo(1)"><span class="st-num">01 / FRAMEWORKS</span><span class="st-label">Select Regulations</span></div>
+    <div class="step-tab" id="stab2" onclick="goTo(2)"><span class="st-num">02 / PROFILE</span><span class="st-label">Organisation Details</span></div>
+    <div class="step-tab" id="stab3" onclick="goTo(3)"><span class="st-num">03 / EVIDENCE</span><span class="st-label">Control Status</span></div>
+    <div class="step-tab" id="stab4" onclick="goTo(4)"><span class="st-num">04 / ANALYSIS</span><span class="st-label">AI Gap Report</span></div>
+  </div>
+
+  <!-- ═══════════════ PANEL 1 — FRAMEWORKS -->
+  <div id="panel1" class="panel active">
+
+    <div class="intro-stripe">
+      <div>
+        <h2>Nigerian Regulatory Compliance,<br><em>intelligently mapped.</em></h2>
+        <p>Select the frameworks applicable to your organisation. Prudent AI will extract obligations, assess your evidence, and generate a prioritised remediation plan — cited to specific Nigerian regulatory clauses.</p>
+      </div>
+      <div class="intro-badge">
+        <span>FRAMEWORKS</span>
+        <strong>6 Active</strong>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Nigerian Regulatory Frameworks — Select all applicable</div>
+      <div class="fw-grid" id="fwGrid">
+
+        <div class="fw-card sel" data-fw="ndpa" onclick="toggleFW(this)">
+          <div class="fw-tick"><svg viewBox="0 0 10 8"><polyline points="1,4 3.5,7 9,1"/></svg></div>
+          <div class="fw-icon" style="background:var(--accent-light);color:var(--accent)">NDPA</div>
+          <div class="fw-name">NDPA 2023</div>
+          <div class="fw-desc">Nigeria Data Protection Act · NDPC · Data processing, consent, subject rights, breach notification</div>
+        </div>
+
+        <div class="fw-card sel" data-fw="gaid" onclick="toggleFW(this)">
+          <div class="fw-tick"><svg viewBox="0 0 10 8"><polyline points="1,4 3.5,7 9,1"/></svg></div>
+          <div class="fw-icon" style="background:var(--purple-light);color:var(--purple)">GAID</div>
+          <div class="fw-name">GAID 2025</div>
+          <div class="fw-desc">General Application &amp; Implementation Directive · NDPC September 2025 · DPIA, vendor DPAs, AI systems</div>
+        </div>
+
+        <div class="fw-card" data-fw="nitda" onclick="toggleFW(this)">
+          <div class="fw-tick"><svg viewBox="0 0 10 8"><polyline points="1,4 3.5,7 9,1"/></svg></div>
+          <div class="fw-icon" style="background:var(--info-light);color:var(--info)">NITA</div>
+          <div class="fw-name">NITDA Code of Practice 2022</div>
+          <div class="fw-desc">ICT platforms · Data localisation · Digital services · National AI Strategy 2024 obligations</div>
+        </div>
+
+        <div class="fw-card" data-fw="cbn" onclick="toggleFW(this)">
+          <div class="fw-tick"><svg viewBox="0 0 10 8"><polyline points="1,4 3.5,7 9,1"/></svg></div>
+          <div class="fw-icon" style="background:var(--warn-light);color:var(--warn)">CBN</div>
+          <div class="fw-name">CBN AML/CFT &amp; KYC</div>
+          <div class="fw-desc">Anti-money laundering · KYC guidelines · Risk-based cybersecurity framework 2024 · SCUML</div>
+        </div>
+
+        <div class="fw-card" data-fw="ncc" onclick="toggleFW(this)">
+          <div class="fw-tick"><svg viewBox="0 0 10 8"><polyline points="1,4 3.5,7 9,1"/></svg></div>
+          <div class="fw-icon" style="background:var(--danger-light);color:var(--danger)">NCC</div>
+          <div class="fw-name">NCC Consumer Regulations</div>
+          <div class="fw-desc">Telecoms &amp; digital services · Consumer protection · Type approval · Spectrum management</div>
+        </div>
+
+        <div class="fw-card" data-fw="sec" onclick="toggleFW(this)">
+          <div class="fw-tick"><svg viewBox="0 0 10 8"><polyline points="1,4 3.5,7 9,1"/></svg></div>
+          <div class="fw-icon" style="background:var(--gold-light);color:var(--gold)">SEC</div>
+          <div class="fw-name">SEC Digital Assets 2024</div>
+          <div class="fw-desc">Capital markets · Digital assets rules · Crypto / DeFi compliance · Virtual asset licensing</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="info-box">
+      <p>This engine implements the RegTech integrated model: <strong>Regulation → Obligation → Control → Evidence → Assessment → Alert → Reporting → Regulatory Visibility</strong>. Each selected framework is parsed by Gemini AI to extract specific obligations applicable to your entity type. You then declare your evidence status per control, and Gemini generates a structured gap analysis with source-cited remediation steps, a cross-framework control crosswalk, and a prioritised action plan exportable as PDF.</p>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goTo(2)">Next: Organisation Profile →</button>
     </div>
   </div>
 
-  <div class="header-badges">
-    <span class="hbadge hbadge-green">MULTI-FRAMEWORK</span>
-    <span class="hbadge hbadge-purple">OBLIGATION EXTRACTION</span>
-    <span class="hbadge hbadge-blue">GEMINI POWERED</span>
-    <button class="hbadge" id="apiKeyBtn" onclick="openKeyModal()">⚙ API Key</button>
+  <!-- ═══════════════ PANEL 2 — ORG PROFILE -->
+  <div id="panel2" class="panel">
+    <div class="card">
+      <div class="card-title">Organisation Profile</div>
+      <div class="form-grid">
+        <div class="field full"><label>Organisation Name</label><input id="orgName" placeholder="e.g. PayStack Nigeria Ltd" /></div>
+        <div class="field">
+          <label>Entity Type</label>
+          <select id="entityType">
+            <option>Fintech / Payment Service Provider</option>
+            <option>Digital Platform / Tech Company</option>
+            <option>Data Processor / Controller</option>
+            <option>Telecommunications Provider</option>
+            <option>Licensed Financial Institution / Bank</option>
+            <option>Healthcare Technology Provider</option>
+            <option>E-commerce / Retail Technology</option>
+            <option>AI / ML Service Provider</option>
+            <option>Digital Asset / Crypto Exchange</option>
+            <option>Government / Public Sector Agency</option>
+            <option>Insurance Technology (InsurTech)</option>
+            <option>Other ICT Organisation</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Primary Data Activity</label>
+          <select id="dataActivity">
+            <option>Collect and process personal data of Nigerians</option>
+            <option>Transfer personal data across borders</option>
+            <option>Process financial transactions / payments</option>
+            <option>Provide AI / automated decision-making</option>
+            <option>Operate a digital marketplace / platform</option>
+            <option>Provide cloud / SaaS / infrastructure services</option>
+            <option>Conduct KYC / identity verification</option>
+            <option>Offer digital asset / crypto trading</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Approximate User Count</label>
+          <select id="userCount">
+            <option>Under 1,000 users</option>
+            <option>1,000 – 10,000 users</option>
+            <option>10,000 – 100,000 users</option>
+            <option>100,000 – 1 million users</option>
+            <option>Over 1 million users</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Data Storage Location</label>
+          <select id="dataStorage">
+            <option>Servers within Nigeria only</option>
+            <option>Hybrid — Nigeria + international cloud</option>
+            <option>International cloud only (AWS / Azure / GCP)</option>
+            <option>Not yet determined</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>Describe your product / service</label>
+          <textarea id="orgDesc" placeholder="e.g. Mobile payment app processing 50,000 transactions/day, storing Nigerian user financial and identity data, using ML for fraud detection, with cross-border settlement to UK and USA…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="goTo(1)">← Back</button>
+      <button class="btn btn-primary" onclick="goTo(3)">Next: Evidence Status →</button>
+    </div>
   </div>
-</header>
 
-<!-- CHAIN BAR -->
-<div class="chain-bar" id="chainBar">
-  <div class="chain-node active" id="cn1">Regulation</div>
-  <div class="chain-node" id="cn2">Obligation</div>
-  <div class="chain-node" id="cn3">Control</div>
-  <div class="chain-node" id="cn4">Evidence</div>
-  <div class="chain-node" id="cn5">Assessment</div>
-  <div class="chain-node" id="cn6">Alert</div>
-  <div class="chain-node" id="cn7">Report</div>
+  <!-- ═══════════════ PANEL 3 — EVIDENCE -->
+  <div id="panel3" class="panel">
+    <div class="card">
+      <div class="card-title">Control &amp; Evidence Status — rate each obligation</div>
+      <div id="evidenceRows"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="goTo(2)">← Back</button>
+      <button class="btn btn-primary" onclick="runAnalysis()">Run AI Gap Analysis ↗</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════ PANEL 4 — AI REPORT -->
+  <div id="panel4" class="panel">
+    <div id="reportArea"></div>
+  </div>
+
 </div>
 
-<!-- STEPPER -->
-<div class="stepper">
-  <div class="step-tab active" onclick="goTo(1)">Select Regulations</div>
-  <div class="step-tab" onclick="goTo(2)">Organisation Details</div>
-  <div class="step-tab" onclick="goTo(3)">Control Status</div>
-  <div class="step-tab" onclick="goTo(4)">AI Gap Report</div>
-</div>
+<script>
+/* ─── CONFIG ─── */
 
-<!-- PANEL 1 -->
-<div id="panel1" class="panel active">
+/* ─── STATE ─── */
+const selectedFWs = new Set(['ndpa','gaid']);
+let evStatus = {};
+
+/* ─── OBLIGATIONS ─── */
+const ALL_OBLIGATIONS = [
+  {key:'lawful_basis',   label:'Lawful basis documented for all processing',   fw:'NDPA 2023 §2',     risk:'High',   fwKeys:['ndpa'], desc:'Legal basis (consent/contract/legitimate interest) identified and recorded for every processing activity'},
+  {key:'privacy_notice', label:'Privacy notice published and accessible',       fw:'NDPA 2023 §24',    risk:'High',   fwKeys:['ndpa'], desc:'Compliant privacy notice on website/app disclosing purpose, retention periods, and data subject rights'},
+  {key:'consent_mech',   label:'Granular consent mechanism implemented',        fw:'NDPA 2023 §25',    risk:'High',   fwKeys:['ndpa'], desc:'Withdrawable, granular consent obtained before processing; separate consent per purpose'},
+  {key:'dpo',            label:'Data Protection Officer designated',            fw:'NDPA 2023 §30',    risk:'Medium', fwKeys:['ndpa','gaid'], desc:'DPO appointed, contact details published, registered with NDPC'},
+  {key:'breach_proc',    label:'72-hour breach notification procedure',         fw:'NDPA 2023 §40',    risk:'High',   fwKeys:['ndpa'], desc:'Written process for detecting, containing, and notifying NDPC of breaches within 72 hours'},
+  {key:'data_subject',   label:'Data subject rights request handling',          fw:'NDPA 2023 §34–38', risk:'Medium', fwKeys:['ndpa'], desc:'Process to handle access, rectification, erasure, portability within 30 days'},
+  {key:'vendor_dpa',     label:'Data processing agreements with vendors',       fw:'NDPA 2023 §43',    risk:'Medium', fwKeys:['ndpa','gaid'], desc:'Signed DPAs with all third-party processors containing NDPA-required clauses'},
+  {key:'ndpc_audit',     label:'NDPC annual data audit / DPCO engagement',      fw:'NDPA 2023 §5',     risk:'High',   fwKeys:['ndpa'], desc:'Annual data audit filed with NDPC or licensed Data Protection Compliance Organisation engaged'},
+  {key:'dpia',           label:'DPIA conducted for high-risk processing',       fw:'GAID 2025 §12',    risk:'High',   fwKeys:['gaid'], desc:'Data Protection Impact Assessment completed and documented before deploying high-risk systems'},
+  {key:'ai_impact',      label:'AI/automated decision impact assessment',       fw:'GAID 2025 §18',    risk:'High',   fwKeys:['gaid'], desc:'Assessment of automated decision-making impact on data subjects; human review option available'},
+  {key:'retention_sched',label:'Data retention schedule documented',            fw:'GAID 2025 §9',     risk:'Medium', fwKeys:['gaid','ndpa'], desc:'Clear retention periods per data category; automated deletion or anonymisation at expiry'},
+  {key:'data_localisation',label:'Data localisation compliance',                fw:'NITDA Code §5',    risk:'High',   fwKeys:['nitda'], desc:'Nigerian user data stored on servers within Nigeria, or lawful cross-border transfer mechanism documented'},
+  {key:'platform_tos',   label:'Platform terms of service registered',          fw:'NITDA Code §8',    risk:'Medium', fwKeys:['nitda'], desc:'Terms of service filed with NITDA for digital platforms; accessible to users in plain language'},
+  {key:'it_security',    label:'IT security policy implemented',                fw:'NITDA Code §11',   risk:'High',   fwKeys:['nitda'], desc:'Documented information security policy, access controls, encryption at rest and in transit'},
+  {key:'aml_policy',     label:'AML/CFT policy documented and active',          fw:'CBN AML/CFT §3',   risk:'High',   fwKeys:['cbn'], desc:'Anti-money laundering and counter-terrorism financing policy in force; board-approved'},
+  {key:'kyc_proc',       label:'KYC / CDD procedures implemented',              fw:'CBN KYC Guidelines §5', risk:'High', fwKeys:['cbn'], desc:'Know Your Customer and Customer Due Diligence procedures meeting CBN tiered requirements'},
+  {key:'scuml_cert',     label:'SCUML certificate obtained',                    fw:'CBN / EFCC SCUML', risk:'High',   fwKeys:['cbn'], desc:'Special Control Unit against Money Laundering certificate obtained from SCUML (via EFCC)'},
+  {key:'txn_monitoring', label:'Transaction monitoring system active',          fw:'CBN AML/CFT §14',  risk:'High',   fwKeys:['cbn'], desc:'Real-time or batch transaction monitoring with defined thresholds and STR filing capability'},
+  {key:'cbn_cybersec',   label:'CBN cybersecurity framework compliance',        fw:'CBN Risk-Based Cybersecurity 2024', risk:'High', fwKeys:['cbn'], desc:'Risk-based cybersecurity framework implemented; annual assessment submitted to CBN'},
+  {key:'type_approval',  label:'Type approval for equipment/services',          fw:'NCC Consumer Regs §6', risk:'Medium', fwKeys:['ncc'], desc:'NCC type approval obtained for all telecom equipment and digital service platforms'},
+  {key:'consumer_protect',label:'Consumer protection compliance',               fw:'NCC Consumer Regs §15', risk:'Medium', fwKeys:['ncc'], desc:'Complaint resolution mechanism; SLA commitments; NCC consumer protection obligations met'},
+  {key:'vasp_license',   label:'VASP / digital asset licence obtained',         fw:'SEC Digital Assets 2024 §4', risk:'High', fwKeys:['sec'], desc:'Virtual Asset Service Provider registration and licence obtained from SEC Nigeria'},
+  {key:'aml_crypto',     label:'Crypto-specific AML controls',                  fw:'SEC Digital Assets 2024 §12', risk:'High', fwKeys:['sec'], desc:'Travel rule compliance, wallet screening, blockchain analytics tool deployed'},
+];
+
+/* ─── FRAMEWORK TOGGLE ─── */
+function toggleFW(el) {
+  const fw = el.dataset.fw;
+  if (selectedFWs.has(fw)) { selectedFWs.delete(fw); el.classList.remove('sel'); }
+  else { selectedFWs.add(fw); el.classList.add('sel'); }
+}
+
+/* ─── NAVIGATION ─── */
+function goTo(n) {
+  for (let i=1;i<=4;i++) {
+    document.getElementById('panel'+i).classList.toggle('active',i===n);
+    const tab = document.getElementById('stab'+i);
+    tab.classList.remove('active','done');
+    if (i===n) tab.classList.add('active');
+    else if (i<n) tab.classList.add('done');
+  }
+  updateChain(n);
+  if (n===3) buildEvidenceRows();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateChain(step) {
+  const map = {1:1,2:2,3:4,4:6};
+  const active = map[step]||1;
+  for (let i=1;i<=7;i++) {
+    const el = document.getElementById('cn'+i);
+    if(!el) continue;
+    el.classList.remove('active','done');
+    if (i===active) el.classList.add('active');
+    else if (i<active) el.classList.add('done');
+  }
+}
+
+/* ─── EVIDENCE ROWS ─── */
+function getActiveObligations() {
+  return ALL_OBLIGATIONS.filter(o => o.fwKeys.some(f => selectedFWs.has(f)));
+}
+
+function buildEvidenceRows() {
+  const obligations = getActiveObligations();
+  obligations.forEach(o => { if(!evStatus[o.key]) evStatus[o.key]='compliant'; });
+  const wrap = document.getElementById('evidenceRows');
+  wrap.innerHTML = '';
+  obligations.forEach(o => {
+    const riskClass = o.risk==='High'?'rb-high':o.risk==='Medium'?'rb-medium':'rb-low';
+    const row = document.createElement('div');
+    row.className = 'ev-row';
+    row.innerHTML = `
+      <div class="ev-info">
+        <div class="ev-label">${o.label}</div>
+        <div class="ev-meta">${o.fw} &nbsp;&middot;&nbsp; <span class="risk-badge ${riskClass}">${o.risk} Risk</span></div>
+        <div class="ev-desc">${o.desc}</div>
+      </div>
+      <div class="pill-group">
+        <div class="pill pill-off" id="ec-${o.key}" onclick="setEv('${o.key}','compliant')">Compliant</div>
+        <div class="pill pill-off" id="ep-${o.key}" onclick="setEv('${o.key}','partial')">Partial</div>
+        <div class="pill pill-off" id="en-${o.key}" onclick="setEv('${o.key}','non-compliant')">Non-compliant</div>
+      </div>`;
+    wrap.appendChild(row);
+    setEv(o.key, evStatus[o.key]||'compliant');
+  });
+}
+
+function setEv(key, val) {
+  evStatus[key] = val;
+  [['c','compliant','pill-c'],['p','partial','pill-p'],['n','non-compliant','pill-n']].forEach(([s,v,cls]) => {
+    const el = document.getElementById(`e${s}-${key}`);
+    if(!el) return;
+    el.className = 'pill '+(v===val?cls:'pill-off');
+  });
+}
+
+/* ─── GEMINI API CALL ─── */
+const GEMINI_API_KEY = 'AIzaSyD0s-lQcHKvi1gxoJ-fET2iRcTPjMMb69A';
+const GEMINI_MODEL   = 'gemini-2.0-flash';
+
+async function callGemini(prompt) {
+  const targetUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  const payload = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { maxOutputTokens: 4096, temperature: 0.3 }
+  });
+
+  // Try direct call first (no-referrer suppresses the referer header)
+  try {
+    const res = await fetch(targetUrl, {
+      method: 'POST',
+      referrerPolicy: 'no-referrer',
+      headers: { 'Content-Type': 'application/json' },
+      body: payload
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
+      if (text) return text;
+    }
+    const errText = await res.text().catch(() => '');
+    console.warn('Direct Gemini call failed:', res.status, errText.substring(0, 200));
+  } catch(e) {
+    console.warn('Direct Gemini call threw:', e.message);
+  }
+
+  // Fallback: allorigins CORS proxy (strips referrer server-side)
+  const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+  const res2 = await fetch(proxyUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: payload
+  });
+  if (!res2.ok) {
+    const err = await res2.text().catch(() => String(res2.status));
+    throw new Error('Gemini ' + res2.status + ': ' + err.substring(0, 300));
+  }
+  const data2 = await res2.json();
+  const text2 = data2?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
+  if (!text2) throw new Error('Empty response from Gemini');
+  return text2;
+}
+
+/* ─── ANALYSIS ─── */
+async function runAnalysis() {
+  goTo(4);
+  const ra = document.getElementById('reportArea');
+
+  const obligations  = getActiveObligations();
+  const nonCompliant = obligations.filter(o=>evStatus[o.key]==='non-compliant');
+  const partial      = obligations.filter(o=>evStatus[o.key]==='partial');
+  const compliant    = obligations.filter(o=>evStatus[o.key]==='compliant');
+  const rawScore     = Math.round((nonCompliant.length*25+partial.length*10)/Math.max(obligations.length,1));
+  const score        = Math.min(100,rawScore);
+  const lvl          = score>50?'high':score>20?'medium':'low';
+  const barColor     = lvl==='high'?'#b52a2a':lvl==='medium'?'#b85c00':'#1a5c3e';
+  const metricColor  = lvl==='high'?'var(--danger)':lvl==='medium'?'var(--warn)':'var(--accent)';
+
+  const orgName    = document.getElementById('orgName').value||'Your Organisation';
+  const entityType = document.getElementById('entityType').value;
+  const dataActivity = document.getElementById('dataActivity').value;
+  const orgDesc    = document.getElementById('orgDesc').value||entityType;
+  const userCount  = document.getElementById('userCount').value;
+  const dataStorage = document.getElementById('dataStorage').value;
+  const fwMap = {ndpa:'NDPA 2023',gaid:'GAID 2025',nitda:'NITDA Code of Practice 2022',cbn:'CBN AML/CFT & KYC',ncc:'NCC Consumer Regulations',sec:'SEC Digital Assets 2024'};
+  const fwList = Array.from(selectedFWs).map(f=>fwMap[f]).join(', ');
+  const today  = new Date().toLocaleDateString('en-NG',{year:'numeric',month:'long',day:'numeric'});
+
+  ra.innerHTML = `
+  <div class="metric-grid">
+    <div class="metric">
+      <div class="metric-lbl">Risk Score</div>
+      <div class="metric-val" style="color:${metricColor}">${score}</div>
+      <div class="risk-bar"><div class="risk-fill" style="width:${score}%;background:${barColor}"></div></div>
+    </div>
+    <div class="metric">
+      <div class="metric-lbl">Gaps Found</div>
+      <div class="metric-val">${nonCompliant.length+partial.length}<span style="font-size:14px;color:var(--text3)"> / ${obligations.length}</span></div>
+    </div>
+    <div class="metric">
+      <div class="metric-lbl">Frameworks</div>
+      <div class="metric-val" style="font-size:22px">${selectedFWs.size}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-lbl">Risk Level</div>
+      <div class="metric-val" style="font-size:18px;color:${metricColor}">${lvl.toUpperCase()}</div>
+    </div>
+  </div>
+
   <div class="card">
-    <div class="card-title">Frameworks</div>
-    <div class="fw-grid" id="fwGrid"></div>
+    <div class="card-title">Assessment Profile</div>
+    <div style="display:flex;flex-wrap:wrap;gap:20px;font-size:13px">
+      <span style="color:var(--text2)">Organisation: <strong style="color:var(--text)">${orgName}</strong></span>
+      <span style="color:var(--text2)">Type: <strong style="color:var(--text)">${entityType}</strong></span>
+      <span style="color:var(--text2)">Users: <strong style="color:var(--text)">${userCount}</strong></span>
+      <span style="color:var(--text2)">Storage: <strong style="color:var(--text)">${dataStorage}</strong></span>
+      <span style="color:var(--text2)">Date: <strong style="color:var(--text)">${today}</strong></span>
+    </div>
   </div>
-  <button class="btn btn-primary" onclick="goTo(2)">Next</button>
-</div>
 
-<!-- PANEL 2 -->
-<div id="panel2" class="panel">
   <div class="card">
-    <div class="card-title">Organisation Profile</div>
-    <input id="orgName" placeholder="Organisation Name">
+    <div class="card-title">Full Obligation Checklist — ${obligations.length} controls across ${selectedFWs.size} frameworks</div>
+    ${obligations.map(o=>`
+    <div class="obl-item">
+      <div class="obl-dot" style="background:${evStatus[o.key]==='compliant'?'#1a5c3e':evStatus[o.key]==='partial'?'#b85c00':'#b52a2a'}"></div>
+      <div class="obl-content">
+        <div class="obl-name">${o.label}</div>
+        <div class="obl-fw">${o.fw}</div>
+        <span class="obl-status ${evStatus[o.key]==='compliant'?'st-c':evStatus[o.key]==='partial'?'st-p':'st-n'}">${evStatus[o.key]}</span>
+      </div>
+    </div>`).join('')}
   </div>
-  <button onclick="goTo(1)">Back</button>
-  <button onclick="goTo(3)">Next</button>
-</div>
 
-<!-- PANEL 3 -->
-<div id="panel3" class="panel">
-  <div class="card">
-    <div class="card-title">Evidence</div>
-    <div id="evidenceRows"></div>
+  <div class="card" id="aiCard">
+    <div class="card-title">AI Obligation Analysis — Gemini · Obligation Extraction</div>
+    <div class="ai-box">
+      <div class="ai-header">
+        <div class="ai-dot" id="aiDot"></div>
+        <span class="ai-label-text" id="aiStatus">Extracting obligations and generating gap analysis…</span>
+        <div class="spinner" id="aiSpinner"></div>
+      </div>
+      <div class="ai-content" id="aiContent" style="color:var(--text2);font-size:12px">Calling Gemini API — analysing ${nonCompliant.length} non-compliant and ${partial.length} partial obligations across ${fwList}…</div>
+    </div>
   </div>
-  <button onclick="goTo(2)">Back</button>
-  <button onclick="runAnalysis()">Run Analysis</button>
-</div>
 
-<!-- PANEL 4 -->
-<div id="panel4" class="panel">
-  <div id="reportArea"></div>
-</div>
+  <div class="btn-row" id="exportRow" style="display:none">
+    <button class="btn" onclick="goTo(3)">← Back to Evidence</button>
+    <button class="btn btn-pdf" onclick="exportPDF()">Download PDF Report</button>
+  </div>`;
 
-</div>
+  const gapLines = [
+    ...nonCompliant.map(o=>`• NON-COMPLIANT — ${o.label} (${o.fw}): ${o.desc}`),
+    ...partial.map(o=>`• PARTIAL       — ${o.label} (${o.fw}): ${o.desc}`)
+  ].join('\n');
 
-<!-- MODAL -->
-<div id="keyOverlay" class="modal">
-  <div class="modal-box">
-    <h3>Gemini API Key</h3>
-    <input id="keyInput">
-    <button onclick="saveKey()">Save</button>
-    <button onclick="closeKeyModal()">Close</button>
-  </div>
-</div>
+  const prompt = `You are a Nigerian RegTech compliance expert helping organisations comply with Nigerian digital regulations. Analyse the following compliance gaps for ${orgName} (${entityType}) with ${userCount}, data storage: ${dataStorage}.
 
-<script src="script.js"></script>
+Active regulatory frameworks: ${fwList}
+
+Organisation description: ${orgDesc}
+Primary data activity: ${dataActivity}
+
+COMPLIANCE GAPS IDENTIFIED (${nonCompliant.length+partial.length} total):
+${gapLines||'None — organisation is fully compliant.'}
+
+Please provide a structured gap analysis using EXACTLY this format for each gap:
+
+---
+OBLIGATION: [specific legal obligation name]
+FRAMEWORK CLAUSE: [e.g. NDPA 2023 §24]
+SEVERITY: [High / Medium / Low]
+CONTROL REQUIRED: [what operational control must be implemented]
+EVIDENCE NEEDED: [what document, certificate, log, or approval constitutes compliance evidence]
+REMEDIATION STEPS:
+  1. [specific action]
+  2. [specific action]
+  3. [specific action]
+REGULATORY CONTACT: [Nigerian regulator name, contact, website]
+TIMELINE: [realistic timeframe, e.g. "30 days" or "60–90 days"]
+---
+
+After all gaps, provide:
+
+CROSS-FRAMEWORK CONTROL CROSSWALK:
+[List any controls that satisfy multiple frameworks simultaneously]
+
+PRIORITY ACTION PLAN:
+P1 (Immediate — 0–30 days): [list actions]
+P2 (Short-term — 30–90 days): [list actions]
+P3 (Medium-term — 90–180 days): [list actions]
+
+Keep all guidance specific to the Nigerian regulatory context.`;
+
+  try {
+    const text = await callGemini(prompt);
+
+    document.getElementById('aiSpinner').style.display='none';
+    document.getElementById('aiDot').style.animation='none';
+    document.getElementById('aiDot').style.background='#1a5c3e';
+    document.getElementById('aiStatus').textContent='Analysis complete — Gemini';
+
+    const formatted = text
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/^(OBLIGATION|FRAMEWORK CLAUSE|SEVERITY|CONTROL REQUIRED|EVIDENCE NEEDED|REMEDIATION STEPS|REGULATORY CONTACT|TIMELINE|CROSS-FRAMEWORK CONTROL CROSSWALK|PRIORITY ACTION PLAN|P1|P2|P3):/gm,
+        '<strong style="color:var(--accent)">$1:</strong>')
+      .replace(/^---$/gm,'<hr style="border:none;border-top:1px solid var(--border);margin:14px 0">')
+      .replace(/\n/g,'<br>');
+
+    document.getElementById('aiContent').innerHTML=`<div style="color:var(--text)">${formatted}</div>`;
+    document.getElementById('exportRow').style.display='flex';
+
+  } catch(err) {
+    console.error('Gemini API error:', err);
+    document.getElementById('aiSpinner').style.display='none';
+    document.getElementById('aiDot').style.background='var(--warn)';
+
+    const isCors = err.message?.includes('fetch') || err.message?.toLowerCase().includes('failed to fetch') || err.message?.includes('cors');
+    const errTitle = isCors ? 'API Key Referrer Restriction' : 'Gemini API Error';
+    const errGuide = isCors
+      ? `Your Gemini API key has <strong>HTTP referrer restrictions</strong> that are blocking requests from this domain.<br><br>
+         To fix: Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--accent)">Google Cloud Console → APIs & Services → Credentials</a>, select your API key, and either:<br>
+         &nbsp;&nbsp;• Set <strong>Application restrictions → None</strong> (unrestricted), or<br>
+         &nbsp;&nbsp;• Add <strong><code style="font-family:var(--mono);background:var(--surface3);padding:2px 5px;border-radius:3px">thesardauna.github.io/*</code></strong> to the allowed referrers list.`
+      : (err.message || 'Unknown error');
+
+    document.getElementById('aiStatus').textContent = errTitle;
+    document.getElementById('aiContent').innerHTML=`
+<div style="color:var(--text2)">
+<strong style="color:var(--warn)">${errTitle}</strong><br><br>
+${errGuide}<br><br>
+<hr style="border:none;border-top:1px solid var(--border);margin:14px 0">
+<strong style="color:var(--accent)">Gaps identified for ${orgName} (${nonCompliant.length + partial.length} total):</strong><br><br>
+${nonCompliant.length?`<strong style="color:var(--danger)">Non-Compliant (${nonCompliant.length}):</strong><br>${nonCompliant.map(o=>`• ${o.label} — ${o.fw}`).join('<br>')}`:'' }
+${partial.length?`<br><br><strong style="color:var(--warn)">Partial (${partial.length}):</strong><br>${partial.map(o=>`• ${o.label} — ${o.fw}`).join('<br>')}`:'' }
+<br><br>
+<strong>Frameworks:</strong> ${fwList} &nbsp;·&nbsp; <strong>Risk Score:</strong> ${score}/100 (${lvl.toUpperCase()})
+</div>`;
+    document.getElementById('exportRow').style.display='flex';
+  }
+}
+
+/* ─── PDF EXPORT ─── */
+function exportPDF() {
+  if(!window.jspdf){alert('PDF library loading — please try again.');return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const pw=210,m=18,cw=pw-m*2;
+  let y=m;
+
+  const orgName   =document.getElementById('orgName').value||'Your Organisation';
+  const entityType=document.getElementById('entityType').value;
+  const today     =new Date().toLocaleDateString('en-NG',{year:'numeric',month:'long',day:'numeric'});
+  const obligations=getActiveObligations();
+  const nonCompliant=obligations.filter(o=>evStatus[o.key]==='non-compliant');
+  const partial     =obligations.filter(o=>evStatus[o.key]==='partial');
+  const score       =Math.min(100,Math.round((nonCompliant.length*25+partial.length*10)/Math.max(obligations.length,1)));
+  const lvl         =score>50?'HIGH':score>20?'MEDIUM':'LOW';
+  const fwMap={ndpa:'NDPA 2023',gaid:'GAID 2025',nitda:'NITDA Code',cbn:'CBN AML/CFT',ncc:'NCC',sec:'SEC Digital Assets'};
+  const fwList=Array.from(selectedFWs).map(f=>fwMap[f]).join(', ');
+
+  // Header
+  doc.setFillColor(26,92,62);doc.rect(0,0,210,30,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(15);doc.setFont('helvetica','bold');
+  doc.text('Prudent AI Compliance Engine',m,13);
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(200,230,215);
+  doc.text('Nigerian Digital Regulatory Compliance Report — Powered by Gemini',m,20);
+  doc.text(today,210-m,20,{align:'right'});
+  y=38;
+
+  // Profile
+  doc.setFillColor(242,241,236);doc.roundedRect(m,y,cw,18,2,2,'F');
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(90,90,82);
+  doc.text('Organisation',m+4,y+6);doc.text('Entity Type',m+60,y+6);doc.text('Frameworks',m+115,y+6);
+  doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(26,26,24);
+  doc.text(orgName.substring(0,24),m+4,y+13);
+  doc.text(entityType.substring(0,26),m+60,y+13);
+  doc.text(fwList.substring(0,28),m+115,y+13);
+  y+=26;
+
+  const mW=(cw-10)/3;
+  const scoreRGB=lvl==='HIGH'?[181,42,42]:lvl==='MEDIUM'?[184,92,0]:[26,92,62];
+  [[''+score,'Risk Score'],[''+nonCompliant.length+' / '+obligations.length,'Gaps Found'],[lvl,'Risk Level']].forEach(([val,lbl],i)=>{
+    const x=m+i*(mW+5);
+    doc.setFillColor(249,248,245);doc.roundedRect(x,y,mW,18,2,2,'F');
+    doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(90,90,82);
+    doc.text(lbl,x+4,y+6);
+    doc.setFontSize(14);doc.setFont('helvetica','bold');doc.setTextColor(...scoreRGB);
+    doc.text(val,x+4,y+14);
+  });
+  y+=26;
+
+  doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(26,92,62);
+  doc.text('COMPLIANCE CHECKLIST',m,y);y+=5;
+  doc.setDrawColor(220,218,212);doc.line(m,y,m+cw,y);y+=5;
+
+  obligations.forEach(o=>{
+    if(y>275){doc.addPage();y=m;doc.setFillColor(26,92,62);doc.rect(0,0,210,14,'F');doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);doc.text('Prudent AI Compliance Engine',m,9);y=20;}
+    const st=evStatus[o.key];
+    const col=st==='compliant'?[26,92,62]:st==='partial'?[184,92,0]:[181,42,42];
+    doc.setFillColor(...col);doc.circle(m+2,y+1.5,2,'F');
+    doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.setTextColor(26,26,24);
+    doc.text(o.label,m+7,y+3);
+    doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(90,90,82);
+    doc.text(o.fw,m+7,y+8);
+    doc.setTextColor(...col);doc.setFont('helvetica','bold');doc.setFontSize(7);
+    doc.text(st.toUpperCase(),210-m,y+3,{align:'right'});
+    y+=13;doc.setDrawColor(232,230,225);doc.line(m,y,m+cw,y);y+=3;
+  });
+
+  if(nonCompliant.length+partial.length>0){
+    if(y>250){doc.addPage();y=m;}
+    y+=5;
+    doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(181,42,42);
+    doc.text('VIOLATIONS & REMEDIATION',m,y);y+=5;
+    doc.setDrawColor(220,218,212);doc.line(m,y,m+cw,y);y+=5;
+    [...nonCompliant,...partial].forEach(o=>{
+      if(y>260){doc.addPage();y=m;}
+      const st=evStatus[o.key];
+      const col=st==='non-compliant'?[181,42,42]:[184,92,0];
+      doc.setFillColor(...col);doc.circle(m+2,y+2,2,'F');
+      doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.setTextColor(26,26,24);
+      doc.text(o.label,m+7,y+3);
+      doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(90,90,82);
+      const descLines=doc.splitTextToSize(o.desc,cw-10);
+      doc.text(descLines,m+7,y+8);
+      doc.setTextColor(...col);doc.setFont('helvetica','bold');doc.setFontSize(7);
+      doc.text(o.fw,210-m,y+3,{align:'right'});
+      y+=8+(descLines.length-1)*4+8;
+      doc.setDrawColor(232,230,225);doc.line(m,y,m+cw,y);y+=4;
+    });
+  }
+
+  const aiText=document.getElementById('aiContent')?.innerText||'';
+  if(aiText&&aiText.length>50){
+    if(y>240){doc.addPage();y=m;}
+    y+=5;
+    doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(26,92,62);
+    doc.text('AI OBLIGATION ANALYSIS — GEMINI',m,y);y+=5;
+    doc.setDrawColor(220,218,212);doc.line(m,y,m+cw,y);y+=5;
+    doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(50,50,45);
+    const lines=doc.splitTextToSize(aiText.replace(/[^\x00-\x7F]/g,'').substring(0,2500),cw);
+    lines.forEach(line=>{if(y>278){doc.addPage();y=m;}doc.text(line,m,y);y+=4;});
+  }
+
+  const pages=doc.internal.getNumberOfPages();
+  for(let i=1;i<=pages;i++){
+    doc.setPage(i);
+    doc.setFillColor(242,241,236);doc.rect(0,285,210,15,'F');
+    doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(130,130,120);
+    doc.text(`Prudent AI Compliance Engine · ${orgName} · Confidential · ${today}`,m,292);
+    doc.text(`Page ${i} of ${pages}`,210-m,292,{align:'right'});
+  }
+
+  const fname=(orgName||'organisation').replace(/\s+/g,'_').toLowerCase()+'_prudent_compliance_report.pdf';
+  doc.save(fname);
+}
+</script>
 </body>
 </html>
