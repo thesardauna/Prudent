@@ -1,70 +1,90 @@
 const GEMINI_MODEL = 'gemini-2.0-flash';
-const API_KEY_KEY = 'prudent_gemini_key';
 
-// Data Registry
-const selectedFWs = new Set(['ndpa']);
+// State
+let selectedFWs = new Set(['ndpa']);
 let evStatus = {};
 
-const ALL_OBLIGATIONS = [
-    {key:'lawful_basis', label:'Lawful basis documented', fw:'NDPA 2023 §2', risk:'High', fwKeys:['ndpa']},
-    {key:'dpia', label:'DPIA conducted', fw:'GAID 2025 §12', risk:'High', fwKeys:['gaid']},
-    {key:'data_localisation', label:'Data localisation compliance', fw:'NITDA Code §5', risk:'High', fwKeys:['nitda']}
+const OBLIGATIONS = [
+    {key:'lawful_basis', label:'Lawful basis documented', fw:'NDPA §2', fwKeys:['ndpa']},
+    {key:'dpo', label:'DPO appointed', fw:'NDPA §30', fwKeys:['ndpa']},
+    {key:'localisation', label:'Data Localisation compliance', fw:'NITDA Code', fwKeys:['nitda']}
 ];
 
 // Navigation
 function goTo(step) {
-    document.querySelectorAll('.panel, .step-tab, .chain-node').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.step-tab').forEach(t => t.classList.remove('active'));
+    
     document.getElementById(`panel${step}`).classList.add('active');
     document.getElementById(`stab${step}`).classList.add('active');
-    document.getElementById(`cn${step}`).classList.add('active');
 
     if (step === 3) renderEvidence();
 }
 
-// Framework Selection
-function toggleFW(card) {
-    const fw = card.dataset.fw;
-    selectedFWs.has(fw) ? selectedFWs.delete(fw) : selectedFWs.add(fw);
-    card.classList.toggle('sel');
+function toggleFW(el) {
+    const fw = el.dataset.fw;
+    if (selectedFWs.has(fw)) {
+        selectedFWs.delete(fw);
+        el.classList.remove('sel');
+    } else {
+        selectedFWs.add(fw);
+        el.classList.add('sel');
+    }
 }
 
-// Render Compliance Rows
 function renderEvidence() {
     const container = document.getElementById('evidenceRows');
     container.innerHTML = '<h3>Assess Controls</h3>';
     
-    ALL_OBLIGATIONS.filter(o => o.fwKeys.some(k => selectedFWs.has(k))).forEach(o => {
+    const filtered = OBLIGATIONS.filter(o => o.fwKeys.some(k => selectedFWs.has(k)));
+    
+    filtered.forEach(o => {
         const div = document.createElement('div');
-        div.className = 'ev-row';
+        div.style.marginBottom = "15px";
         div.innerHTML = `
-            <p><strong>${o.label}</strong> (${o.fw})</p>
-            <button onclick="setEv('${o.key}', 'c')">Compliant</button>
-            <button onclick="setEv('${o.key}', 'n')">Non-Compliant</button>
+            <p><strong>${o.label}</strong></p>
+            <select onchange="evStatus['${o.key}'] = this.value" style="width:100%; padding:5px;">
+                <option value="none">Select Status...</option>
+                <option value="compliant">Compliant</option>
+                <option value="gap">Non-Compliant</option>
+            </select>
         `;
         container.appendChild(div);
     });
 }
 
-function setEv(key, status) {
-    evStatus[key] = status;
+// Modal Logic
+function openKeyModal() { document.getElementById('keyOverlay').style.display = 'flex'; }
+function closeKeyModal() { document.getElementById('keyOverlay').style.display = 'none'; }
+function saveKey() {
+    const key = document.getElementById('keyInput').value;
+    localStorage.setItem('gemini_api_key', key);
+    closeKeyModal();
 }
 
-// Gemini Integration
+// AI Analysis
 async function runAnalysis() {
+    const apiKey = localStorage.getItem('gemini_api_key');
+    if (!apiKey) return openKeyModal();
+
     goTo(4);
     const area = document.getElementById('reportArea');
-    area.innerHTML = "Consulting Gemini AI for Nigerian Regulatory insights...";
+    area.innerHTML = "Generating Nigerian Regulatory Report...";
 
-    const prompt = `Perform a gap analysis for a Nigerian organization based on these compliance statuses: ${JSON.stringify(evStatus)}`;
+    const prompt = `Analyze this Nigerian org: ${document.getElementById('orgName').value}. 
+    Description: ${document.getElementById('orgDesc').value}. 
+    Gaps: ${JSON.stringify(evStatus)}. 
+    Provide remediation steps based on NDPA 2023.`;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${localStorage.getItem(API_KEY_KEY)}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`, {
             method: 'POST',
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
         const data = await response.json();
-        area.innerHTML = data.candidates[0].content.parts[0].text;
+        area.innerHTML = `<div class="card">${data.candidates[0].content.parts[0].text}</div>`;
     } catch (e) {
-        area.innerHTML = "Error: Please ensure your API Key is set correctly.";
+        area.innerHTML = "Error: Check your API Key and internet connection.";
     }
 }
