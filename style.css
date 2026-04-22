@@ -1,69 +1,44 @@
 :root {
-    --primary: #0F6E56;
-    --primary-light: #E1F5EE;
-    --dark: #0F172A;
-    --bg: #F8FAFC;
-    --text: #334155;
-    --border: #E2E8F0;
-    --pass: #10B981;
-    --fail: #EF4444;
-    --gap: #F59E0B;
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --text: #0f0f0d;
+    --accent: #1a5c3e;
+    --border: rgba(0,0,0,0.08);
+    --radius: 12px;
+    --serif: 'DM Serif Display', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', 'Courier New', monospace;
 }
 
-* { box-sizing: border-box; }
-body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+}
 
-.hidden { display: none !important; }
+/* Paper Texture Effect */
+body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: .4;
+}
 
-/* Navigation */
-.top-nav { background: var(--dark); padding: 1rem 2.5rem; display: flex; justify-content: space-between; align-items: center; }
-.logo { color: white; font-weight: 800; font-size: 1.2rem; letter-spacing: 1px; }
-.logo .accent { color: #34D399; }
-.version-tag { color: #94A3B8; font-family: monospace; font-size: 0.85rem; margin-right: 1.5rem; }
-.btn-primary { background: var(--primary); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-.btn-primary:hover { background: #0c5c48; }
+.shell { max-width: 1060px; margin: 0 auto; padding: 0 28px 100px; position: relative; z-index: 1; }
 
-/* Layout */
-.container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
-.view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-.view-header h1 { margin: 0 0 0.5rem 0; color: var(--dark); }
-.view-header p { margin: 0; color: #64748B; }
+/* Panels and Display */
+.panel { display: none; }
+.panel.active { display: block; animation: fadeIn .2s ease; }
 
-/* Upload Zone */
-.upload-zone { border: 2px dashed var(--primary); background: var(--primary-light); padding: 1.5rem 2rem; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s ease; color: var(--primary); display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
-.upload-zone:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(15, 110, 86, 0.15); }
-.upload-zone p { color: var(--primary); font-size: 0.9rem; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Grid & Cards */
-.layout-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.5rem; }
-.card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-.metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-.metric-card { background: white; border: 1px solid var(--border); padding: 1.5rem; border-radius: 8px; }
-.metric-card.warning { border-left: 4px solid var(--gap); }
-.metric-card .value { font-size: 2.5rem; font-weight: 700; color: var(--dark); margin: 0.5rem 0; }
+/* Cards & Buttons */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 14px; }
+.btn-primary { background: var(--accent); color: #fff; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; }
 
-/* Terminal */
-.terminal { background: #1E293B; border-radius: 8px; padding: 1rem; height: 350px; overflow-y: auto; font-family: 'Fira Code', monospace; font-size: 0.85rem; line-height: 1.6; }
-.log { margin-bottom: 0.5rem; padding-left: 1rem; border-left: 2px solid transparent; animation: fadeIn 0.3s ease-in; }
-.log.system { color: #94A3B8; }
-.log.ai { color: #A78BFA; border-color: #A78BFA; }
-.log.rule { color: #34D399; border-color: #34D399; }
-.log.error { color: #F87171; border-color: #F87171; }
-
-/* Table */
-.reg-table { width: 100%; border-collapse: collapse; }
-.reg-table th { background: #F1F5F9; padding: 0.75rem; text-align: left; font-size: 0.8rem; text-transform: uppercase; color: #64748B; letter-spacing: 0.5px; }
-.reg-table td { padding: 1rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
-.badge { padding: 0.25rem 0.6rem; border-radius: 99px; font-size: 0.75rem; font-weight: 600; }
-.badge.pass { background: #D1FAE5; color: #065F46; }
-.badge.fail { background: #FEE2E2; color: #991B1B; }
-.badge.gap { background: #FEF3C7; color: #92400E; }
-.btn-outline { border: 1px solid var(--border); background: transparent; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
-.btn-outline:hover { background: #F8FAFC; border-color: #94A3B8; }
-
-/* Modal */
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); z-index: 50; }
-.modal-content { background: white; padding: 2rem; border-radius: 12px; width: 500px; max-width: 90%; position: relative; }
-.close { position: absolute; top: 1rem; right: 1.5rem; font-size: 1.5rem; cursor: pointer; color: #64748B; }
-
-@keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+/* Frameworks Grid */
+.fw-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+.fw-card { border: 1.5px solid var(--border); padding: 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s; position: relative; }
+.fw-card.sel { border-color: var(--accent); background: rgba(26, 92, 62, 0.05); }
+.fw-tick { position: absolute; top: 10px; right: 10px; display: none; }
+.fw-card.sel .fw-tick { display: block; }
