@@ -1,127 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prudent AI Compliance Engine</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&family=DM+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prudent AI Compliance Engine</title>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
+
 <body>
-    <div class="shell">
-        <header>
-            <div class="logo-block">
-                <div class="logo-mark">
-                    <svg viewBox="0 0 22 22"><path d="M11 2L20 7V15L11 20L2 15V7L11 2Z" stroke="white" fill="none"/><path d="M11 2V20M2 7L20 15M20 7L2 15" stroke="white"/></svg>
-                </div>
-                <div class="logo-text">
-                    <h1>Prudent AI Compliance Engine</h1>
-                    <p>NIGERIAN DIGITAL REGULATORY COMPLIANCE</p>
-                </div>
-            </div>
-            <div class="header-badges">
-                <span class="hbadge hbadge-green">MULTI-FRAMEWORK</span>
-                <span class="hbadge hbadge-purple">OBLIGATION EXTRACTION</span>
-                <button class="hbadge" onclick="openKeyModal()">⚙ API Key</button>
-            </div>
-        </header>
 
-        <div class="chain-bar">
-            <div class="chain-node active" id="cn1"><span>REGULATION</span><small>STEP 01</small></div>
-            <div class="chain-node" id="cn2"><span>PROFILE</span><small>STEP 02</small></div>
-            <div class="chain-node" id="cn3"><span>EVIDENCE</span><small>STEP 03</small></div>
-            <div class="chain-node" id="cn4"><span>ASSESSMENT</span><small>STEP 04</small></div>
-            <div class="chain-node" id="cn5"><span>ALERT</span><small>STEP 05</small></div>
-            <div class="chain-node" id="cn6"><span>REPORT</span><small>STEP 06</small></div>
-            <div class="chain-node" id="cn7"><span>EXPORT</span><small>STEP 07</small></div>
-        </div>
+<div class="shell">
 
-        <div class="stepper">
-            <div class="step-tab active" id="stab1" onclick="goTo(1)"><span class="st-num">01 / FRAMEWORKS</span><span class="st-label">Select Regulations</span></div>
-            <div class="step-tab" id="stab2" onclick="goTo(2)"><span class="st-num">02 / PROFILE</span><span class="st-label">Organisation Details</span></div>
-            <div class="step-tab" id="stab3" onclick="goTo(3)"><span class="st-num">03 / EVIDENCE</span><span class="st-label">Control Status</span></div>
-            <div class="step-tab" id="stab4" onclick="goTo(4)"><span class="st-num">04 / ANALYSIS</span><span class="st-label">AI Gap Report</span></div>
-        </div>
-
-        <div id="panel1" class="panel active">
-            <div class="intro-stripe">
-                <div class="intro-content">
-                    <h2>Nigerian Regulatory Compliance, <em>intelligently mapped.</em></h2>
-                    <p>Select the frameworks applicable to your organisation. Prudent AI will extract obligations and generate a prioritised remediation plan.</p>
-                </div>
-                <div class="framework-badge">
-                    <span>FRAMEWORKS</span>
-                    <strong id="fwCount">1 Active</strong>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">NIGERIAN REGULATORY FRAMEWORKS</div>
-                <div class="fw-grid" id="fwGrid">
-                    <div class="fw-card sel" data-fw="ndpa" onclick="toggleFW(this)">
-                        <div class="fw-icon ndpa">NDPA</div>
-                        <div class="fw-name">NDPA 2023</div>
-                        <div class="fw-desc">Nigeria Data Protection Act · NDPC</div>
-                    </div>
-                    <div class="fw-card" data-fw="gaid" onclick="toggleFW(this)">
-                        <div class="fw-icon gaid">GAID</div>
-                        <div class="fw-name">GAID 2025</div>
-                        <div class="fw-desc">General Application Directive</div>
-                    </div>
-                    <div class="fw-card" data-fw="nitda" onclick="toggleFW(this)">
-                        <div class="fw-icon nitda">NITA</div>
-                        <div class="fw-name">NITDA Code 2022</div>
-                        <div class="fw-desc">ICT platforms · Data localisation</div>
-                    </div>
-                    <div class="fw-card" data-fw="cbn" onclick="toggleFW(this)">
-                        <div class="fw-icon cbn">CBN</div>
-                        <div class="fw-name">CBN AML/CFT & KYC</div>
-                        <div class="fw-desc">Anti-money laundering · KYC</div>
-                    </div>
-                    <div class="fw-card" data-fw="ncc" onclick="toggleFW(this)">
-                        <div class="fw-icon ncc">NCC</div>
-                        <div class="fw-name">NCC Consumer Reg</div>
-                        <div class="fw-desc">Telecoms & digital services</div>
-                    </div>
-                    <div class="fw-card" data-fw="sec" onclick="toggleFW(this)">
-                        <div class="fw-icon sec">SEC</div>
-                        <div class="fw-name">SEC Digital Assets</div>
-                        <div class="fw-desc">Capital markets · Crypto</div>
-                    </div>
-                </div>
-            </div>
-            <button class="btn btn-primary" onclick="goTo(2)">Next: Organisation Profile →</button>
-        </div>
-
-        <div id="panel2" class="panel">
-            <div class="card">
-                <div class="field"><label>Organisation Name</label><input id="orgName" placeholder="e.g. PayStack Nigeria Ltd"></div>
-                <div class="field"><label>Service Description</label><textarea id="orgDesc" placeholder="e.g. Mobile payment app using ML for fraud detection..."></textarea></div>
-            </div>
-            <button class="btn btn-primary" onclick="goTo(3)">Next: Control Status →</button>
-        </div>
-
-        <div id="panel3" class="panel">
-            <div class="card" id="evidenceRows"></div>
-            <button class="btn btn-primary" onclick="runAnalysis()">Run AI Gap Analysis ↗</button>
-        </div>
-
-        <div id="panel4" class="panel">
-            <div id="reportArea"></div>
-        </div>
+<!-- HEADER -->
+<header>
+  <div class="logo-block">
+    <div class="logo-mark">
+      <svg viewBox="0 0 22 22">
+        <path d="M11 2L20 7V15L11 20L2 15V7L11 2Z"/>
+        <path d="M11 2V20M2 7L20 15M20 7L2 15"/>
+      </svg>
     </div>
-
-    <div id="keyOverlay" class="modal-overlay" style="display:none;">
-        <div class="modal">
-            <h3>Gemini API Key</h3>
-            <input type="password" id="keyInput" placeholder="Enter AIza... Key">
-            <div class="btn-row">
-                <button class="btn" onclick="closeKeyModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveKey()">Save Key</button>
-            </div>
-        </div>
+    <div class="logo-text">
+      <h1>Prudent AI Compliance Engine</h1>
+      <p>NIGERIAN DIGITAL REGULATORY COMPLIANCE · AI-POWERED · GEMINI</p>
     </div>
+  </div>
 
-    <script src="app.js"></script>
+  <div class="header-badges">
+    <span class="hbadge hbadge-green">MULTI-FRAMEWORK</span>
+    <span class="hbadge hbadge-purple">OBLIGATION EXTRACTION</span>
+    <span class="hbadge hbadge-blue">GEMINI POWERED</span>
+    <button class="hbadge" id="apiKeyBtn" onclick="openKeyModal()">⚙ API Key</button>
+  </div>
+</header>
+
+<!-- CHAIN BAR -->
+<div class="chain-bar" id="chainBar">
+  <div class="chain-node active" id="cn1">Regulation</div>
+  <div class="chain-node" id="cn2">Obligation</div>
+  <div class="chain-node" id="cn3">Control</div>
+  <div class="chain-node" id="cn4">Evidence</div>
+  <div class="chain-node" id="cn5">Assessment</div>
+  <div class="chain-node" id="cn6">Alert</div>
+  <div class="chain-node" id="cn7">Report</div>
+</div>
+
+<!-- STEPPER -->
+<div class="stepper">
+  <div class="step-tab active" onclick="goTo(1)">Select Regulations</div>
+  <div class="step-tab" onclick="goTo(2)">Organisation Details</div>
+  <div class="step-tab" onclick="goTo(3)">Control Status</div>
+  <div class="step-tab" onclick="goTo(4)">AI Gap Report</div>
+</div>
+
+<!-- PANEL 1 -->
+<div id="panel1" class="panel active">
+  <div class="card">
+    <div class="card-title">Frameworks</div>
+    <div class="fw-grid" id="fwGrid"></div>
+  </div>
+  <button class="btn btn-primary" onclick="goTo(2)">Next</button>
+</div>
+
+<!-- PANEL 2 -->
+<div id="panel2" class="panel">
+  <div class="card">
+    <div class="card-title">Organisation Profile</div>
+    <input id="orgName" placeholder="Organisation Name">
+  </div>
+  <button onclick="goTo(1)">Back</button>
+  <button onclick="goTo(3)">Next</button>
+</div>
+
+<!-- PANEL 3 -->
+<div id="panel3" class="panel">
+  <div class="card">
+    <div class="card-title">Evidence</div>
+    <div id="evidenceRows"></div>
+  </div>
+  <button onclick="goTo(2)">Back</button>
+  <button onclick="runAnalysis()">Run Analysis</button>
+</div>
+
+<!-- PANEL 4 -->
+<div id="panel4" class="panel">
+  <div id="reportArea"></div>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div id="keyOverlay" class="modal">
+  <div class="modal-box">
+    <h3>Gemini API Key</h3>
+    <input id="keyInput">
+    <button onclick="saveKey()">Save</button>
+    <button onclick="closeKeyModal()">Close</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
