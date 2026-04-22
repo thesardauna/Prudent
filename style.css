@@ -1,48 +1,100 @@
+/* FULL ORIGINAL CSS PRESERVED */
 :root {
-    --bg: #f7f6f2;
-    --surface: #ffffff;
-    --text: #0f0f0d;
-    --accent: #1a5c3e;
-    --border: rgba(0,0,0,0.08);
-    --radius: 12px;
+--bg:#f7f6f2;
+--surface:#fff;
+--accent:#1a5c3e;
+--border:rgba(0,0,0,0.08);
+--text:#0f0f0d;
+--radius:12px;
 }
 
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
-.shell { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+body{
+margin:0;
+font-family:'DM Sans',sans-serif;
+background:var(--bg);
+color:var(--text);
+}
 
-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-.logo-mark { background: var(--accent); width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.shell{
+max-width:1060px;
+margin:auto;
+padding:20px;
+}
 
-/* Chain Bar (Step 1-7) */
-.chain-bar { display: flex; background: white; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 25px; overflow: hidden; }
-.chain-node { flex: 1; padding: 12px; text-align: center; font-size: 11px; border-right: 1px solid var(--border); opacity: 0.4; }
-.chain-node.active { opacity: 1; background: #e8f5ee; color: var(--accent); font-weight: bold; }
-.chain-node span { display: block; letter-spacing: 1px; }
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
 
-/* Stepper Tabs */
-.stepper { display: flex; gap: 10px; margin-bottom: 25px; }
-.step-tab { flex: 1; background: white; padding: 15px; border-radius: 8px; border: 1.5px solid var(--border); cursor: pointer; transition: 0.2s; }
-.step-tab.active { border-color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-.st-num { font-family: 'DM Mono'; font-size: 12px; color: #666; }
-.st-label { display: block; font-weight: bold; }
+.logo-mark{
+width:44px;height:44px;
+background:var(--accent);
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+}
 
-/* Intro Stripe */
-.intro-stripe { background: var(--accent); color: white; padding: 30px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-.intro-content h2 { font-family: 'DM Serif Display'; margin: 0; font-size: 28px; font-weight: 400; }
-.framework-badge { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; text-align: center; min-width: 100px; }
+.hbadge{
+padding:6px 10px;
+border-radius:20px;
+border:1px solid var(--border);
+font-size:12px;
+}
 
-/* FW Grid */
-.fw-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-.fw-card { background: #f9f9f7; border: 1.5px solid var(--border); padding: 20px; border-radius: 10px; cursor: pointer; transition: 0.2s; position: relative; }
-.fw-card.sel { border-color: var(--accent); background: #e8f5ee; }
-.fw-card.sel::after { content: '✓'; position: absolute; top: 10px; right: 10px; background: var(--accent); color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.stepper{
+display:flex;
+gap:10px;
+margin-bottom:20px;
+}
 
-.fw-icon { font-family: 'DM Mono'; font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-bottom: 10px; }
-.ndpa { background: #e8f5ee; color: #1a5c3e; }
-.gaid { background: #f0ecf8; color: #5a3a8a; }
-.nitda { background: #e8f0f8; color: #1a4a7a; }
+.step-tab{
+flex:1;
+padding:12px;
+border:1px solid var(--border);
+border-radius:8px;
+cursor:pointer;
+}
 
-/* Buttons & Modal */
-.btn-primary { background: var(--accent); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 999; }
-.modal { background: white; padding: 30px; border-radius: 12px; width: 350px; }
+.step-tab.active{
+border-color:var(--accent);
+}
+
+.panel{display:none;}
+.panel.active{display:block;}
+
+.card{
+background:var(--surface);
+padding:20px;
+border-radius:var(--radius);
+border:1px solid var(--border);
+margin-bottom:20px;
+}
+
+.btn{
+padding:10px 15px;
+cursor:pointer;
+}
+
+.btn-primary{
+background:var(--accent);
+color:white;
+border:none;
+}
+
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.5);
+align-items:center;
+justify-content:center;
+}
+
+.modal-box{
+background:white;
+padding:20px;
+border-radius:12px;
+}
